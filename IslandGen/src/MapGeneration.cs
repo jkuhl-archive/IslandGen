@@ -1,88 +1,78 @@
 using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Extensions;
-using Raylib_CsLo;
 
 namespace IslandGen;
 
 public static class MapGeneration
 {
     private const int RockDeformPass1MaxTimes = 10;
-    private const int RockDeformPass1MaxSize = 120;
     private const int RockDeformPass2MaxTimes = 20;
-    private const int RockDeformPass2MaxSize = 50;
-
-    private const int SandPadPass1MaxTimes = 50;
-    private const int SandPadPass2MaxTimes = 20;
     private const int SandDeformPass1MaxTimes = 15;
-    private const int SandDeformPass1MaxSize = 100;
     private const int SandDeformPass2MaxTimes = 1000;
-    private const int SandDeformPass2MaxSize = 20;
     private const int SandDeformPass3MaxTimes = 100;
-    private const int SandDeformPass3MaxSize = 50;
     
+    private const float RockDeformPass1MaxSizeMultiplier = 0.15f;
+    private const float RockDeformPass2MaxSizeMultiplier = 0.06f;
+    private const float SandPadPass1MaxTimesMultiplier = 0.06f;
+    private const float SandPadPass2MaxTimesMultiplier = 0.02f;
+    
+    private const float SandDeformPass1MaxSizeMultiplier = 0.10f;
+    private const float SandDeformPass2MaxSizeMultiplier = 0.02f;
+    private const float SandDeformPass3MaxSizeMultiplier = 0.06f;
+
     private static readonly Random Rnd = new();
-    private static readonly GameMap GameMap = new(800);
-
-    private static readonly Rectangle IslandBaseArea = new(100, 100, 600, 600);
-
+    
     /// <summary>
     ///     Randomly generates a new map and returns it
     /// </summary>
-    /// <returns> Newly generated GameMap object </returns>
-    public static GameMap GenerateMap()
+    /// <param name="gameMap"> GameMap that we want to generate </param>
+    public static void GenerateMap(GameMap gameMap)
     {
-        // Fill entire map with ocean and then fill island base area with rock
-        FillMapSection(Vector2.Zero, new Vector2(GameMap.MapSize), TileType.Ocean);
-        FillMapSection(IslandBaseArea.Start(), IslandBaseArea.End(), TileType.Rock);
+        // Fill island base area with rock
+        gameMap.FillMapSection(gameMap.BaseIslandArea.Start(), gameMap.BaseIslandArea.End(), TileType.Rock);
 
         // Rock deform pass 1 and 2
-        DeformMapEdge(IslandBaseArea.Start(), IslandBaseArea.End(), RockDeformPass1MaxTimes, RockDeformPass1MaxSize,
-            TileType.Rock, TileType.Ocean);
-        DeformMapEdge(IslandBaseArea.Start(), IslandBaseArea.End(), RockDeformPass2MaxTimes, RockDeformPass2MaxSize,
-            TileType.Rock, TileType.Ocean);
+        DeformMapEdge(gameMap, RockDeformPass1MaxTimes, (int)(gameMap.MapSize * RockDeformPass1MaxSizeMultiplier), TileType.Rock, TileType.Ocean);
+        DeformMapEdge(gameMap, RockDeformPass2MaxTimes, (int)(gameMap.MapSize * RockDeformPass2MaxSizeMultiplier), TileType.Rock, TileType.Ocean);
 
         // Rock padding pass 1
-        PadMapEdge(TileType.Ocean, TileType.Rock, TileType.Rock);
+        PadMapEdge(gameMap, TileType.Ocean, TileType.Rock, TileType.Rock);
 
         // Sand padding pass 1
-        PadMapEdge(TileType.Ocean, TileType.Rock, TileType.Sand);
-        for (var i = 0; i < Rnd.Next(SandPadPass1MaxTimes); i++)
-            PadMapEdge(TileType.Ocean, TileType.Sand, TileType.Sand);
+        PadMapEdge(gameMap, TileType.Ocean, TileType.Rock, TileType.Sand);
+        for (var i = 0; i < Rnd.Next((int)(gameMap.MapSize * SandPadPass1MaxTimesMultiplier)); i++)
+            PadMapEdge(gameMap, TileType.Ocean, TileType.Sand, TileType.Sand);
 
         // Sand deform pass 1 and 2
-        DeformMapEdge(IslandBaseArea.Start(), IslandBaseArea.End(), SandDeformPass1MaxTimes, SandDeformPass1MaxSize,
-            TileType.Sand, TileType.Ocean);
-        DeformMapEdge(IslandBaseArea.Start(), IslandBaseArea.End(), SandDeformPass2MaxTimes, SandDeformPass2MaxSize,
-            TileType.Sand, TileType.Ocean);
+        DeformMapEdge(gameMap, SandDeformPass1MaxTimes, (int)(gameMap.MapSize * SandDeformPass1MaxSizeMultiplier), TileType.Sand, TileType.Ocean);
+        DeformMapEdge(gameMap, SandDeformPass2MaxTimes, (int)(gameMap.MapSize * SandDeformPass2MaxSizeMultiplier), TileType.Sand, TileType.Ocean);
 
         // Sand padding pass 2
-        PadMapEdge(TileType.Ocean, TileType.Rock, TileType.Sand);
-        for (var i = 0; i < Rnd.Next(SandPadPass2MaxTimes); i++)
-            PadMapEdge(TileType.Ocean, TileType.Sand, TileType.Sand);
+        PadMapEdge(gameMap, TileType.Ocean, TileType.Rock, TileType.Sand);
+        for (var i = 0; i < Rnd.Next((int)(gameMap.MapSize * SandPadPass2MaxTimesMultiplier)); i++)
+            PadMapEdge(gameMap, TileType.Ocean, TileType.Sand, TileType.Sand);
 
         // Sand deform pass 3
-        DeformMapEdge(IslandBaseArea.Start(), IslandBaseArea.End(), SandDeformPass3MaxTimes, SandDeformPass3MaxSize,
-            TileType.Sand, TileType.Ocean);
+        DeformMapEdge(gameMap, SandDeformPass3MaxTimes, (int)(gameMap.MapSize * SandDeformPass3MaxSizeMultiplier), TileType.Sand, TileType.Ocean);
 
         // Sand padding final pass for polish
-        PadMapEdge(TileType.Ocean, TileType.Sand, TileType.Sand);
-
-        return GameMap;
+        PadMapEdge(gameMap, TileType.Ocean, TileType.Sand, TileType.Sand);
     }
 
     /// <summary>
     ///     Deforms edges of the map by replacing random subsections of it
     /// </summary>
-    /// <param name="start"> Starting point for the deform operation (top left corner) </param>
-    /// <param name="end"> Ending point for the deform operation (bottom right corner) </param>
+    /// <param name="gameMap"> GameMap that we want to deform </param>
     /// <param name="deformMaxTimes"> Number of times each side should be deformed </param>
     /// <param name="deformMaxSize"> Maximum size of a randomly selected subsection </param>
     /// <param name="replaceTileType"> TileType that should be replaced if located in a subsection </param>
     /// <param name="fillTileType"> TileType the subsections should be filled with </param>
-    private static void DeformMapEdge(Vector2 start, Vector2 end, int deformMaxTimes, int deformMaxSize,
-        TileType replaceTileType, TileType fillTileType)
+    private static void DeformMapEdge(GameMap gameMap, int deformMaxTimes, int deformMaxSize, TileType replaceTileType, TileType fillTileType)
     {
+        var start = gameMap.BaseIslandArea.Start();
+        var end = gameMap.BaseIslandArea.End();
+        
         for (var i = 0; i < Rnd.Next(deformMaxTimes); i++)
         {
             var deformStartPoints = new List<Vector2>
@@ -99,41 +89,28 @@ public static class MapGeneration
 
                 for (var mapX = deformStart.X_int() - deformSize; mapX < deformStart.X_int() + deformSize; mapX++)
                 for (var mapY = deformStart.Y_int() - deformSize; mapY < deformStart.Y_int() + deformSize; mapY++)
-                    if (GameMap.TileMap.InRange(mapX, mapY) && GameMap.TileMap[mapX, mapY] == replaceTileType)
-                        GameMap.TileMap[mapX, mapY] = fillTileType;
+                    if (gameMap.TileMap.InRange(mapX, mapY) && gameMap.TileMap[mapX, mapY] == replaceTileType)
+                        gameMap.TileMap[mapX, mapY] = fillTileType;
             }
         }
     }
 
     /// <summary>
-    ///     Fills a section of the map
+    ///     Pads the map edge by replacing tiles where one TileType touches another
     /// </summary>
-    /// <param name="start"> Starting point for the fill operation (top left corner) </param>
-    /// <param name="end"> Ending point for the fill operation (bottom right corner) </param>
-    /// <param name="fill"> TileType the section should be filled with </param>
-    private static void FillMapSection(Vector2 start, Vector2 end, TileType fill)
-    {
-        for (var mapX = start.X_int(); mapX < end.X_int(); mapX++)
-        for (var mapY = start.Y_int(); mapY < end.Y_int(); mapY++)
-            if (GameMap.TileMap.InRange(mapX, mapY))
-                GameMap.TileMap[mapX, mapY] = fill;
-    }
-
-    /// <summary>
-    /// Pads the map edge by replacing tiles where one TileType touches another
-    /// </summary>
+    /// <param name="gameMap"> GameMap that we want to pad </param>
     /// <param name="tileType1"> TileType that we are checking for as the transition, replaced if valid </param>
-    /// <param name="tileType2"> TileType that we are checking for as the edge</param>
+    /// <param name="tileType2"> TileType that we are checking for as the edge </param>
     /// <param name="fill"> TileType that valid transition tiles should be replaced with </param>
-    private static void PadMapEdge(TileType tileType1, TileType tileType2, TileType fill)
+    private static void PadMapEdge(GameMap gameMap, TileType tileType1, TileType tileType2, TileType fill)
     {
         var tilesPendingUpdate = new List<(int, int)>();
 
         // Find tiles that exist at the edge of tileType1 and tileType2 and mark them to be updated
-        for (var mapX = 0; mapX < GameMap.MapSize; mapX++)
-        for (var mapY = 0; mapY < GameMap.MapSize; mapY++)
+        for (var mapX = 0; mapX < gameMap.MapSize; mapX++)
+        for (var mapY = 0; mapY < gameMap.MapSize; mapY++)
         {
-            var currentTile = GameMap.TileMap[mapX, mapY];
+            var currentTile = gameMap.TileMap[mapX, mapY];
             var adjacentTiles = new List<(int, int)>
             {
                 (mapX, mapY + 1),
@@ -143,9 +120,9 @@ public static class MapGeneration
             };
 
             foreach (var adjacentTile in adjacentTiles)
-                if (GameMap.TileMap.InRange(adjacentTile.Item1, adjacentTile.Item2) &&
+                if (gameMap.TileMap.InRange(adjacentTile.Item1, adjacentTile.Item2) &&
                     currentTile == tileType1 &&
-                    GameMap.TileMap[adjacentTile.Item1, adjacentTile.Item2] == tileType2)
+                    gameMap.TileMap[adjacentTile.Item1, adjacentTile.Item2] == tileType2)
                 {
                     tilesPendingUpdate.Add((mapX, mapY));
                     break;
@@ -154,6 +131,6 @@ public static class MapGeneration
 
         // Update all marked tiles
         foreach (var tileCoordinates in tilesPendingUpdate)
-            GameMap.TileMap[tileCoordinates.Item1, tileCoordinates.Item2] = fill;
+            gameMap.TileMap[tileCoordinates.Item1, tileCoordinates.Item2] = fill;
     }
 }
