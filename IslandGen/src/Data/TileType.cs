@@ -3,7 +3,7 @@ using Raylib_CsLo;
 namespace IslandGen.Data;
 
 /// <summary>
-/// Tracks possible tile contents for the map
+///     Tracks possible tile contents for the map
 /// </summary>
 public enum TileType
 {
