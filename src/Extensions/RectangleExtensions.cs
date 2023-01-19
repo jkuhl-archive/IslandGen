@@ -6,7 +6,7 @@ namespace IslandGen.Extensions;
 public static class RectangleExtensions
 {
     /// <summary>
-    /// Gets the top left coordinate in the rectangle and returns it
+    ///     Gets the top left coordinate in the rectangle and returns it
     /// </summary>
     /// <param name="rectangle"> Rectangle we are getting coordinates for </param>
     /// <returns> Vector2 that represents the top left corner </returns>
@@ -16,7 +16,7 @@ public static class RectangleExtensions
     }
 
     /// <summary>
-    /// Gets the bottom right coordinate in the rectangle and returns it
+    ///     Gets the bottom right coordinate in the rectangle and returns it
     /// </summary>
     /// <param name="rectangle"> Rectangle we are getting coordinates for </param>
     /// <returns> Vector2 that represents the bottom right corner </returns>
@@ -26,7 +26,7 @@ public static class RectangleExtensions
     }
 
     /// <summary>
-    /// Checks if the given coordinate exists within the confines of the rectangle
+    ///     Checks if the given coordinate exists within the confines of the rectangle
     /// </summary>
     /// <param name="rectangle"> Rectangle we are checking </param>
     /// <param name="point"> Vector2 that contains the coordinates we are checking </param>

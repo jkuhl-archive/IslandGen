@@ -11,10 +11,10 @@ public static class MapGeneration
     private const int SandDeformPass1MaxTimes = 15;
     private const int SandDeformPass2MaxTimes = 1000;
     private const int SandDeformPass3MaxTimes = 100;
-    
+
     private const int LakeSeedingPass1MaxTimes = 5;
     private const int RockSeedingPass1MaxTimes = 20;
-    
+
     private const float DirtDeformPass1MaxSizeMultiplier = 0.15f;
     private const float DirtDeformPass2MaxSizeMultiplier = 0.06f;
     private const float SandDeformPass1MaxSizeMultiplier = 0.10f;
@@ -23,10 +23,10 @@ public static class MapGeneration
 
     private const float LakeSeedingPass1MaxSizeMultiplier = 0.02f;
     private const float RockSeedingPass1MaxSizeMultiplier = 0.05f;
-    
+
     private const float SandPadPass1MaxTimesMultiplier = 0.06f;
     private const float SandPadPass2MaxTimesMultiplier = 0.02f;
-    
+
     private static readonly Random Rnd = new();
 
     /// <summary>
@@ -50,7 +50,8 @@ public static class MapGeneration
         PadTileTransition(gameMap, TileType.Ocean, TileType.Dirt, TileType.Dirt);
 
         // Lake seeding pass 1
-        SeedTileType(gameMap, LakeSeedingPass1MaxTimes, (int)(gameMap.MapSize * LakeSeedingPass1MaxSizeMultiplier), null, TileType.Lake);
+        SeedTileType(gameMap, LakeSeedingPass1MaxTimes, (int)(gameMap.MapSize * LakeSeedingPass1MaxSizeMultiplier),
+            null, TileType.Lake);
 
         // Lake padding pass 1
         PadTileTransition(gameMap, TileType.Ocean, TileType.Lake, TileType.Lake);
@@ -63,7 +64,8 @@ public static class MapGeneration
             PadTileTransition(gameMap, TileType.Ocean, TileType.Sand, TileType.Sand);
 
         // Rock seeding pass 1
-        SeedTileType(gameMap, RockSeedingPass1MaxTimes, (int)(gameMap.MapSize * RockSeedingPass1MaxSizeMultiplier), TileType.Dirt, TileType.Rock);
+        SeedTileType(gameMap, RockSeedingPass1MaxTimes, (int)(gameMap.MapSize * RockSeedingPass1MaxSizeMultiplier),
+            TileType.Dirt, TileType.Rock);
 
         // Rock padding pass 1
         PadTileTransition(gameMap, TileType.Dirt, TileType.Rock, TileType.Rock);
@@ -90,7 +92,7 @@ public static class MapGeneration
         // River generation pass 1 and pass 2
         RiverGenerator(gameMap);
         RiverGenerator(gameMap);
-        
+
         // River padding pass 1
         PadTileTransition(gameMap, TileType.Dirt, TileType.River, TileType.River);
         PadTileTransition(gameMap, TileType.Rock, TileType.River, TileType.River);
@@ -168,12 +170,9 @@ public static class MapGeneration
             var riverDirection = directionsArray[Rnd.Next(directionsArray.Length)];
             var flowDistance = Rnd.Next(1, gameMap.MapSize / 25);
             attemptCounter++;
-            
+
             // If river generation has not found a map edge after a large number of iterations, return now to stop
-            if (attemptCounter > gameMap.MapSize * 10)
-            {
-                return;
-            }
+            if (attemptCounter > gameMap.MapSize * 10) return;
 
             // Add tiles to list of tiles to be converted to river tiles
             var lastTile = riverCurrentTile;
@@ -202,14 +201,11 @@ public static class MapGeneration
                 riverCurrentTile = tileCoordinate;
 
                 // Once the river hits a map edge, return to stop river generation
-                if (riverCurrentTile.X_int() != riverStartTile.X_int() && riverCurrentTile.Y_int() == riverStartTile.Y_int())
-                {
+                if (riverCurrentTile.X_int() != riverStartTile.X_int() &&
+                    riverCurrentTile.Y_int() == riverStartTile.Y_int())
                     if (tileCoordinate.X_int() == 0 || tileCoordinate.X_int() == gameMap.MapSize - 1 ||
                         tileCoordinate.Y_int() == 0 || tileCoordinate.Y_int() == gameMap.MapSize - 1)
-                    {
                         return;
-                    }
-                }
             }
         }
     }
@@ -220,7 +216,7 @@ public static class MapGeneration
     /// <param name="gameMap"> GameMap that we want to seed tile clusters on </param>
     /// <param name="seedMaxTimes"> Maximum number of seeds that should be added </param>
     /// <param name="seedMaxSize"> Maximum size for seeded clusters </param>
-    /// <param name="replaceTileType"> TileType that should be replaced if located in a cluster, can be null to replace anything </param>
+    /// <param name="replaceTileType"> TileType that should be replaced, can be null to replace anything </param>
     /// <param name="fillTileType"> TileType the clusters should be filled with </param>
     private static void SeedTileType(GameMap gameMap, int seedMaxTimes, int seedMaxSize, TileType? replaceTileType,
         TileType fillTileType)

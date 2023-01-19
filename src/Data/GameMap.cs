@@ -6,8 +6,8 @@ namespace IslandGen.Data;
 
 public class GameMap
 {
-    public readonly int MapSize;
     public readonly Rectangle BaseIslandArea;
+    public readonly int MapSize;
     public readonly TileType[,] TileMap;
 
     /// <summary>
@@ -17,15 +17,15 @@ public class GameMap
     public GameMap(int mapSize)
     {
         MapSize = mapSize;
-        
+
         var buffer = MapSize / 10;
         var baseIslandSize = mapSize - buffer * 2;
         BaseIslandArea = new Rectangle(buffer, buffer, baseIslandSize, baseIslandSize);
-        
+
         TileMap = new TileType[mapSize, mapSize];
         FillMapSection(Vector2.Zero, new Vector2(MapSize), TileType.Ocean);
     }
-    
+
     /// <summary>
     ///     Fills a section of the map
     /// </summary>
