@@ -87,9 +87,10 @@ public static class MapGeneration
         // Sand padding pass 3
         PadTileTransition(gameMap, TileType.Ocean, TileType.Sand, TileType.Sand);
 
-        // River generation pass 1
+        // River generation pass 1 and pass 2
         RiverGenerator(gameMap);
-
+        RiverGenerator(gameMap);
+        
         // River padding pass 1
         PadTileTransition(gameMap, TileType.Dirt, TileType.River, TileType.River);
         PadTileTransition(gameMap, TileType.Rock, TileType.River, TileType.River);
@@ -163,7 +164,7 @@ public static class MapGeneration
         // Continuously place river segments until we hit the map edge again
         while (true)
         {
-            var tilesPendingUpdate = new List<Vector2> { riverCurrentTile };
+            var tilesPendingUpdate = new List<Vector2>();
             var riverDirection = directionsArray[Rnd.Next(directionsArray.Length)];
             var flowDistance = Rnd.Next(1, gameMap.MapSize / 25);
             attemptCounter++;
