@@ -19,7 +19,7 @@ internal static class Program
     private static readonly Vector2 MapDrawingStart =
         new((VirtualScreenSize.X - MapSize) / 2, (VirtualScreenSize.Y - MapSize) / 2);
 
-    private static GameMap _gameMap = new(MapSize);
+    private static GameMap _gameMap = MapGeneration.GenerateMap(MapSize);
 
     public static void Main()
     {
@@ -40,23 +40,14 @@ internal static class Program
 
         while (!Raylib.WindowShouldClose())
         {
-            // If mouse is clicked generate a new map
+            // Handle input
             if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
-            {
-                _gameMap = new GameMap(MapSize);
-                MapGeneration.GenerateMap(_gameMap);
-            }
-
+                _gameMap = MapGeneration.GenerateMap(MapSize);
             if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_UP)) renderCamera.zoom -= .1f;
-
             if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_DOWN)) renderCamera.zoom += .1f;
-
-            if (Raylib.IsKeyReleased(KeyboardKey.KEY_LEFT)) renderCamera.target.X -= 10.0f;
-
-            if (Raylib.IsKeyReleased(KeyboardKey.KEY_RIGHT)) renderCamera.target.X += 10.0f;
-
+            if (Raylib.IsKeyReleased(KeyboardKey.KEY_RIGHT)) renderCamera.target.X -= 10.0f;
+            if (Raylib.IsKeyReleased(KeyboardKey.KEY_LEFT)) renderCamera.target.X += 10.0f;
             if (Raylib.IsKeyReleased(KeyboardKey.KEY_DOWN)) renderCamera.target.Y -= 10.0f;
-
             if (Raylib.IsKeyReleased(KeyboardKey.KEY_UP)) renderCamera.target.Y += 10.0f;
 
             // Render map to a texture
@@ -82,7 +73,9 @@ internal static class Program
 
             // Draw FPS and header
             Raylib.DrawFPS(0, 0);
-            Raylib.DrawText("Click Left Mouse to generate map", 0, 20, 20, Raylib.WHITE);
+            Raylib.DrawText("Click Left Mouse to generate a new map", 0, 20, 20, Raylib.WHITE);
+            Raylib.DrawText("PageUp / PageDown to zoom", 0, 40, 20, Raylib.WHITE);
+            Raylib.DrawText("Arrow Keys move map", 0, 60, 20, Raylib.WHITE);
 
             Raylib.EndDrawing();
         }

@@ -3,14 +3,17 @@ using Raylib_CsLo;
 namespace IslandGen.Data;
 
 /// <summary>
-///     Tracks possible tile contents for the map
+///     Contents of a single tile on the map
 /// </summary>
 public enum TileType
 {
     Debug,
     Ocean,
+    Dirt,
     Rock,
-    Sand
+    Lake,
+    Sand,
+    River
 }
 
 public static class TileTypeExtensions
@@ -26,8 +29,11 @@ public static class TileTypeExtensions
         {
             TileType.Debug => Raylib.PINK,
             TileType.Ocean => Raylib.BLUE,
+            TileType.Dirt => Raylib.BROWN,
             TileType.Rock => Raylib.DARKGRAY,
+            TileType.Lake => Raylib.DARKBLUE,
             TileType.Sand => Raylib.BEIGE,
+            TileType.River => Raylib.DARKBLUE,
             _ => Raylib.PURPLE
         };
     }
