@@ -8,12 +8,12 @@ namespace IslandGen.Data;
 public enum TileType
 {
     Debug,
-    Ocean,
     Dirt,
-    Rock,
     Lake,
-    Sand,
-    River
+    Ocean,
+    River,
+    Rock,
+    Sand
 }
 
 public static class TileTypeExtensions
@@ -28,13 +28,33 @@ public static class TileTypeExtensions
         return tileType switch
         {
             TileType.Debug => Raylib.PINK,
-            TileType.Ocean => Raylib.BLUE,
             TileType.Dirt => Raylib.BROWN,
-            TileType.Rock => Raylib.DARKGRAY,
             TileType.Lake => Raylib.DARKBLUE,
-            TileType.Sand => Raylib.BEIGE,
+            TileType.Ocean => Raylib.BLUE,
             TileType.River => Raylib.DARKBLUE,
+            TileType.Rock => Raylib.GRAY,
+            TileType.Sand => Raylib.BEIGE,
             _ => Raylib.PURPLE
+        };
+    }
+
+    /// <summary>
+    ///     Returns the name of the texture associated with TileType
+    /// </summary>
+    /// <param name="tileType"> TileType that we want to get the texture name for </param>
+    /// <returns> String containing the texture name </returns>
+    public static string GetTileTextureName(this TileType tileType)
+    {
+        return tileType switch
+        {
+            TileType.Debug => "debug",
+            TileType.Dirt => "dirt",
+            TileType.Lake => "lake",
+            TileType.Ocean => "ocean",
+            TileType.River => "river",
+            TileType.Rock => "rock",
+            TileType.Sand => "sand",
+            _ => "debug"
         };
     }
 }
