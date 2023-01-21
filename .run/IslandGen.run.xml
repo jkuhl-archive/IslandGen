@@ -14,9 +14,8 @@
         <option name="PROJECT_KIND" value="DotNetCore"/>
         <option name="PROJECT_TFM" value="net6.0"/>
         <method v="2">
-            <option name="CleanProject" default="false" projectName="IslandGen"
-                    projectPath="file://$PROJECT_DIR$/IslandGen.csproj"/>
-            <option name="RunConfigurationTask" enabled="true" run_configuration_name="Copy assets"
+            <option name="CleanSolution" enabled="true"/>
+            <option name="RunConfigurationTask" enabled="false" run_configuration_name="DEBUG - Copy Assets"
                     run_configuration_type="ShConfigurationType"/>
             <option name="Build"/>
         </method>

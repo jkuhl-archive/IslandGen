@@ -1,5 +1,7 @@
 ﻿using System.Numerics;
 using IslandGen.Data;
+using IslandGen.Data.ECS;
+using IslandGen.Data.ECS.Entities;
 using IslandGen.Extensions;
 using Raylib_CsLo;
 
@@ -16,7 +18,7 @@ internal static class Program
 
     private const string TexturesDirectory = "assets/textures";
     private const string WindowName = "IslandGen";
-    
+
     private static readonly Vector2 WindowSize = new(1280, 720);
     private static readonly Vector2 MapRenderTextureSize = new(MapSize * TileTextureSize, MapSize * TileTextureSize);
     private static readonly Vector2 MiniMapTextureSize = new(MapSize, MapSize);
@@ -26,6 +28,7 @@ internal static class Program
         WindowSize.Y - MiniMapTextureSize.Y * MiniMapScale - UiPaddingSize * 2);
 
     private static GameMap _gameMap = MapGeneration.GenerateMap(MapSize);
+    private static readonly List<IEntity> _entities = new();
 
     /// <summary>
     ///     Loads all textures within the TexturesDirectory and returns a dictionary containing them
@@ -63,6 +66,9 @@ internal static class Program
         // Load textures
         var textureDictionary = LoadTextureDictionary();
 
+        // Initialize entities
+        _entities.Add(new Colonist("Bob", new Vector2(500, 500), textureDictionary["colonist"]));
+
         while (!Raylib.WindowShouldClose())
         {
             // Handle input
@@ -75,6 +81,9 @@ internal static class Program
             if (Raylib.IsKeyReleased(KeyboardKey.KEY_DOWN)) mapRenderCamera.target.Y -= 100.0f;
             if (Raylib.IsKeyReleased(KeyboardKey.KEY_UP)) mapRenderCamera.target.Y += 100.0f;
 
+            // Update entities
+            foreach (var entity in _entities) entity.Update();
+
             // Render map to texture
             Raylib.BeginTextureMode(gameMapTexture.RenderTexture);
             Raylib.ClearBackground(Raylib.BLACK);
@@ -85,6 +94,8 @@ internal static class Program
                 var texture = textureDictionary[_gameMap.TileMap[mapX, mapY].GetTileTextureName()];
                 Raylib.DrawTexture(texture, mapX * TileTextureSize, mapY * TileTextureSize, Raylib.WHITE);
             }
+
+            foreach (var entity in _entities) entity.Draw();
             Raylib.EndMode2D();
             Raylib.EndTextureMode();
 
