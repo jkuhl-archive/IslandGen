@@ -27,12 +27,14 @@ public class GameUi
         var scalingManager = ServiceManager.GetService<ScalingManager>();
 
         // Render minimap to texture
+        var gameCamera = ServiceManager.GetService<GameCamera>();
         var gameMap = ServiceManager.GetService<GameMap>();
         Raylib.BeginTextureMode(_miniMapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
         for (var mapX = 0; mapX < gameMap.MapSize; mapX++)
         for (var mapY = 0; mapY < gameMap.MapSize; mapY++)
             Raylib.DrawPixelV(new Vector2(mapX, mapY), gameMap.TileMap[mapX, mapY].GetTileColor());
+        Raylib.DrawRectangleLinesEx(gameCamera.GetCameraMapArea(), 1, Raylib.RED);
         Raylib.EndTextureMode();
 
         // Draw minimap backdrop
@@ -53,7 +55,15 @@ public class GameUi
         _miniMapTexture.DestinationRectangle.Y = miniMapPosition.Y + scalingManager.HeightPadding;
         _miniMapTexture.Draw();
 
-        DrawPopUp($"FPS: {Raylib.GetFPS()}\n" + ControlsMessage, scalingManager.FontSize, scalingManager.WidthPadding,
+        // Print status popup
+        var statusMessage =
+            $"FPS: {Raylib.GetFPS()}\n" +
+            $"Scaling Factor: W: {scalingManager.WidthScale}, H: {scalingManager.HeightScale}\n" +
+            $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
+            $"Camera Target: {gameCamera.Camera.target}\n" +
+            $"Camera Visible Map Tiles: {gameCamera.GetCameraMapArea().String()}\n\n" +
+            ControlsMessage;
+        DrawPopUp(statusMessage, scalingManager.FontSize, scalingManager.WidthPadding,
             scalingManager.HeightPadding);
     }
 

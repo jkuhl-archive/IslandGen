@@ -12,12 +12,12 @@ public class InputManager
 
         // Camera controls
         var gameCamera = ServiceManager.GetService<GameCamera>();
-        if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_UP)) gameCamera.Camera2D.zoom -= .1f;
-        if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_DOWN)) gameCamera.Camera2D.zoom += .1f;
-        if (Raylib.IsKeyReleased(KeyboardKey.KEY_RIGHT)) gameCamera.Camera2D.target.X -= 100.0f;
-        if (Raylib.IsKeyReleased(KeyboardKey.KEY_LEFT)) gameCamera.Camera2D.target.X += 100.0f;
-        if (Raylib.IsKeyReleased(KeyboardKey.KEY_DOWN)) gameCamera.Camera2D.target.Y -= 100.0f;
-        if (Raylib.IsKeyReleased(KeyboardKey.KEY_UP)) gameCamera.Camera2D.target.Y += 100.0f;
+        if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_UP)) gameCamera.ZoomOut();
+        if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_DOWN)) gameCamera.ZoomIn();
+        if (Raylib.IsKeyReleased(KeyboardKey.KEY_UP)) gameCamera.PanUp();
+        if (Raylib.IsKeyReleased(KeyboardKey.KEY_DOWN)) gameCamera.PanDown();
+        if (Raylib.IsKeyReleased(KeyboardKey.KEY_LEFT)) gameCamera.PanLeft();
+        if (Raylib.IsKeyReleased(KeyboardKey.KEY_RIGHT)) gameCamera.PanRight();
 
         // Window controls
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_F1)) Raylib.ToggleFullscreen();

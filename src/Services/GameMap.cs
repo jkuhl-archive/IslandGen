@@ -35,7 +35,6 @@ public class GameMap
     public readonly TileType[,] TileMap;
     public readonly int TileTextureSize;
 
-
     /// <summary>
     ///     Constructor for GameMap
     /// </summary>
@@ -55,18 +54,28 @@ public class GameMap
 
     public void Draw()
     {
+        var gameCamera = ServiceManager.GetService<GameCamera>();
+        var textureManager = ServiceManager.GetService<TextureManager>();
+        var mapVisibleArea = gameCamera.GetCameraMapArea();
+
         Raylib.BeginTextureMode(MapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
-        Raylib.BeginMode2D(ServiceManager.GetService<GameCamera>().Camera2D);
+        Raylib.BeginMode2D(gameCamera.Camera);
+
+        // TODO: This can be optimized to use the visible area as the for loop start and end
         for (var mapX = 0; mapX < MapSize; mapX++)
         for (var mapY = 0; mapY < MapSize; mapY++)
         {
-            var texture = ServiceManager.GetService<TextureManager>()
-                .Textures[TileMap[mapX, mapY].GetTileTextureName()];
+            if (!mapVisibleArea.PointInsideRectangle(mapX, mapY)) continue;
+
+            var texture = textureManager.Textures[TileMap[mapX, mapY].GetTileTextureName()];
             Raylib.DrawTexture(texture, mapX * TileTextureSize, mapY * TileTextureSize, Raylib.WHITE);
         }
 
-        foreach (var entity in Entities) entity.Draw();
+        foreach (var entity in Entities.Where(entity =>
+                     mapVisibleArea.PointInsideRectangle(entity.Position.X_int(), entity.Position.Y_int())))
+            entity.Draw();
+
         Raylib.EndMode2D();
         Raylib.EndTextureMode();
 
@@ -295,7 +304,7 @@ public class GameMap
                 for (var mapY = seedStartPoint.Y_int() - (int)(MapSize * sizeMultiplier);
                      mapY < seedStartPoint.Y_int() + (int)(MapSize * sizeMultiplier);
                      mapY++)
-                    if (BaseIslandArea.PointInsideRectangle(new Vector2(mapX, mapY)))
+                    if (BaseIslandArea.PointInsideRectangle(mapX, mapY))
                     {
                         if (replaceTileType != null && TileMap[mapX, mapY] != replaceTileType) continue;
                         TileMap[mapX, mapY] = fillTileType;
