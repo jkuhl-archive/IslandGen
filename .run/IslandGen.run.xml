@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-    <configuration default="false" name="IslandGen" type="DotNetProject" factoryName=".NET Project">
+    <configuration default="false" name="IslandGen" type="DotNetProject" factoryName=".NET Project"
+                   activateToolWindowBeforeRun="false">
         <option name="EXE_PATH" value="$PROJECT_DIR$/bin/Debug/net6.0/IslandGen"/>
         <option name="PROGRAM_PARAMETERS" value=""/>
         <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/bin/Debug/net6.0"/>

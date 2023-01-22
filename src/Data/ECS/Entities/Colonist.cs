@@ -1,5 +1,6 @@
 using System.Numerics;
 using IslandGen.Data.ECS.Components;
+using IslandGen.Services;
 using Raylib_CsLo;
 
 namespace IslandGen.Data.ECS.Entities;
@@ -11,14 +12,13 @@ public class Colonist : IEntity
     /// </summary>
     /// <param name="readableName"> Colonist's name </param>
     /// <param name="position"> Colonist's starting position </param>
-    /// <param name="texture"> Colonist's texture </param>
-    public Colonist(string readableName, Vector2 position, Texture texture)
+    public Colonist(string readableName, Vector2 position)
     {
         Id = new Guid();
         ReadableName = readableName;
         Position = position;
         Selectable = true;
-        Texture = texture;
+        Texture = ServiceManager.GetService<TextureManager>().Textures["colonist"];
         Components = new List<IComponent>
         {
             new Health(100),

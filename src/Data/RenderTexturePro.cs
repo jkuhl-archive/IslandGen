@@ -7,9 +7,10 @@ namespace IslandGen.Data;
 public class RenderTexturePro
 {
     public readonly RenderTexture RenderTexture;
-    public float Scale;
-    public Rectangle SourceRectangle;
     public Rectangle DestinationRectangle;
+    public float HeightScale;
+    public Rectangle SourceRectangle;
+    public float WidthScale;
 
     /// <summary>
     ///     Constructor for RenderTexturePro
@@ -18,10 +19,11 @@ public class RenderTexturePro
     public RenderTexturePro(Vector2 textureSize)
     {
         RenderTexture = Raylib.LoadRenderTexture(textureSize.X_int(), textureSize.Y_int());
-        Scale = 1.0f;
-        SourceRectangle =
-            new Rectangle(0, 0, RenderTexture.texture.width,
-                -RenderTexture.texture.height); // The source rectangle's height is flipped for OpenGL reasons
+        WidthScale = 1.0f;
+        HeightScale = 1.0f;
+
+        // The source rectangle's height is flipped for OpenGL reasons
+        SourceRectangle = new Rectangle(0, 0, RenderTexture.texture.width, -RenderTexture.texture.height);
         DestinationRectangle = new Rectangle(0, 0, RenderTexture.texture.width, RenderTexture.texture.height);
     }
 
@@ -35,7 +37,7 @@ public class RenderTexturePro
             SourceRectangle,
             DestinationRectangle with
             {
-                width = DestinationRectangle.width * Scale, height = DestinationRectangle.height * Scale
+                width = DestinationRectangle.width * WidthScale, height = DestinationRectangle.height * HeightScale
             },
             Vector2.Zero,
             0.0f,
