@@ -7,19 +7,6 @@ namespace IslandGen.Services;
 
 public class GameUi
 {
-    private const double BaseWidth = 640;
-    private const double BaseHeight4by3 = 480;
-    private const double BaseHeight16by9 = 360;
-    private const double BaseHeight16by10 = 400;
-
-    private const double AspectRatio4by3 = BaseWidth / BaseHeight4by3;
-    private const double AspectRatio16by9 = BaseWidth / BaseHeight16by9;
-    private const double AspectRatio16by10 = BaseWidth / BaseHeight16by10;
-    private const double WidthScaleFactor = 1 / BaseWidth;
-    private const double HeightScaleFactor4by3 = 1 / BaseHeight4by3;
-    private const double HeightScaleFactor16b9 = 1 / BaseHeight16by9;
-    private const double HeightScaleFactor16b10 = 1 / BaseHeight16by10;
-
     private const string ControlsMessage = "Left Mouse to generate a new map\n" +
                                            "F1 to toggle fullscreen\n" +
                                            "PageUp / PageDown to zoom\n" +
@@ -35,40 +22,9 @@ public class GameUi
         _miniMapTexture = new RenderTexturePro(new Vector2(ServiceManager.GetService<GameMap>().MapSize));
     }
 
-    /// <summary>
-    ///     Calculates a vertical scaling factor for the current game resolution
-    /// </summary>
-    /// <returns> Float that represents the vertical scaling factor </returns>
-    private float GetHeightScale()
-    {
-        return ((double)Raylib.GetRenderWidth() / Raylib.GetRenderHeight()) switch
-        {
-            AspectRatio4by3 => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor4by3, 2),
-            AspectRatio16by9 => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor16b9, 2),
-            AspectRatio16by10 => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor16b10, 2),
-            _ => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor4by3, 2)
-        };
-    }
-
-    /// <summary>
-    ///     Calculates a horizontal scaling factor for the current game resolution
-    /// </summary>
-    /// <returns> Float that represents the horizontal scaling factor </returns>
-    private float GetWidthScale()
-    {
-        return (float)Math.Round(Raylib.GetRenderWidth() * WidthScaleFactor, 2);
-    }
-
     public void Draw()
     {
-        // Calculate current window size, scale, and padding
-        var windowWidth = Raylib.GetRenderWidth();
-        var windowHeight = Raylib.GetRenderHeight();
-        var widthScale = GetWidthScale();
-        var heightScale = GetHeightScale();
-        var widthPadding = (int)(1 * widthScale);
-        var heightPadding = (int)(1 * heightScale);
-        var fontSize = (int)((widthScale + heightScale) / 2 * 10);
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
 
         // Render minimap to texture
         var gameMap = ServiceManager.GetService<GameMap>();
@@ -81,21 +37,24 @@ public class GameUi
 
         // Draw minimap backdrop
         var miniMapPosition = new Vector2(
-            windowWidth - _miniMapTexture.RenderTexture.texture.width * widthScale - widthPadding * 2,
-            windowHeight - _miniMapTexture.RenderTexture.texture.height * heightScale - heightPadding * 2);
+            scalingManager.WindowWidth - _miniMapTexture.RenderTexture.texture.width * scalingManager.WidthScale -
+            scalingManager.WidthPadding * 2,
+            scalingManager.WindowHeight - _miniMapTexture.RenderTexture.texture.height * scalingManager.HeightScale -
+            scalingManager.HeightPadding * 2);
         Raylib.DrawRectangle(miniMapPosition.X_int(), miniMapPosition.Y_int(),
-            (int)(_miniMapTexture.RenderTexture.texture.width * widthScale + widthPadding * 2),
-            (int)(_miniMapTexture.RenderTexture.texture.height * heightScale + heightPadding * 2),
+            (int)(_miniMapTexture.RenderTexture.texture.width * scalingManager.WidthScale +
+                  scalingManager.WidthPadding * 2),
+            (int)(_miniMapTexture.RenderTexture.texture.height * scalingManager.WidthScale +
+                  scalingManager.HeightPadding * 2),
             Raylib.WHITE);
 
         // Draw minimap
-        _miniMapTexture.WidthScale = widthScale;
-        _miniMapTexture.HeightScale = heightScale;
-        _miniMapTexture.DestinationRectangle.X = miniMapPosition.X + widthPadding;
-        _miniMapTexture.DestinationRectangle.Y = miniMapPosition.Y + heightPadding;
+        _miniMapTexture.DestinationRectangle.X = miniMapPosition.X + scalingManager.WidthPadding;
+        _miniMapTexture.DestinationRectangle.Y = miniMapPosition.Y + scalingManager.HeightPadding;
         _miniMapTexture.Draw();
 
-        DrawPopUp($"FPS: {Raylib.GetFPS()}\n" + ControlsMessage, fontSize, widthPadding, heightPadding);
+        DrawPopUp($"FPS: {Raylib.GetFPS()}\n" + ControlsMessage, scalingManager.FontSize, scalingManager.WidthPadding,
+            scalingManager.HeightPadding);
     }
 
     /// <summary>

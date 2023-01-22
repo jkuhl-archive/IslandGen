@@ -1,5 +1,6 @@
 using System.Numerics;
 using IslandGen.Extensions;
+using IslandGen.Services;
 using Raylib_CsLo;
 
 namespace IslandGen.Data;
@@ -8,9 +9,7 @@ public class RenderTexturePro
 {
     public readonly RenderTexture RenderTexture;
     public Rectangle DestinationRectangle;
-    public float HeightScale;
     public Rectangle SourceRectangle;
-    public float WidthScale;
 
     /// <summary>
     ///     Constructor for RenderTexturePro
@@ -19,8 +18,6 @@ public class RenderTexturePro
     public RenderTexturePro(Vector2 textureSize)
     {
         RenderTexture = Raylib.LoadRenderTexture(textureSize.X_int(), textureSize.Y_int());
-        WidthScale = 1.0f;
-        HeightScale = 1.0f;
 
         // The source rectangle's height is flipped for OpenGL reasons
         SourceRectangle = new Rectangle(0, 0, RenderTexture.texture.width, -RenderTexture.texture.height);
@@ -32,12 +29,15 @@ public class RenderTexturePro
     /// </summary>
     public void Draw()
     {
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+
         Raylib.DrawTexturePro(
             RenderTexture.texture,
             SourceRectangle,
             DestinationRectangle with
             {
-                width = DestinationRectangle.width * WidthScale, height = DestinationRectangle.height * HeightScale
+                width = DestinationRectangle.width * scalingManager.WidthScale,
+                height = DestinationRectangle.height * scalingManager.HeightScale
             },
             Vector2.Zero,
             0.0f,

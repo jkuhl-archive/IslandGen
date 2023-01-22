@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-using IslandGen.Data.ECS.Entities;
-using IslandGen.Services;
+﻿using IslandGen.Services;
 using Raylib_CsLo;
 
 namespace IslandGen;
@@ -21,22 +19,19 @@ internal static class Game
 
         // Initialize game services
         ServiceManager.AddService(new Random());
-        ServiceManager.AddService(new EntityManager());
         ServiceManager.AddService(new GameCamera());
         ServiceManager.AddService(new GameMap());
         ServiceManager.AddService(new InputManager());
         ServiceManager.AddService(new GameUi());
+        ServiceManager.AddService(new ScalingManager());
         ServiceManager.AddService(new TextureManager());
-
-        // Spawn some basic entities for testing
-        // TODO: Remove this once we have a better way to spawn entities
-        ServiceManager.GetService<EntityManager>().Entities.Add(new Colonist("Bob", new Vector2(500, 500)));
 
         while (!Raylib.WindowShouldClose())
         {
             // Update
+            ServiceManager.GetService<ScalingManager>().Update();
             ServiceManager.GetService<InputManager>().Update();
-            ServiceManager.GetService<EntityManager>().Update();
+            ServiceManager.GetService<GameMap>().Update();
 
             // Draw
             Raylib.BeginDrawing();

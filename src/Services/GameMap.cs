@@ -1,5 +1,6 @@
 using System.Numerics;
 using IslandGen.Data;
+using IslandGen.Data.ECS;
 using IslandGen.Extensions;
 using Raylib_CsLo;
 
@@ -27,11 +28,13 @@ public class GameMap
     private const float SandPad2Multiplier = 0.02f;
 
     public readonly Rectangle BaseIslandArea;
+    public readonly List<IEntity> Entities;
     public readonly int MapBuffer;
     public readonly int MapSize;
     public readonly RenderTexturePro MapTexture;
     public readonly TileType[,] TileMap;
     public readonly int TileTextureSize;
+
 
     /// <summary>
     ///     Constructor for GameMap
@@ -45,6 +48,7 @@ public class GameMap
         BaseIslandArea = new Rectangle(MapBuffer, MapBuffer, MapSize - MapBuffer * 2, MapSize - MapBuffer * 2);
         MapTexture = new RenderTexturePro(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
         TileMap = new TileType[MapSize, MapSize];
+        Entities = new List<IEntity>();
 
         GenerateMap();
     }
@@ -62,11 +66,16 @@ public class GameMap
             Raylib.DrawTexture(texture, mapX * TileTextureSize, mapY * TileTextureSize, Raylib.WHITE);
         }
 
-        ServiceManager.GetService<EntityManager>().Draw();
+        foreach (var entity in Entities) entity.Draw();
         Raylib.EndMode2D();
         Raylib.EndTextureMode();
 
         MapTexture.Draw();
+    }
+
+    public void Update()
+    {
+        foreach (var entity in Entities) entity.Update();
     }
 
     /// <summary>
