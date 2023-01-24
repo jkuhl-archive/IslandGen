@@ -7,7 +7,7 @@ internal static class Game
 {
     private const int DefaultWindowWidth = 1280;
     private const int DefaultWindowHeight = 720;
-    private const int DefaultTargetFrameRate = 60;
+    private const int TargetFrameRate = 60;
 
     private const string WindowName = "IslandGen";
 
@@ -15,7 +15,7 @@ internal static class Game
     {
         // Initialize game window
         Raylib.InitWindow(DefaultWindowWidth, DefaultWindowHeight, WindowName);
-        Raylib.SetTargetFPS(DefaultTargetFrameRate);
+        Raylib.SetTargetFPS(TargetFrameRate);
 
         // Initialize game services
         ServiceManager.AddService(new Random());
@@ -24,14 +24,15 @@ internal static class Game
         ServiceManager.AddService(new InputManager());
         ServiceManager.AddService(new GameUi());
         ServiceManager.AddService(new ScalingManager());
-        ServiceManager.AddService(new TextureManager());
+        ServiceManager.AddService(new TextureManager(TargetFrameRate));
 
         while (!Raylib.WindowShouldClose())
         {
             // Update
-            ServiceManager.GetService<ScalingManager>().Update();
-            ServiceManager.GetService<InputManager>().Update();
             ServiceManager.GetService<GameMap>().Update();
+            ServiceManager.GetService<InputManager>().Update();
+            ServiceManager.GetService<ScalingManager>().Update();
+            ServiceManager.GetService<TextureManager>().Update();
 
             // Draw
             Raylib.BeginDrawing();

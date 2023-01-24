@@ -57,4 +57,20 @@ public static class TileTypeExtensions
             _ => "debug"
         };
     }
+
+    /// <summary>
+    ///     Returns true if the tile should be animated
+    /// </summary>
+    /// <param name="tileType"> TileType that we are checking </param>
+    /// <returns> True if animated, false if not </returns>
+    public static bool IsAnimated(this TileType tileType)
+    {
+        return tileType switch
+        {
+            TileType.Lake => true,
+            TileType.Ocean => true,
+            TileType.River => true,
+            _ => false
+        };
+    }
 }

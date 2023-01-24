@@ -68,8 +68,17 @@ public class GameMap
         {
             if (!mapVisibleArea.PointInsideRectangle(mapX, mapY)) continue;
 
-            var texture = textureManager.Textures[TileMap[mapX, mapY].GetTileTextureName()];
-            Raylib.DrawTexture(texture, mapX * TileTextureSize, mapY * TileTextureSize, Raylib.WHITE);
+            var currentTile = TileMap[mapX, mapY];
+            if (currentTile.IsAnimated())
+            {
+                var texture = textureManager.AnimatedTextures[currentTile.GetTileTextureName()];
+                texture.Draw(new Vector2(mapX * TileTextureSize, mapY * TileTextureSize));
+            }
+            else
+            {
+                var texture = textureManager.Textures[currentTile.GetTileTextureName()];
+                Raylib.DrawTexture(texture, mapX * TileTextureSize, mapY * TileTextureSize, Raylib.WHITE);
+            }
         }
 
         foreach (var entity in Entities.Where(entity =>
