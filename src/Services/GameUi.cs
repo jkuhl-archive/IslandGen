@@ -131,6 +131,7 @@ public class GameUi
             var gameCamera = ServiceManager.GetService<GameCamera>();
             _debugInfo =
                 $"FPS: {Raylib.GetFPS()}\n" +
+                $"Current Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
                 $"Scaling Factor: W: {scalingManager.WidthScale}, H: {scalingManager.HeightScale}\n" +
                 $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
                 $"Camera Target: {gameCamera.Camera.target}\n" +
