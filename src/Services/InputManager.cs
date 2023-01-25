@@ -6,10 +6,6 @@ public class InputManager
 {
     public void Update()
     {
-        // Mouse controls
-        if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
-            ServiceManager.ReplaceService(new GameMap());
-
         // Camera controls
         var gameCamera = ServiceManager.GetService<GameCamera>();
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_UP)) gameCamera.ZoomOut();
@@ -18,8 +14,5 @@ public class InputManager
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_DOWN)) gameCamera.PanDown();
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_LEFT)) gameCamera.PanLeft();
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_RIGHT)) gameCamera.PanRight();
-
-        // Window controls
-        if (Raylib.IsKeyReleased(KeyboardKey.KEY_F1)) Raylib.ToggleFullscreen();
     }
 }

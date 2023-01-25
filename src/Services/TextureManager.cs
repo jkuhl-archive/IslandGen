@@ -13,7 +13,7 @@ public class TextureManager
     public readonly Dictionary<string, Texture> Textures;
 
     /// <summary>
-    ///     Constructor for TextureManager
+    ///     Service that manages loading and serving textures
     /// </summary>
     /// <param name="targetFrameRate"> Framerate the game should be running at, used for animations </param>
     public TextureManager(int targetFrameRate)

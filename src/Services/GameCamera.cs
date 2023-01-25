@@ -12,7 +12,7 @@ public class GameCamera
     public Camera2D Camera;
 
     /// <summary>
-    ///     Constructor for GameCamera
+    ///     Service that manages the game's camera
     /// </summary>
     public GameCamera()
     {

@@ -28,11 +28,12 @@ internal static class Game
 
         while (!Raylib.WindowShouldClose())
         {
-            // Update
-            ServiceManager.GetService<GameMap>().Update();
-            ServiceManager.GetService<InputManager>().Update();
+            // Update, these are called in a specific order to ensure changes are tracked across services
             ServiceManager.GetService<ScalingManager>().Update();
+            ServiceManager.GetService<InputManager>().Update();
             ServiceManager.GetService<TextureManager>().Update();
+            ServiceManager.GetService<GameMap>().Update();
+            ServiceManager.GetService<GameUi>().Update();
 
             // Draw
             Raylib.BeginDrawing();

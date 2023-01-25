@@ -1,31 +1,55 @@
 using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Extensions;
+using IslandGen.UI;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
 
 public class GameUi
 {
-    private const string ControlsMessage = "Left Mouse to generate a new map\n" +
-                                           "F1 to toggle fullscreen\n" +
-                                           "PageUp / PageDown to zoom\n" +
-                                           "Arrow Keys move map";
+    private const int SidebarWidth = 100;
+    private const int SidebarHeight = 200;
+    private const int SidebarWidthPaddingSegments = 2;
+    private const int SidebarHeightPaddingSegments = 3;
+    private const int MiniMapWidth = 100;
+    private const int MiniMapHeight = 100;
+    private const int ButtonsWidth = 100;
+    private const int ButtonsHeight = 100;
+    private const int ButtonWidth = 50;
+    private const int ButtonHeight = 20;
+    private const int ButtonsRows = ButtonsWidth / ButtonWidth;
+    private const int ButtonsColumns = ButtonsHeight / ButtonHeight;
 
+    private readonly List<Button> _buttonsList;
     private readonly RenderTexturePro _miniMapTexture;
 
+    private Rectangle _buttonsArea;
+    private string _debugInfo;
+    private Rectangle _miniMapArea;
+    private bool _showDebugInfo;
+    private Rectangle _sidebarArea;
+
     /// <summary>
-    ///     Constructor for GameUi
+    ///     Service that manages the game's UI
     /// </summary>
     public GameUi()
     {
-        _miniMapTexture = new RenderTexturePro(new Vector2(ServiceManager.GetService<GameMap>().MapSize));
+        _buttonsList = new List<Button>
+        {
+            new("Zoom In", ServiceManager.GetService<GameCamera>().ZoomIn),
+            new("Zoom Out", ServiceManager.GetService<GameCamera>().ZoomOut),
+            new("New Island", () => ServiceManager.ReplaceService(new GameMap())),
+            new("Debug Stats", () => _showDebugInfo = !_showDebugInfo),
+            new("Fullscreen", Raylib.ToggleFullscreen),
+            new("Exit Game", Raylib.CloseWindow)
+        };
+        _debugInfo = string.Empty;
+        _miniMapTexture = new RenderTexturePro(new Vector2(MiniMapWidth, MiniMapHeight));
     }
 
     public void Draw()
     {
-        var scalingManager = ServiceManager.GetService<ScalingManager>();
-
         // Render minimap to texture
         var gameCamera = ServiceManager.GetService<GameCamera>();
         var gameMap = ServiceManager.GetService<GameMap>();
@@ -37,46 +61,95 @@ public class GameUi
         Raylib.DrawRectangleLinesEx(gameCamera.GetCameraMapArea(), 1, Raylib.RED);
         Raylib.EndTextureMode();
 
-        // Draw minimap backdrop
-        var miniMapPosition = new Vector2(
-            scalingManager.WindowWidth - _miniMapTexture.RenderTexture.texture.width * scalingManager.WidthScale -
-            scalingManager.WidthPadding * 2,
-            scalingManager.WindowHeight - _miniMapTexture.RenderTexture.texture.height * scalingManager.HeightScale -
-            scalingManager.HeightPadding * 2);
-        Raylib.DrawRectangle(miniMapPosition.X_int(), miniMapPosition.Y_int(),
-            (int)(_miniMapTexture.RenderTexture.texture.width * scalingManager.WidthScale +
-                  scalingManager.WidthPadding * 2),
-            (int)(_miniMapTexture.RenderTexture.texture.height * scalingManager.WidthScale +
-                  scalingManager.HeightPadding * 2),
-            Raylib.WHITE);
+        // Draw sidebar backdrop
+        Raylib.DrawRectangleRec(_sidebarArea, Raylib.WHITE);
+        Raylib.DrawRectangleRec(_buttonsArea, Raylib.GRAY);
+
+        // Draw buttons
+        foreach (var button in _buttonsList) button.Draw();
 
         // Draw minimap
-        _miniMapTexture.DestinationRectangle.X = miniMapPosition.X + scalingManager.WidthPadding;
-        _miniMapTexture.DestinationRectangle.Y = miniMapPosition.Y + scalingManager.HeightPadding;
         _miniMapTexture.Draw();
 
-        // Print status popup
-        var statusMessage =
-            $"FPS: {Raylib.GetFPS()}\n" +
-            $"Scaling Factor: W: {scalingManager.WidthScale}, H: {scalingManager.HeightScale}\n" +
-            $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
-            $"Camera Target: {gameCamera.Camera.target}\n" +
-            $"Camera Visible Map Tiles: {gameCamera.GetCameraMapArea().String()}\n\n" +
-            ControlsMessage;
-        DrawPopUp(statusMessage, scalingManager.FontSize, scalingManager.WidthPadding,
-            scalingManager.HeightPadding);
+        // Draw debug info
+        if (_showDebugInfo) DrawPopUp(_debugInfo);
+    }
+
+    public void Update()
+    {
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+        var sidebarWidthPadding = scalingManager.WidthPadding * SidebarWidthPaddingSegments;
+        var sidebarHeightPadding = scalingManager.HeightPadding * SidebarHeightPaddingSegments;
+
+        // Set sidebar area
+        _sidebarArea = new Rectangle(
+            scalingManager.WindowWidth - SidebarWidth * scalingManager.WidthScale - sidebarWidthPadding,
+            scalingManager.WindowHeight - SidebarHeight * scalingManager.HeightScale - sidebarHeightPadding,
+            (int)(SidebarWidth * scalingManager.WidthScale + sidebarWidthPadding),
+            (int)(SidebarHeight * scalingManager.HeightScale + sidebarHeightPadding));
+
+        // Set buttons area
+        _buttonsArea = new Rectangle(
+            _sidebarArea.X + scalingManager.WidthPadding,
+            _sidebarArea.Y + scalingManager.HeightPadding,
+            (int)(ButtonsWidth * scalingManager.WidthScale),
+            (int)(ButtonsHeight * scalingManager.HeightScale));
+
+        // Set minimap area
+        _miniMapArea = new Rectangle(
+            _sidebarArea.X + scalingManager.WidthPadding,
+            _sidebarArea.Y + _buttonsArea.height + scalingManager.HeightPadding * 2,
+            (int)(MiniMapWidth * scalingManager.WidthScale),
+            (int)(MiniMapHeight * scalingManager.HeightScale));
+
+        // Set button positions
+        var rowCounter = 0;
+        var columnCounter = 0;
+        foreach (var button in _buttonsList)
+        {
+            button.Area = new Rectangle(
+                _buttonsArea.X + rowCounter * ButtonWidth * scalingManager.WidthScale,
+                _buttonsArea.Y + columnCounter * ButtonHeight * scalingManager.HeightScale,
+                ButtonWidth * scalingManager.WidthScale,
+                ButtonHeight * scalingManager.HeightScale);
+
+            rowCounter++;
+
+            if (rowCounter >= ButtonsRows)
+            {
+                rowCounter = 0;
+                columnCounter++;
+            }
+        }
+
+        // Apply minimap area to texture
+        _miniMapTexture.DestinationRectangle = _miniMapArea;
+
+        // Set debug info
+        if (_showDebugInfo)
+        {
+            var gameCamera = ServiceManager.GetService<GameCamera>();
+            _debugInfo =
+                $"FPS: {Raylib.GetFPS()}\n" +
+                $"Scaling Factor: W: {scalingManager.WidthScale}, H: {scalingManager.HeightScale}\n" +
+                $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
+                $"Camera Target: {gameCamera.Camera.target}\n" +
+                $"Camera Visible Map Tiles: {gameCamera.GetCameraMapArea().String()}";
+        }
     }
 
     /// <summary>
     ///     Draws a popup message in the top right corner of the screen
     /// </summary>
     /// <param name="message"> String containing the popup contents </param>
-    /// <param name="fontSize"> Font size the popup should use </param>
-    /// <param name="widthPadding"> Amount of padding on the left and right sides of the popup </param>
-    /// <param name="heightPadding"> Amount of padding on the top and right bottom of the popup </param>
-    private void DrawPopUp(string message, int fontSize, int widthPadding, int heightPadding)
+    private void DrawPopUp(string message)
     {
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+        var fontSize = scalingManager.FontSize;
+        var widthPadding = scalingManager.WidthPadding;
+        var heightPadding = scalingManager.HeightPadding;
         var messageSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), message, fontSize, 2);
+
         Raylib.DrawRectangle(0, 0, messageSize.X_int() + widthPadding * 8, messageSize.Y_int() + heightPadding * 8,
             Raylib.WHITE);
         Raylib.DrawRectangle(widthPadding, heightPadding, messageSize.X_int() + widthPadding * 6,

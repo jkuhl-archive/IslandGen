@@ -17,6 +17,9 @@ public class ScalingManager
     private const double HeightScaleFactor16B9 = 1 / BaseHeight16By9;
     private const double HeightScaleFactor16B10 = 1 / BaseHeight16By10;
 
+    /// <summary>
+    ///     Service that manages automatically scaling the game to fit the current window size / resolution
+    /// </summary>
     public ScalingManager()
     {
         UpdateScaling();

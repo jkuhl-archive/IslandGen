@@ -27,18 +27,25 @@ public class RenderTexturePro
     /// <summary>
     ///     Draws this texture to the screen, must be called within a draw session
     /// </summary>
-    public void Draw()
+    /// <param name="scaled"> If true the destination rectangle will be scaled </param>
+    public void Draw(bool scaled = false)
     {
-        var scalingManager = ServiceManager.GetService<ScalingManager>();
+        var destinationRectangle = DestinationRectangle;
+
+        if (scaled)
+        {
+            var scalingManager = ServiceManager.GetService<ScalingManager>();
+            destinationRectangle = destinationRectangle with
+            {
+                width = DestinationRectangle.width * scalingManager.WidthScale,
+                height = DestinationRectangle.height * scalingManager.HeightScale
+            };
+        }
 
         Raylib.DrawTexturePro(
             RenderTexture.texture,
             SourceRectangle,
-            DestinationRectangle with
-            {
-                width = DestinationRectangle.width * scalingManager.WidthScale,
-                height = DestinationRectangle.height * scalingManager.HeightScale
-            },
+            destinationRectangle,
             Vector2.Zero,
             0.0f,
             Raylib.WHITE);

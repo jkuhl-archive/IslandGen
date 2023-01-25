@@ -36,8 +36,10 @@ public class GameMap
     public readonly int TileTextureSize;
 
     /// <summary>
-    ///     Constructor for GameMap
+    ///     Service that manages the the game's map and entities
     /// </summary>
+    /// <param name="mapSize"> Size of the map </param>
+    /// <param name="tileTextureSize"> Size of the textures used for tiles on the map </param>
     public GameMap(int mapSize = 100, int tileTextureSize = 16)
     {
         MapSize = mapSize;
@@ -88,7 +90,7 @@ public class GameMap
         Raylib.EndMode2D();
         Raylib.EndTextureMode();
 
-        MapTexture.Draw();
+        MapTexture.Draw(true);
     }
 
     public void Update()
