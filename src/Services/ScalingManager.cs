@@ -12,6 +12,7 @@ public class ScalingManager
     private const double AspectRatio4By3 = BaseWidth / BaseHeight4By3;
     private const double AspectRatio16By9 = BaseWidth / BaseHeight16By9;
     private const double AspectRatio16By10 = BaseWidth / BaseHeight16By10;
+    
     private const double WidthScaleFactor = 1 / BaseWidth;
     private const double HeightScaleFactor4By3 = 1 / BaseHeight4By3;
     private const double HeightScaleFactor16B9 = 1 / BaseHeight16By9;

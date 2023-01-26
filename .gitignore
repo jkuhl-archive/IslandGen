@@ -354,3 +354,4 @@ MigrationBackup/
 
 # Builds
 output/
+assets/build_id.txt

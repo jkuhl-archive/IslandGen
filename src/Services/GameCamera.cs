@@ -5,7 +5,7 @@ namespace IslandGen.Services;
 public class GameCamera
 {
     private const float MinZoom = 0.4f;
-    private const float MaxZoom = 1.0f;
+    private const float MaxZoom = 1.5f;
     private const float ZoomIncrement = 0.1f;
     private const float PanIncrement = 100.0f;
 
@@ -63,7 +63,12 @@ public class GameCamera
     /// </summary>
     public void ZoomIn()
     {
-        if (Camera.zoom + ZoomIncrement is >= MinZoom and <= MaxZoom) Camera.zoom += ZoomIncrement;
+        Camera.zoom = (float)Math.Round(Camera.zoom + ZoomIncrement, 2);
+
+        if (Camera.zoom > MaxZoom)
+        {
+            Camera.zoom = MaxZoom;
+        }
     }
 
     /// <summary>
@@ -71,6 +76,11 @@ public class GameCamera
     /// </summary>
     public void ZoomOut()
     {
-        if (Camera.zoom - ZoomIncrement is >= MinZoom and <= MaxZoom) Camera.zoom -= ZoomIncrement;
+        Camera.zoom = (float)Math.Round(Camera.zoom - ZoomIncrement, 2);
+        
+        if (Camera.zoom < MinZoom)
+        {
+            Camera.zoom = MinZoom;
+        }
     }
 }
