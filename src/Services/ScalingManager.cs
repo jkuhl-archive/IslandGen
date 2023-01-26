@@ -8,15 +8,18 @@ public class ScalingManager
     private const double BaseHeight4By3 = 480;
     private const double BaseHeight16By9 = 360;
     private const double BaseHeight16By10 = 400;
-
+    private const double BaseHeight32By9 = 180;
+    
     private const double AspectRatio4By3 = BaseWidth / BaseHeight4By3;
     private const double AspectRatio16By9 = BaseWidth / BaseHeight16By9;
     private const double AspectRatio16By10 = BaseWidth / BaseHeight16By10;
-    
+    private const double AspectRatio32By9 = BaseWidth / BaseHeight32By9;
+
     private const double WidthScaleFactor = 1 / BaseWidth;
     private const double HeightScaleFactor4By3 = 1 / BaseHeight4By3;
-    private const double HeightScaleFactor16B9 = 1 / BaseHeight16By9;
-    private const double HeightScaleFactor16B10 = 1 / BaseHeight16By10;
+    private const double HeightScaleFactor16By9 = 1 / BaseHeight16By9;
+    private const double HeightScaleFactor16By10 = 1 / BaseHeight16By10;
+    private const double HeightScaleFactor32By9 = 1 / BaseHeight32By9;
 
     /// <summary>
     ///     Service that manages automatically scaling the game to fit the current window size / resolution
@@ -68,8 +71,8 @@ public class ScalingManager
         return ((double)Raylib.GetRenderWidth() / Raylib.GetRenderHeight()) switch
         {
             AspectRatio4By3 => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor4By3, 2),
-            AspectRatio16By9 => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor16B9, 2),
-            AspectRatio16By10 => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor16B10, 2),
+            AspectRatio16By9 => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor16By9, 2),
+            AspectRatio16By10 => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor16By10, 2),
             _ => (float)Math.Round(Raylib.GetRenderHeight() * HeightScaleFactor4By3, 2)
         };
     }
