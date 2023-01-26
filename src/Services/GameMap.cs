@@ -1,6 +1,7 @@
 using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Data.ECS;
+using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using Newtonsoft.Json;
 using Raylib_CsLo;
@@ -12,7 +13,7 @@ public class GameMap
     private const int MapSize = 100;
     private const int MapBuffer = MapSize / 10;
     private const int TileTextureSize = 16;
-    
+
     private const int DirtDeform1Iterations = 10;
     private const int DirtDeform2Iterations = 20;
     private const int SandDeform1Iterations = 15;

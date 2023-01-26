@@ -1,6 +1,6 @@
 using Raylib_CsLo;
 
-namespace IslandGen.Data;
+namespace IslandGen.Data.Enum;
 
 /// <summary>
 ///     Contents of a single tile on the map

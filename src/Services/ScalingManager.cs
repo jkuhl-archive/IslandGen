@@ -32,6 +32,7 @@ public class ScalingManager
     public int WidthPadding { get; private set; }
     public int HeightPadding { get; private set; }
     public int FontSize { get; private set; }
+    public int FontSpacing { get; private set; }
 
     public void Update()
     {
@@ -54,6 +55,7 @@ public class ScalingManager
         WidthPadding = (int)(1 * WidthScale);
         HeightPadding = (int)(1 * HeightScale);
         FontSize = (int)((WidthScale + HeightScale) / 2 * 10);
+        FontSpacing = (int)(2 * WidthScale);
     }
 
     /// <summary>

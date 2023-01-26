@@ -1,8 +1,9 @@
 using System.Numerics;
 using IslandGen.Data;
+using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.UI;
-using Newtonsoft.Json;
+using IslandGen.Utilities;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -40,12 +41,12 @@ public class GameUi
         {
             new("Zoom In", ServiceManager.GetService<GameCamera>().ZoomIn),
             new("Zoom Out", ServiceManager.GetService<GameCamera>().ZoomOut),
-            new("Save Island", SaveMap),
-            new("Load Island", LoadMap),
+            new("Save Island", SaveUtils.SaveMap),
+            new("Load Island", () => SaveUtils.LoadMap()),
             new("New Island", () => ServiceManager.ReplaceService(new GameMap())),
             new("Debug Stats", () => _showDebugInfo = !_showDebugInfo),
             new("Fullscreen", Raylib.ToggleFullscreen),
-            new("Exit Game", Raylib.CloseWindow)
+            new("Main Menu", ReturnToMainMenu)
         };
         _debugInfo = string.Empty;
         _miniMapTexture = new RenderTexturePro(new Vector2(MiniMapWidth, MiniMapHeight));
@@ -150,34 +151,25 @@ public class GameUi
     {
         var scalingManager = ServiceManager.GetService<ScalingManager>();
         var fontSize = scalingManager.FontSize;
+        var fontSpacing = scalingManager.FontSpacing;
         var widthPadding = scalingManager.WidthPadding;
         var heightPadding = scalingManager.HeightPadding;
-        var messageSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), message, fontSize, 2);
+        var messageSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), message, fontSize, fontSpacing);
 
         Raylib.DrawRectangle(0, 0, messageSize.X_int() + widthPadding * 8, messageSize.Y_int() + heightPadding * 8,
             Raylib.WHITE);
         Raylib.DrawRectangle(widthPadding, heightPadding, messageSize.X_int() + widthPadding * 6,
             messageSize.Y_int() + heightPadding * 6, Raylib.BLACK);
         Raylib.DrawTextEx(Raylib.GetFontDefault(), message, new Vector2(widthPadding * 4, heightPadding * 4), fontSize,
-            2, Raylib.WHITE);
+            fontSpacing, Raylib.WHITE);
     }
 
     /// <summary>
-    ///     Loads a saved map
+    ///     Unloads the map and returns to the main menu
     /// </summary>
-    private void LoadMap()
+    private void ReturnToMainMenu()
     {
-        var mapJson = File.ReadAllText("save.json");
-        ServiceManager.ReplaceService(JsonConvert.DeserializeObject<GameMap>(mapJson));
-    }
-
-    /// <summary>
-    ///     Saves the current map
-    /// </summary>
-    private void SaveMap()
-    {
-        var jsonSettings = new JsonSerializerSettings { Formatting = Formatting.Indented };
-        var mapJson = JsonConvert.SerializeObject(ServiceManager.GetService<GameMap>(), jsonSettings);
-        File.WriteAllText("save.json", mapJson);
+        ServiceManager.RemoveService(typeof(GameMap));
+        ServiceManager.GetService<StateManager>().GameState = GameState.MainMenu;
     }
 }

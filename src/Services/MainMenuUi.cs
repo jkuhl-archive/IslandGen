@@ -1,0 +1,125 @@
+using System.Numerics;
+using IslandGen.Data.Enum;
+using IslandGen.Extensions;
+using IslandGen.UI;
+using IslandGen.Utilities;
+using Raylib_CsLo;
+
+namespace IslandGen.Services;
+
+public class MainMenuUi
+{
+    private const int ButtonWidth = 80;
+    private const int ButtonHeight = 40;
+    private const float BackgroundTileScale = 4.0f;
+    private const string GameTitle = "IslandGen";
+    private const string GameMajorVersion = "0.1-alpha";
+
+    private readonly List<Button> _buttonsList;
+    private readonly string _versionString;
+
+    private Rectangle _backgroundArea;
+    private Rectangle _buttonsArea;
+    private Rectangle _titleArea;
+    private int _titleFontSize;
+    private int _titleFontSpacing;
+    private Rectangle _versionArea;
+    private int _versionFontSize;
+    private int _versionFontSpacing;
+
+    /// <summary>
+    ///     Service that provides a main menu interface for accessing the game
+    /// </summary>
+    public MainMenuUi()
+    {
+        _buttonsList = new List<Button>
+        {
+            new("New Island", NewGame),
+            new("Load Island", LoadGame),
+            new("Fullscreen", Raylib.ToggleFullscreen),
+            new("Exit Game", Raylib.CloseWindow)
+        };
+
+        var buildId = File.ReadAllText("assets/build_id.txt").Replace("\n", "");
+        _versionString = $"{GameMajorVersion}-{buildId}";
+    }
+
+    public void Draw()
+    {
+        var texture = ServiceManager.GetService<TextureManager>().Textures[TileType.Dirt.GetTileTextureName()];
+        Raylib.DrawTextureTiled(texture, new Rectangle(0, 0, texture.width, texture.height), _backgroundArea,
+            Vector2.Zero, 0, BackgroundTileScale, Raylib.WHITE);
+
+        Raylib.DrawTextEx(Raylib.GetFontDefault(), GameTitle, _titleArea.Start() + Vector2.One * 4, _titleFontSize,
+            _titleFontSpacing, Raylib.BLACK);
+        Raylib.DrawTextEx(Raylib.GetFontDefault(), GameTitle, _titleArea.Start(), _titleFontSize, _titleFontSpacing,
+            Raylib.WHITE);
+        Raylib.DrawTextEx(Raylib.GetFontDefault(), _versionString, _versionArea.Start() + Vector2.One * 2,
+            _versionFontSize, _versionFontSpacing, Raylib.BLACK);
+        Raylib.DrawTextEx(Raylib.GetFontDefault(), _versionString, _versionArea.Start(), _versionFontSize,
+            _versionFontSpacing, Raylib.WHITE);
+
+
+        foreach (var button in _buttonsList) button.Draw();
+    }
+
+    public void Update()
+    {
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+        var windowWidthCenter = scalingManager.WindowWidth / 2;
+        var windowHeightCenter = scalingManager.WindowHeight / 2;
+        _titleFontSize = scalingManager.FontSize * 4;
+        _titleFontSpacing = scalingManager.FontSpacing;
+        _versionFontSize = scalingManager.FontSize;
+        _versionFontSpacing = scalingManager.FontSpacing;
+
+        var buttonsAreaHeight =
+            (ButtonHeight + scalingManager.HeightPadding) * scalingManager.HeightScale * _buttonsList.Count -
+            scalingManager.HeightPadding;
+        var titleSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), GameTitle, _titleFontSize, _titleFontSpacing);
+        var versionSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), _versionString, _versionFontSize,
+            _versionFontSpacing);
+
+        _backgroundArea = new Rectangle(0, 0, scalingManager.WindowWidth, scalingManager.WindowHeight);
+        _versionArea = new Rectangle(
+            scalingManager.WindowWidth - versionSize.X - scalingManager.WidthPadding,
+            scalingManager.WindowHeight - versionSize.Y - scalingManager.HeightPadding,
+            versionSize.X,
+            versionSize.Y);
+        _titleArea = new Rectangle(
+            windowWidthCenter - titleSize.X / 2,
+            windowHeightCenter - titleSize.Y - buttonsAreaHeight / 2,
+            titleSize.X,
+            titleSize.Y + titleSize.Y / 2);
+        _buttonsArea = new Rectangle(
+            windowWidthCenter - ButtonWidth * scalingManager.WidthScale / 2,
+            _titleArea.Y + _titleArea.height,
+            ButtonWidth * scalingManager.WidthScale,
+            buttonsAreaHeight);
+
+        for (var i = 0; i < _buttonsList.Count; i++)
+            _buttonsList[i].Area = _buttonsArea with
+            {
+                Y = _buttonsArea.Y + i * (ButtonHeight * scalingManager.HeightScale + scalingManager.HeightPadding),
+                height = ButtonHeight * scalingManager.HeightScale
+            };
+    }
+    
+    /// <summary>
+    ///     Loads the saved map if one exists and loads into the game
+    /// </summary>
+    private void LoadGame()
+    {
+        if (!SaveUtils.LoadMap()) return;
+        ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
+    }
+
+    /// <summary>
+    ///     Initializes a new map and loads into the game
+    /// </summary>
+    private void NewGame()
+    {
+        ServiceManager.AddService(new GameMap());
+        ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
+    }
+}

@@ -1,4 +1,4 @@
-namespace IslandGen.Data;
+namespace IslandGen.Data.Enum;
 
 /// <summary>
 ///     Cardinal directions

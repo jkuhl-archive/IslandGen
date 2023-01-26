@@ -2,7 +2,7 @@
     <configuration default="false" name="Build Linux-x64" type="DotNetFolderPublish" factoryName="Publish to folder">
         <riderPublish delete_existing_files="true" include_native_libs_for_self_extract="true"
                       produce_single_file="true" ready_to_run="true" runtime="linux-x64" self_contained="true"
-                      target_folder="$PROJECT_DIR$/output/linux-x64" target_framework="net6.0"
+                      target_folder="$PROJECT_DIR$/output/linux-x64" target_framework="net7.0"
                       trim_unused_assemblies="true" uuid_high="7736947248075247542" uuid_low="-77891584236316468"/>
         <method v="2"/>
     </configuration>

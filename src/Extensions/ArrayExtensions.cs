@@ -1,4 +1,4 @@
-using IslandGen.Data;
+using IslandGen.Data.Enum;
 
 namespace IslandGen.Extensions;
 
