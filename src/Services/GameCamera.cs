@@ -23,26 +23,6 @@ public class GameCamera
     }
 
     /// <summary>
-    ///     Determines the area of the map that the camera can currently see
-    /// </summary>
-    /// <returns> Rectangle that represents the area of the map that the camera can currently see </returns>
-    public Rectangle GetCameraMapArea()
-    {
-        var gameMap = ServiceManager.GetService<GameMap>();
-        var scalingManager = ServiceManager.GetService<ScalingManager>();
-
-        var cameraViewWidth = gameMap.MapTexture.RenderTexture.texture.width * Camera.zoom * scalingManager.WidthScale;
-        var cameraViewHeight =
-            gameMap.MapTexture.RenderTexture.texture.height * Camera.zoom * scalingManager.HeightScale;
-        var mapViewX = (int)Math.Round(Camera.target.X / gameMap.TileTextureSize);
-        var mapViewY = (int)Math.Round(Camera.target.Y / gameMap.TileTextureSize);
-        var mapViewWidth = (int)Math.Round(gameMap.MapSize * scalingManager.WindowWidth / cameraViewWidth);
-        var mapViewHeight = (int)Math.Round(gameMap.MapSize * scalingManager.WindowHeight / cameraViewHeight);
-
-        return new Rectangle(mapViewX, mapViewY, mapViewWidth, mapViewHeight);
-    }
-
-    /// <summary>
     ///     Pans the camera up
     /// </summary>
     public void PanUp()

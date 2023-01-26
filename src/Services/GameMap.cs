@@ -2,13 +2,17 @@ using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Data.ECS;
 using IslandGen.Extensions;
+using Newtonsoft.Json;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
 
 public class GameMap
 {
-    // Map generation variables
+    private const int MapSize = 100;
+    private const int MapBuffer = MapSize / 10;
+    private const int TileTextureSize = 16;
+    
     private const int DirtDeform1Iterations = 10;
     private const int DirtDeform2Iterations = 20;
     private const int SandDeform1Iterations = 15;
@@ -16,7 +20,6 @@ public class GameMap
     private const int SandDeform3Iterations = 100;
     private const int LakeSeeding1Iterations = 5;
     private const int RockSeeding1Iterations = 20;
-
     private const float DirtDeform1Multiplier = 0.15f;
     private const float DirtDeform2Multiplier = 0.06f;
     private const float SandDeform1Multiplier = 0.10f;
@@ -27,40 +30,43 @@ public class GameMap
     private const float SandPad1Multiplier = 0.06f;
     private const float SandPad2Multiplier = 0.02f;
 
-    public readonly Rectangle BaseIslandArea;
+    private readonly Rectangle _baseIslandArea =
+        new(MapBuffer, MapBuffer, MapSize - MapBuffer * 2, MapSize - MapBuffer * 2);
+
+    private readonly RenderTexturePro _mapTexture =
+        new(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
+
     public readonly List<IEntity> Entities;
-    public readonly int MapBuffer;
-    public readonly int MapSize;
-    public readonly RenderTexturePro MapTexture;
     public readonly TileType[,] TileMap;
-    public readonly int TileTextureSize;
 
     /// <summary>
-    ///     Service that manages the the game's map and entities
+    ///     Service that manages the game's map and entities
     /// </summary>
-    /// <param name="mapSize"> Size of the map </param>
-    /// <param name="tileTextureSize"> Size of the textures used for tiles on the map </param>
-    public GameMap(int mapSize = 100, int tileTextureSize = 16)
+    public GameMap()
     {
-        MapSize = mapSize;
-        MapBuffer = MapSize / 10;
-        TileTextureSize = tileTextureSize;
-
-        BaseIslandArea = new Rectangle(MapBuffer, MapBuffer, MapSize - MapBuffer * 2, MapSize - MapBuffer * 2);
-        MapTexture = new RenderTexturePro(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
-        TileMap = new TileType[MapSize, MapSize];
         Entities = new List<IEntity>();
-
+        TileMap = new TileType[MapSize, MapSize];
         GenerateMap();
+    }
+
+    /// <summary>
+    ///     Constructor for loading a saved GameMap
+    /// </summary>
+    /// <param name="entities"> List of entities that should populate the map </param>
+    /// <param name="tileMap"> Array that stores the map's tiles </param>
+    [JsonConstructor]
+    private GameMap(List<IEntity> entities, TileType[,] tileMap)
+    {
+        Entities = entities;
+        TileMap = tileMap;
     }
 
     public void Draw()
     {
         var gameCamera = ServiceManager.GetService<GameCamera>();
         var textureManager = ServiceManager.GetService<TextureManager>();
-        var mapVisibleArea = gameCamera.GetCameraMapArea();
 
-        Raylib.BeginTextureMode(MapTexture.RenderTexture);
+        Raylib.BeginTextureMode(_mapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
         Raylib.BeginMode2D(gameCamera.Camera);
 
@@ -68,7 +74,7 @@ public class GameMap
         for (var mapX = 0; mapX < MapSize; mapX++)
         for (var mapY = 0; mapY < MapSize; mapY++)
         {
-            if (!mapVisibleArea.PointInsideRectangle(mapX, mapY)) continue;
+            if (!GetVisibleMapArea().PointInsideRectangle(mapX, mapY)) continue;
 
             var currentTile = TileMap[mapX, mapY];
             if (currentTile.IsAnimated())
@@ -84,18 +90,46 @@ public class GameMap
         }
 
         foreach (var entity in Entities.Where(entity =>
-                     mapVisibleArea.PointInsideRectangle(entity.Position.X_int(), entity.Position.Y_int())))
+                     GetVisibleMapArea().PointInsideRectangle(entity.Position.X_int(), entity.Position.Y_int())))
             entity.Draw();
 
         Raylib.EndMode2D();
         Raylib.EndTextureMode();
 
-        MapTexture.Draw(true);
+        _mapTexture.Draw(true);
     }
 
     public void Update()
     {
         foreach (var entity in Entities) entity.Update();
+    }
+
+    /// <summary>
+    ///     Returns the size of the map
+    /// </summary>
+    /// <returns> Int that represents the width and height of the game map </returns>
+    public int GetMapSize()
+    {
+        return MapSize;
+    }
+
+    /// <summary>
+    ///     Determines the area of the map that the camera can currently see
+    /// </summary>
+    /// <returns> Rectangle that represents the area of the map that the camera can currently see </returns>
+    public Rectangle GetVisibleMapArea()
+    {
+        var camera = ServiceManager.GetService<GameCamera>().Camera;
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+
+        var cameraViewWidth = _mapTexture.RenderTexture.texture.width * camera.zoom * scalingManager.WidthScale;
+        var cameraViewHeight = _mapTexture.RenderTexture.texture.height * camera.zoom * scalingManager.HeightScale;
+        var mapViewX = (int)Math.Round(camera.target.X / TileTextureSize);
+        var mapViewY = (int)Math.Round(camera.target.Y / TileTextureSize);
+        var mapViewWidth = (int)Math.Round(MapSize * scalingManager.WindowWidth / cameraViewWidth);
+        var mapViewHeight = (int)Math.Round(MapSize * scalingManager.WindowHeight / cameraViewHeight);
+
+        return new Rectangle(mapViewX, mapViewY, mapViewWidth, mapViewHeight);
     }
 
     /// <summary>
@@ -107,7 +141,7 @@ public class GameMap
 
         // Fill map with ocean, then fill island base area with dirt
         FillMapSection(Vector2.Zero, new Vector2(MapSize), TileType.Ocean);
-        FillMapSection(BaseIslandArea.Start(), BaseIslandArea.End(), TileType.Dirt);
+        FillMapSection(_baseIslandArea.Start(), _baseIslandArea.End(), TileType.Dirt);
 
         // Dirt perimeter deform pass 1 and 2
         DeformPerimeter(DirtDeform1Iterations, DirtDeform1Multiplier, TileType.Dirt, TileType.Ocean);
@@ -176,8 +210,8 @@ public class GameMap
         TileType fillTileType)
     {
         var rnd = ServiceManager.GetService<Random>();
-        var start = BaseIslandArea.Start();
-        var end = BaseIslandArea.End();
+        var start = _baseIslandArea.Start();
+        var end = _baseIslandArea.End();
 
         for (var i = 0; i < rnd.Next(maxIterations); i++)
         {
@@ -294,8 +328,8 @@ public class GameMap
     private void SeedTileType(int maxIterations, float sizeMultiplier, TileType? replaceTileType, TileType fillTileType)
     {
         var rnd = ServiceManager.GetService<Random>();
-        var start = BaseIslandArea.Start();
-        var end = BaseIslandArea.End();
+        var start = _baseIslandArea.Start();
+        var end = _baseIslandArea.End();
 
         for (var i = 0; i < rnd.Next(maxIterations); i++)
         {
@@ -315,7 +349,7 @@ public class GameMap
                 for (var mapY = seedStartPoint.Y_int() - (int)(MapSize * sizeMultiplier);
                      mapY < seedStartPoint.Y_int() + (int)(MapSize * sizeMultiplier);
                      mapY++)
-                    if (BaseIslandArea.PointInsideRectangle(mapX, mapY))
+                    if (_baseIslandArea.PointInsideRectangle(mapX, mapY))
                     {
                         if (replaceTileType != null && TileMap[mapX, mapY] != replaceTileType) continue;
                         TileMap[mapX, mapY] = fillTileType;

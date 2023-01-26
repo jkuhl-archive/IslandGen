@@ -2,6 +2,7 @@ using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Extensions;
 using IslandGen.UI;
+using Newtonsoft.Json;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -39,6 +40,8 @@ public class GameUi
         {
             new("Zoom In", ServiceManager.GetService<GameCamera>().ZoomIn),
             new("Zoom Out", ServiceManager.GetService<GameCamera>().ZoomOut),
+            new("Save Island", SaveMap),
+            new("Load Island", LoadMap),
             new("New Island", () => ServiceManager.ReplaceService(new GameMap())),
             new("Debug Stats", () => _showDebugInfo = !_showDebugInfo),
             new("Fullscreen", Raylib.ToggleFullscreen),
@@ -51,14 +54,13 @@ public class GameUi
     public void Draw()
     {
         // Render minimap to texture
-        var gameCamera = ServiceManager.GetService<GameCamera>();
         var gameMap = ServiceManager.GetService<GameMap>();
         Raylib.BeginTextureMode(_miniMapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
-        for (var mapX = 0; mapX < gameMap.MapSize; mapX++)
-        for (var mapY = 0; mapY < gameMap.MapSize; mapY++)
+        for (var mapX = 0; mapX < gameMap.GetMapSize(); mapX++)
+        for (var mapY = 0; mapY < gameMap.GetMapSize(); mapY++)
             Raylib.DrawPixelV(new Vector2(mapX, mapY), gameMap.TileMap[mapX, mapY].GetTileColor());
-        Raylib.DrawRectangleLinesEx(gameCamera.GetCameraMapArea(), 1, Raylib.RED);
+        Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapArea(), 1, Raylib.RED);
         Raylib.EndTextureMode();
 
         // Draw sidebar backdrop
@@ -129,13 +131,14 @@ public class GameUi
         if (_showDebugInfo)
         {
             var gameCamera = ServiceManager.GetService<GameCamera>();
+            var gameMap = ServiceManager.GetService<GameMap>();
             _debugInfo =
                 $"FPS: {Raylib.GetFPS()}\n" +
                 $"Current Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
                 $"Scaling Factor: W: {scalingManager.WidthScale}, H: {scalingManager.HeightScale}\n" +
                 $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
                 $"Camera Target: {gameCamera.Camera.target}\n" +
-                $"Camera Visible Map Tiles: {gameCamera.GetCameraMapArea().String()}";
+                $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
         }
     }
 
@@ -157,5 +160,24 @@ public class GameUi
             messageSize.Y_int() + heightPadding * 6, Raylib.BLACK);
         Raylib.DrawTextEx(Raylib.GetFontDefault(), message, new Vector2(widthPadding * 4, heightPadding * 4), fontSize,
             2, Raylib.WHITE);
+    }
+
+    /// <summary>
+    ///     Loads a saved map
+    /// </summary>
+    private void LoadMap()
+    {
+        var mapJson = File.ReadAllText("save.json");
+        ServiceManager.ReplaceService(JsonConvert.DeserializeObject<GameMap>(mapJson));
+    }
+
+    /// <summary>
+    ///     Saves the current map
+    /// </summary>
+    private void SaveMap()
+    {
+        var jsonSettings = new JsonSerializerSettings { Formatting = Formatting.Indented };
+        var mapJson = JsonConvert.SerializeObject(ServiceManager.GetService<GameMap>(), jsonSettings);
+        File.WriteAllText("save.json", mapJson);
     }
 }
