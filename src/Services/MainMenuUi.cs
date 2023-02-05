@@ -74,16 +74,16 @@ public class MainMenuUi
         _versionFontSpacing = scalingManager.FontSpacing;
 
         var buttonsAreaHeight =
-            (ButtonHeight + scalingManager.HeightPadding) * scalingManager.HeightScale * _buttonsList.Count -
-            scalingManager.HeightPadding;
+            (ButtonHeight + scalingManager.Padding) * scalingManager.ScaleFactor * _buttonsList.Count -
+            scalingManager.Padding;
         var titleSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), GameTitle, _titleFontSize, _titleFontSpacing);
         var versionSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), _versionString, _versionFontSize,
             _versionFontSpacing);
 
         _backgroundArea = new Rectangle(0, 0, scalingManager.WindowWidth, scalingManager.WindowHeight);
         _versionArea = new Rectangle(
-            scalingManager.WindowWidth - versionSize.X - scalingManager.WidthPadding,
-            scalingManager.WindowHeight - versionSize.Y - scalingManager.HeightPadding,
+            scalingManager.WindowWidth - versionSize.X - scalingManager.Padding,
+            scalingManager.WindowHeight - versionSize.Y - scalingManager.Padding,
             versionSize.X,
             versionSize.Y);
         _titleArea = new Rectangle(
@@ -92,19 +92,19 @@ public class MainMenuUi
             titleSize.X,
             titleSize.Y + titleSize.Y / 2);
         _buttonsArea = new Rectangle(
-            windowWidthCenter - ButtonWidth * scalingManager.WidthScale / 2,
+            windowWidthCenter - ButtonWidth * scalingManager.ScaleFactor / 2,
             _titleArea.Y + _titleArea.height,
-            ButtonWidth * scalingManager.WidthScale,
+            ButtonWidth * scalingManager.ScaleFactor,
             buttonsAreaHeight);
 
         for (var i = 0; i < _buttonsList.Count; i++)
             _buttonsList[i].Area = _buttonsArea with
             {
-                Y = _buttonsArea.Y + i * (ButtonHeight * scalingManager.HeightScale + scalingManager.HeightPadding),
-                height = ButtonHeight * scalingManager.HeightScale
+                Y = _buttonsArea.Y + i * (ButtonHeight * scalingManager.ScaleFactor + scalingManager.Padding),
+                height = ButtonHeight * scalingManager.ScaleFactor
             };
     }
-    
+
     /// <summary>
     ///     Loads the saved map if one exists and loads into the game
     /// </summary>

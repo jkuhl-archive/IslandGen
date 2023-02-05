@@ -37,8 +37,8 @@ public class RenderTexturePro
             var scalingManager = ServiceManager.GetService<ScalingManager>();
             destinationRectangle = destinationRectangle with
             {
-                width = DestinationRectangle.width * scalingManager.WidthScale,
-                height = DestinationRectangle.height * scalingManager.HeightScale
+                width = DestinationRectangle.width * scalingManager.ScaleFactor,
+                height = DestinationRectangle.height * scalingManager.ScaleFactor
             };
         }
 

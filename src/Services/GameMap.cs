@@ -123,8 +123,8 @@ public class GameMap
         var camera = ServiceManager.GetService<GameCamera>().Camera;
         var scalingManager = ServiceManager.GetService<ScalingManager>();
 
-        var cameraViewWidth = _mapTexture.RenderTexture.texture.width * camera.zoom * scalingManager.WidthScale;
-        var cameraViewHeight = _mapTexture.RenderTexture.texture.height * camera.zoom * scalingManager.HeightScale;
+        var cameraViewWidth = _mapTexture.RenderTexture.texture.width * camera.zoom * scalingManager.ScaleFactor;
+        var cameraViewHeight = _mapTexture.RenderTexture.texture.height * camera.zoom * scalingManager.ScaleFactor;
         var mapViewX = (int)Math.Round(camera.target.X / TileTextureSize);
         var mapViewY = (int)Math.Round(camera.target.Y / TileTextureSize);
         var mapViewWidth = (int)Math.Round(MapSize * scalingManager.WindowWidth / cameraViewWidth);

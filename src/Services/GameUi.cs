@@ -81,29 +81,29 @@ public class GameUi
     public void Update()
     {
         var scalingManager = ServiceManager.GetService<ScalingManager>();
-        var sidebarWidthPadding = scalingManager.WidthPadding * SidebarWidthPaddingSegments;
-        var sidebarHeightPadding = scalingManager.HeightPadding * SidebarHeightPaddingSegments;
+        var sidebarWidthPadding = scalingManager.Padding * SidebarWidthPaddingSegments;
+        var sidebarHeightPadding = scalingManager.Padding * SidebarHeightPaddingSegments;
 
         // Set sidebar area
         _sidebarArea = new Rectangle(
-            scalingManager.WindowWidth - SidebarWidth * scalingManager.WidthScale - sidebarWidthPadding,
-            scalingManager.WindowHeight - SidebarHeight * scalingManager.HeightScale - sidebarHeightPadding,
-            (int)(SidebarWidth * scalingManager.WidthScale + sidebarWidthPadding),
-            (int)(SidebarHeight * scalingManager.HeightScale + sidebarHeightPadding));
+            scalingManager.WindowWidth - SidebarWidth * scalingManager.ScaleFactor - sidebarWidthPadding,
+            scalingManager.WindowHeight - SidebarHeight * scalingManager.ScaleFactor - sidebarHeightPadding,
+            (int)(SidebarWidth * scalingManager.ScaleFactor + sidebarWidthPadding),
+            (int)(SidebarHeight * scalingManager.ScaleFactor + sidebarHeightPadding));
 
         // Set buttons area
         _buttonsArea = new Rectangle(
-            _sidebarArea.X + scalingManager.WidthPadding,
-            _sidebarArea.Y + scalingManager.HeightPadding,
-            (int)(ButtonsWidth * scalingManager.WidthScale),
-            (int)(ButtonsHeight * scalingManager.HeightScale));
+            _sidebarArea.X + scalingManager.Padding,
+            _sidebarArea.Y + scalingManager.Padding,
+            (int)(ButtonsWidth * scalingManager.ScaleFactor),
+            (int)(ButtonsHeight * scalingManager.ScaleFactor));
 
         // Set minimap area
         _miniMapArea = new Rectangle(
-            _sidebarArea.X + scalingManager.WidthPadding,
-            _sidebarArea.Y + _buttonsArea.height + scalingManager.HeightPadding * 2,
-            (int)(MiniMapWidth * scalingManager.WidthScale),
-            (int)(MiniMapHeight * scalingManager.HeightScale));
+            _sidebarArea.X + scalingManager.Padding,
+            _sidebarArea.Y + _buttonsArea.height + scalingManager.Padding * 2,
+            (int)(MiniMapWidth * scalingManager.ScaleFactor),
+            (int)(MiniMapHeight * scalingManager.ScaleFactor));
 
         // Set button positions
         var rowCounter = 0;
@@ -111,10 +111,10 @@ public class GameUi
         foreach (var button in _buttonsList)
         {
             button.Area = new Rectangle(
-                _buttonsArea.X + rowCounter * ButtonWidth * scalingManager.WidthScale,
-                _buttonsArea.Y + columnCounter * ButtonHeight * scalingManager.HeightScale,
-                ButtonWidth * scalingManager.WidthScale,
-                ButtonHeight * scalingManager.HeightScale);
+                _buttonsArea.X + rowCounter * ButtonWidth * scalingManager.ScaleFactor,
+                _buttonsArea.Y + columnCounter * ButtonHeight * scalingManager.ScaleFactor,
+                ButtonWidth * scalingManager.ScaleFactor,
+                ButtonHeight * scalingManager.ScaleFactor);
 
             rowCounter++;
 
@@ -136,7 +136,7 @@ public class GameUi
             _debugInfo =
                 $"FPS: {Raylib.GetFPS()}\n" +
                 $"Current Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
-                $"Scaling Factor: W: {scalingManager.WidthScale}, H: {scalingManager.HeightScale}\n" +
+                $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
                 $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
                 $"Camera Target: {gameCamera.Camera.target}\n" +
                 $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
@@ -152,15 +152,14 @@ public class GameUi
         var scalingManager = ServiceManager.GetService<ScalingManager>();
         var fontSize = scalingManager.FontSize;
         var fontSpacing = scalingManager.FontSpacing;
-        var widthPadding = scalingManager.WidthPadding;
-        var heightPadding = scalingManager.HeightPadding;
+        var padding = scalingManager.Padding;
         var messageSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), message, fontSize, fontSpacing);
 
-        Raylib.DrawRectangle(0, 0, messageSize.X_int() + widthPadding * 8, messageSize.Y_int() + heightPadding * 8,
+        Raylib.DrawRectangle(0, 0, messageSize.X_int() + padding * 8, messageSize.Y_int() + padding * 8,
             Raylib.WHITE);
-        Raylib.DrawRectangle(widthPadding, heightPadding, messageSize.X_int() + widthPadding * 6,
-            messageSize.Y_int() + heightPadding * 6, Raylib.BLACK);
-        Raylib.DrawTextEx(Raylib.GetFontDefault(), message, new Vector2(widthPadding * 4, heightPadding * 4), fontSize,
+        Raylib.DrawRectangle(padding, padding, messageSize.X_int() + padding * 6,
+            messageSize.Y_int() + padding * 6, Raylib.BLACK);
+        Raylib.DrawTextEx(Raylib.GetFontDefault(), message, new Vector2(padding * 4, padding * 4), fontSize,
             fontSpacing, Raylib.WHITE);
     }
 

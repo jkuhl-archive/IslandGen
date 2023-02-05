@@ -65,10 +65,7 @@ public class GameCamera
     {
         Camera.zoom = (float)Math.Round(Camera.zoom + ZoomIncrement, 2);
 
-        if (Camera.zoom > MaxZoom)
-        {
-            Camera.zoom = MaxZoom;
-        }
+        if (Camera.zoom > MaxZoom) Camera.zoom = MaxZoom;
     }
 
     /// <summary>
@@ -77,10 +74,7 @@ public class GameCamera
     public void ZoomOut()
     {
         Camera.zoom = (float)Math.Round(Camera.zoom - ZoomIncrement, 2);
-        
-        if (Camera.zoom < MinZoom)
-        {
-            Camera.zoom = MinZoom;
-        }
+
+        if (Camera.zoom < MinZoom) Camera.zoom = MinZoom;
     }
 }
