@@ -1,4 +1,5 @@
 using System.Numerics;
+using IslandGen.Data.ECS.Entities;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.UI;
@@ -119,7 +120,13 @@ public class MainMenuUi
     /// </summary>
     private void NewGame()
     {
-        ServiceManager.AddService(new GameMap());
+        var entityManager = new EntityManager();
+        var gameMap = new GameMap();
+        ServiceManager.AddService(entityManager);
+        ServiceManager.AddService(gameMap);
+
+        for (var i = 0; i < 3; i++) entityManager.Entities.Add(new Colonist("Bob", gameMap.GetRandomTile()));
+
         ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
     }
 }

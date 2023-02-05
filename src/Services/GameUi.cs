@@ -43,7 +43,7 @@ public class GameUi
             new("Zoom Out", ServiceManager.GetService<GameCamera>().ZoomOut),
             new("Save Island", SaveUtils.SaveMap),
             new("Load Island", () => SaveUtils.LoadMap()),
-            new("New Island", () => ServiceManager.ReplaceService(new GameMap())),
+            new("Change Speed", ChangeSpeed),
             new("Debug Stats", () => _showDebugInfo = !_showDebugInfo),
             new("Fullscreen", Raylib.ToggleFullscreen),
             new("Main Menu", ReturnToMainMenu)
@@ -54,13 +54,19 @@ public class GameUi
 
     public void Draw()
     {
-        // Render minimap to texture
+        var entityManager = ServiceManager.GetService<EntityManager>();
         var gameMap = ServiceManager.GetService<GameMap>();
+
+        // Render map to minimap texture
         Raylib.BeginTextureMode(_miniMapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
         for (var mapX = 0; mapX < gameMap.GetMapSize(); mapX++)
         for (var mapY = 0; mapY < gameMap.GetMapSize(); mapY++)
             Raylib.DrawPixelV(new Vector2(mapX, mapY), gameMap.TileMap[mapX, mapY].GetTileColor());
+
+        // Render entities to minimap texture
+        foreach (var entity in entityManager.Entities)
+            Raylib.DrawPixelV(new Vector2(entity.GetMapPosition().Item1, entity.GetMapPosition().Item2), Raylib.BLACK);
         Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapArea(), 1, Raylib.RED);
         Raylib.EndTextureMode();
 
@@ -131,16 +137,28 @@ public class GameUi
         // Set debug info
         if (_showDebugInfo)
         {
+            var entityManager = ServiceManager.GetService<EntityManager>();
             var gameCamera = ServiceManager.GetService<GameCamera>();
             var gameMap = ServiceManager.GetService<GameMap>();
+
             _debugInfo =
                 $"FPS: {Raylib.GetFPS()}\n" +
                 $"Current Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
                 $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
+                $"Game Speed: {entityManager.GameSpeed} ({entityManager.GameSpeed.GetSpeedMultiplier()}x)\n" +
                 $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
                 $"Camera Target: {gameCamera.Camera.target}\n" +
                 $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
         }
+    }
+
+    /// <summary>
+    ///     Toggles current GameSpeed to the next value
+    /// </summary>
+    private void ChangeSpeed()
+    {
+        var entityManager = ServiceManager.GetService<EntityManager>();
+        entityManager.GameSpeed = entityManager.GameSpeed.GetNext();
     }
 
     /// <summary>
@@ -168,6 +186,7 @@ public class GameUi
     /// </summary>
     private void ReturnToMainMenu()
     {
+        ServiceManager.RemoveService(typeof(EntityManager));
         ServiceManager.RemoveService(typeof(GameMap));
         ServiceManager.GetService<StateManager>().GameState = GameState.MainMenu;
     }

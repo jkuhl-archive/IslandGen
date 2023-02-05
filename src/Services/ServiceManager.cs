@@ -11,13 +11,11 @@ public static class ServiceManager
     private static readonly Dictionary<Type, object?> Services = new();
 
     /// <summary>
-    ///     Add a service provider to this container.
+    ///     Adds a service
     /// </summary>
-    /// <typeparam name="T">The type of the service.</typeparam>
-    /// <param name="service">The provider of the service.</param>
-    /// <exception cref="ArgumentNullException">
-    ///     If <paramref name="service" /> is <code>null</code>.
-    /// </exception>
+    /// <typeparam name="T"> Type of the service </typeparam>
+    /// <param name="service"> Service object </param>
+    /// <exception cref="ArgumentNullException"> If service is null </exception>
     public static void AddService<T>(T? service)
     {
         var serviceType = typeof(T);
@@ -30,13 +28,10 @@ public static class ServiceManager
     }
 
     /// <summary>
-    ///     Get a service provider of the specified type.
+    ///     Gets a service of the specified type
     /// </summary>
-    /// <typeparam name="T">The type of the service provider.</typeparam>
-    /// <returns>
-    ///     A service provider of the specified type or <code>null</code> if
-    ///     no suitable service provider is registered in this container.
-    /// </returns>
+    /// <typeparam name="T"> Type of the service </typeparam>
+    /// <returns> Service of the specified type or null </returns>
     public static T GetService<T>() where T : class
     {
         var requestedType = typeof(T);
@@ -51,10 +46,10 @@ public static class ServiceManager
     }
 
     /// <summary>
-    ///     Remove the service with the specified type. Does nothing no service of the specified type is registered.
+    ///     Removes a service with the specified type
     /// </summary>
-    /// <param name="type">The type of the service to remove.</param>
-    /// <exception cref="ArgumentNullException">If the specified type is <code>null</code>.</exception>
+    /// <param name="type"> Type of the service to remove </param>
+    /// <exception cref="ArgumentNullException"> If the specified type is null </exception>
     public static void RemoveService(Type type)
     {
         if (type == null)
@@ -66,8 +61,8 @@ public static class ServiceManager
     /// <summary>
     ///     Replaces an existing service
     /// </summary>
-    /// <param name="service"> The provider of the service. </param>
-    /// <typeparam name="T"> The type of the service provider. </typeparam>
+    /// <typeparam name="T"> Type of the service </typeparam>
+    /// <param name="service"> Service object </param>
     public static void ReplaceService<T>(T? service)
     {
         RemoveService(typeof(T));

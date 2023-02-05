@@ -18,7 +18,7 @@ public class GameCamera
     {
         Camera = new Camera2D
         {
-            zoom = MinZoom
+            zoom = 1.0f
         };
     }
 

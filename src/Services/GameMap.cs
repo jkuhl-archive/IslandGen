@@ -1,6 +1,5 @@
 using System.Numerics;
 using IslandGen.Data;
-using IslandGen.Data.ECS;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using Newtonsoft.Json;
@@ -37,7 +36,6 @@ public class GameMap
     private readonly RenderTexturePro _mapTexture =
         new(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
 
-    public readonly List<IEntity> Entities;
     public readonly TileType[,] TileMap;
 
     /// <summary>
@@ -45,7 +43,6 @@ public class GameMap
     /// </summary>
     public GameMap()
     {
-        Entities = new List<IEntity>();
         TileMap = new TileType[MapSize, MapSize];
         GenerateMap();
     }
@@ -53,12 +50,10 @@ public class GameMap
     /// <summary>
     ///     Constructor for loading a saved GameMap
     /// </summary>
-    /// <param name="entities"> List of entities that should populate the map </param>
     /// <param name="tileMap"> Array that stores the map's tiles </param>
     [JsonConstructor]
-    private GameMap(List<IEntity> entities, TileType[,] tileMap)
+    private GameMap(TileType[,] tileMap)
     {
-        Entities = entities;
         TileMap = tileMap;
     }
 
@@ -81,7 +76,7 @@ public class GameMap
             if (currentTile.IsAnimated())
             {
                 var texture = textureManager.AnimatedTextures[currentTile.GetTileTextureName()];
-                texture.Draw(new Vector2(mapX * TileTextureSize, mapY * TileTextureSize));
+                texture.Draw(GetTileCoordinates((mapX, mapY)));
             }
             else
             {
@@ -90,19 +85,12 @@ public class GameMap
             }
         }
 
-        foreach (var entity in Entities.Where(entity =>
-                     GetVisibleMapArea().PointInsideRectangle(entity.Position.X_int(), entity.Position.Y_int())))
-            entity.Draw();
+        ServiceManager.GetService<EntityManager>().Draw();
 
         Raylib.EndMode2D();
         Raylib.EndTextureMode();
 
         _mapTexture.Draw(true);
-    }
-
-    public void Update()
-    {
-        foreach (var entity in Entities) entity.Update();
     }
 
     /// <summary>
@@ -112,6 +100,34 @@ public class GameMap
     public int GetMapSize()
     {
         return MapSize;
+    }
+
+    /// <summary>
+    ///     Randomly selects a tile on the game map
+    /// </summary>
+    /// <param name="allowWater"> If true water tiles can be selected, if false only return land tiles </param>
+    /// <returns> Tuple containing position of selected tile </returns>
+    public (int, int) GetRandomTile(bool allowWater = false)
+    {
+        var rnd = ServiceManager.GetService<Random>();
+
+        while (true)
+        {
+            var position = (rnd.Next(MapSize), rnd.Next(MapSize));
+            if (!allowWater && TileMap[position.Item1, position.Item2].IsWater()) continue;
+
+            return position;
+        }
+    }
+
+    /// <summary>
+    ///     Gets the screen coordinates of a tile on the game map
+    /// </summary>
+    /// <param name="tilePosition"> Tuple containing position of tile </param>
+    /// <returns> Vector2 containing the X and Y coordinates of the tile on screen </returns>
+    public Vector2 GetTileCoordinates((int, int) tilePosition)
+    {
+        return new Vector2(tilePosition.Item1 * TileTextureSize, tilePosition.Item2 * TileTextureSize);
     }
 
     /// <summary>

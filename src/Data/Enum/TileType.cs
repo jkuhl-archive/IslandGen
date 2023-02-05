@@ -73,4 +73,20 @@ public static class TileTypeExtensions
             _ => false
         };
     }
+
+    /// <summary>
+    ///     Returns true if the tile is water
+    /// </summary>
+    /// <param name="tileType"> TileType that we are checking </param>
+    /// <returns> True if water, false if not </returns>
+    public static bool IsWater(this TileType tileType)
+    {
+        return tileType switch
+        {
+            TileType.Lake => true,
+            TileType.Ocean => true,
+            TileType.River => true,
+            _ => false
+        };
+    }
 }
