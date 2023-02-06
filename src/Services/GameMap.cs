@@ -85,7 +85,7 @@ public class GameMap
             }
         }
 
-        ServiceManager.GetService<EntityManager>().Draw();
+        ServiceManager.GetService<GameLogic>().Draw();
 
         Raylib.EndMode2D();
         Raylib.EndTextureMode();

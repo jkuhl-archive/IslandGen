@@ -54,7 +54,7 @@ public class GameUi
 
     public void Draw()
     {
-        var entityManager = ServiceManager.GetService<EntityManager>();
+        var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameMap = ServiceManager.GetService<GameMap>();
 
         // Render map to minimap texture
@@ -65,7 +65,7 @@ public class GameUi
             Raylib.DrawPixelV(new Vector2(mapX, mapY), gameMap.TileMap[mapX, mapY].GetTileColor());
 
         // Render entities to minimap texture
-        foreach (var entity in entityManager.Entities)
+        foreach (var entity in gameLogic.Colonists)
             Raylib.DrawPixelV(new Vector2(entity.GetMapPosition().Item1, entity.GetMapPosition().Item2), Raylib.BLACK);
         Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapArea(), 1, Raylib.RED);
         Raylib.EndTextureMode();
@@ -137,15 +137,15 @@ public class GameUi
         // Set debug info
         if (_showDebugInfo)
         {
-            var entityManager = ServiceManager.GetService<EntityManager>();
             var gameCamera = ServiceManager.GetService<GameCamera>();
+            var gameLogic = ServiceManager.GetService<GameLogic>();
             var gameMap = ServiceManager.GetService<GameMap>();
 
             _debugInfo =
                 $"FPS: {Raylib.GetFPS()}\n" +
                 $"Current Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
                 $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
-                $"Game Speed: {entityManager.GameSpeed} ({entityManager.GameSpeed.GetSpeedMultiplier()}x)\n" +
+                $"Game Speed: {gameLogic.GameSpeed} ({gameLogic.GameSpeed.GetSpeedMultiplier()}x)\n" +
                 $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
                 $"Camera Target: {gameCamera.Camera.target}\n" +
                 $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
@@ -157,8 +157,8 @@ public class GameUi
     /// </summary>
     private void ChangeSpeed()
     {
-        var entityManager = ServiceManager.GetService<EntityManager>();
-        entityManager.GameSpeed = entityManager.GameSpeed.GetNext();
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+        gameLogic.GameSpeed = gameLogic.GameSpeed.GetNext();
     }
 
     /// <summary>
@@ -186,7 +186,7 @@ public class GameUi
     /// </summary>
     private void ReturnToMainMenu()
     {
-        ServiceManager.RemoveService(typeof(EntityManager));
+        ServiceManager.RemoveService(typeof(GameLogic));
         ServiceManager.RemoveService(typeof(GameMap));
         ServiceManager.GetService<StateManager>().GameState = GameState.MainMenu;
     }

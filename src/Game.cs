@@ -49,7 +49,7 @@ internal static class Game
                     // Update Game
                     ServiceManager.GetService<InputManager>().Update();
                     ServiceManager.GetService<TextureManager>().Update();
-                    ServiceManager.GetService<EntityManager>().Update();
+                    ServiceManager.GetService<GameLogic>().Update();
                     ServiceManager.GetService<GameUi>().Update();
 
                     // Draw Game

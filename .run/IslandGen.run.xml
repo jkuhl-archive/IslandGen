@@ -18,7 +18,7 @@
             <option name="CleanSolution" enabled="true"/>
             <option name="RunConfigurationTask" enabled="true" run_configuration_name="Update Build Version"
                     run_configuration_type="ShConfigurationType"/>
-            <option name="RunConfigurationTask" enabled="false" run_configuration_name="Build Assets"
+            <option name="RunConfigurationTask" enabled="false" run_configuration_name="Build Debug Assets"
                     run_configuration_type="ShConfigurationType"/>
             <option name="Build"/>
         </method>

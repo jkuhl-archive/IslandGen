@@ -5,6 +5,7 @@ namespace IslandGen.Data.ECS.Components;
 public class Wander : IComponent
 {
     private readonly int _delay;
+    private readonly (int, int) _init = (-1, -1);
     private bool _delayActive;
     private int _delayCounter;
     private (int, int) _destination;
@@ -18,11 +19,13 @@ public class Wander : IComponent
         _delay = delay;
         _delayActive = false;
         _delayCounter = 0;
-        _destination = ServiceManager.GetService<GameMap>().GetRandomTile();
+        _destination = _init;
     }
 
     public void Update(EntityBase entity)
     {
+        if (_destination == _init) _destination = ServiceManager.GetService<GameMap>().GetRandomTile();
+
         if (_delayActive)
         {
             _delayCounter++;

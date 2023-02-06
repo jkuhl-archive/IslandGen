@@ -1,42 +1,41 @@
-using IslandGen.Data.ECS;
+using IslandGen.Data.ECS.Entities;
 using IslandGen.Data.Enum;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
 
-public class EntityManager
+public class GameLogic
 {
-    public readonly List<EntityBase> Entities;
-
+    public readonly List<Colonist> Colonists;
     private float _updateTimer;
     public GameSpeed GameSpeed;
 
     /// <summary>
-    ///     Service that manages the game's entities
+    ///     Service that manages the game's logic
     /// </summary>
-    public EntityManager()
+    public GameLogic()
     {
-        Entities = new List<EntityBase>();
+        Colonists = new List<Colonist>();
         GameSpeed = GameSpeed.Normal;
     }
 
     /// <summary>
-    ///     Constructor for loading a saved EntityManager
+    ///     Constructor for loading a saved GameLogic
     /// </summary>
-    /// <param name="entities"> List of entities </param>
+    /// <param name="colonists"> List of colonists </param>
     /// <param name="gameSpeed"> Current GameSpeed </param>
     [JsonConstructor]
-    private EntityManager(List<EntityBase> entities, GameSpeed gameSpeed)
+    private GameLogic(List<Colonist> colonists, GameSpeed gameSpeed)
     {
-        Entities = entities;
+        Colonists = colonists;
         GameSpeed = gameSpeed;
     }
 
     public void Draw()
     {
         // TODO: Add map culling here
-        foreach (var entity in Entities) entity.Draw();
+        foreach (var colonist in Colonists) colonist.Draw();
     }
 
     public void Update()
@@ -45,7 +44,7 @@ public class EntityManager
 
         if (_updateTimer >= 1 * GameSpeed.GetSpeedMultiplier())
         {
-            foreach (var entity in Entities) entity.Update();
+            foreach (var colonist in Colonists) colonist.Update();
             _updateTimer = 0;
         }
     }

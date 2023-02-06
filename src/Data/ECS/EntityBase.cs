@@ -7,10 +7,11 @@ namespace IslandGen.Data.ECS;
 public abstract class EntityBase
 {
     private readonly Dictionary<Type, IComponent> _components = new();
-    public readonly Guid Id = Guid.NewGuid();
+    private readonly Guid _id = Guid.NewGuid();
+
     public (int, int) MapPosition;
     public string ReadableName;
-    public Texture? Texture;
+    protected Texture? Texture;
 
     /// <summary>
     ///     Base class for all entities
