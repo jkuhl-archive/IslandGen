@@ -3,7 +3,6 @@ using IslandGen.Data;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.UI;
-using IslandGen.Utilities;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -41,8 +40,9 @@ public class GameUi
         {
             new("Zoom In", ServiceManager.GetService<GameCamera>().ZoomIn),
             new("Zoom Out", ServiceManager.GetService<GameCamera>().ZoomOut),
-            new("Save Island", SaveUtils.SaveMap),
-            new("Load Island", () => SaveUtils.LoadMap()),
+            new("Save Island", StateManager.SaveGame),
+            new("Load Island", StateManager.LoadGame),
+            new("New Island", StateManager.NewGame),
             new("Change Speed", ChangeSpeed),
             new("Debug Stats", () => _showDebugInfo = !_showDebugInfo),
             new("Fullscreen", Raylib.ToggleFullscreen),
@@ -186,8 +186,6 @@ public class GameUi
     /// </summary>
     private void ReturnToMainMenu()
     {
-        ServiceManager.RemoveService(typeof(GameLogic));
-        ServiceManager.RemoveService(typeof(GameMap));
         ServiceManager.GetService<StateManager>().GameState = GameState.MainMenu;
     }
 }

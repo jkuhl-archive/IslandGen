@@ -1,10 +1,7 @@
 using System.Numerics;
-using IslandGen.Data;
-using IslandGen.Data.ECS.Entities;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.UI;
-using IslandGen.Utilities;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -36,8 +33,8 @@ public class MainMenuUi
     {
         _buttonsList = new List<Button>
         {
-            new("New Island", NewGame),
-            new("Load Island", LoadGame),
+            new("New Island", StateManager.NewGame),
+            new("Load Island", StateManager.LoadGame),
             new("Fullscreen", Raylib.ToggleFullscreen),
             new("Exit Game", Raylib.CloseWindow)
         };
@@ -105,30 +102,5 @@ public class MainMenuUi
                 Y = _buttonsArea.Y + i * (ButtonHeight * scalingManager.ScaleFactor + scalingManager.Padding),
                 height = ButtonHeight * scalingManager.ScaleFactor
             };
-    }
-
-    /// <summary>
-    ///     Loads the saved map if one exists and loads into the game
-    /// </summary>
-    private void LoadGame()
-    {
-        if (!SaveUtils.LoadMap()) return;
-        ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
-    }
-
-    /// <summary>
-    ///     Initializes a new map and loads into the game
-    /// </summary>
-    private void NewGame()
-    {
-        var gameLogic = new GameLogic();
-        var gameMap = new GameMap();
-        ServiceManager.AddService(gameLogic);
-        ServiceManager.AddService(gameMap);
-
-        for (var i = 0; i < 10; i++)
-            gameLogic.Colonists.Add(new Colonist(DataSets.MaleNames.RandomItem(), gameMap.GetRandomTile()));
-
-        ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
     }
 }
