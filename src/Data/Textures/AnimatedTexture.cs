@@ -1,7 +1,7 @@
 using System.Numerics;
 using Raylib_CsLo;
 
-namespace IslandGen.Data;
+namespace IslandGen.Data.Textures;
 
 public class AnimatedTexture
 {

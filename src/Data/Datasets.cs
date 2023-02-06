@@ -1,6 +1,6 @@
 namespace IslandGen.Data;
 
-public static class DataSets
+public static class Datasets
 {
     private const string FemaleNamesFile = "assets/datasets/names_female.txt";
     private const string MaleNamesFile = "assets/datasets/names_male.txt";

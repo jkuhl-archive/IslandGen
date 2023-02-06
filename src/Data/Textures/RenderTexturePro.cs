@@ -3,7 +3,7 @@ using IslandGen.Extensions;
 using IslandGen.Services;
 using Raylib_CsLo;
 
-namespace IslandGen.Data;
+namespace IslandGen.Data.Textures;
 
 public class RenderTexturePro
 {

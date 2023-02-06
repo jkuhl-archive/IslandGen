@@ -41,6 +41,17 @@ public static class RectangleExtensions
     }
 
     /// <summary>
+    ///     Checks if the given coordinate exists within the confines of the rectangle
+    /// </summary>
+    /// <param name="rectangle"> Rectangle we are checking </param>
+    /// <param name="position"> Vector2 containing the X and Y coordinates </param>
+    /// <returns> True if coordinate is inside rectangle, false if not </returns>
+    public static bool PointInsideRectangle(this Rectangle rectangle, Vector2 position)
+    {
+        return rectangle.PointInsideRectangle(position.X_int(), position.Y_int());
+    }
+
+    /// <summary>
     ///     Returns a string that contains the rectangles values
     /// </summary>
     /// <param name="rectangle"> Rectangle that we want to get a string for </param>

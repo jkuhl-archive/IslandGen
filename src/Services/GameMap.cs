@@ -1,6 +1,7 @@
 using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Data.Enum;
+using IslandGen.Data.Textures;
 using IslandGen.Extensions;
 using Newtonsoft.Json;
 using Raylib_CsLo;
@@ -60,17 +61,21 @@ public class GameMap
     public void Draw()
     {
         var gameCamera = ServiceManager.GetService<GameCamera>();
+        var gameSettings = ServiceManager.GetService<GameSettings>();
         var textureManager = ServiceManager.GetService<TextureManager>();
+        var visibleArea = GetVisibleMapArea();
 
+        // Begin rendering map to texture
         Raylib.BeginTextureMode(_mapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
         Raylib.BeginMode2D(gameCamera.Camera);
 
+        // Draw tiles
         // TODO: This can be optimized to use the visible area as the for loop start and end
         for (var mapX = 0; mapX < MapSize; mapX++)
         for (var mapY = 0; mapY < MapSize; mapY++)
         {
-            if (!GetVisibleMapArea().PointInsideRectangle(mapX, mapY)) continue;
+            if (!visibleArea.PointInsideRectangle(mapX, mapY)) continue;
 
             var currentTile = TileMap[mapX, mapY];
             if (currentTile.IsAnimated())
@@ -85,11 +90,48 @@ public class GameMap
             }
         }
 
+        // Draw entities
         ServiceManager.GetService<GameLogic>().Draw();
 
+        // Draw debug elements
+        if (gameSettings.DebugMode)
+        {
+            var mapMouseTile = GetMapMouseTile();
+
+            // Draw grid
+            for (var mapX = 1; mapX < MapSize; mapX++)
+            {
+                var x = mapX * TileTextureSize;
+                Raylib.DrawLine(x, 0, x, _mapTexture.RenderTexture.texture.height, Colors.TransparentGray);
+            }
+
+            for (var mapY = 1; mapY < MapSize; mapY++)
+            {
+                var y = mapY * TileTextureSize;
+                Raylib.DrawLine(0, y, _mapTexture.RenderTexture.texture.width, y, Colors.TransparentGray);
+            }
+
+            if (_mapTexture.DestinationRectangle.PointInsideRectangle(GetMapMousePosition()))
+            {
+                // Draw box around highlighted tile
+                Raylib.DrawRectangleLines(
+                    mapMouseTile.Item1 * TileTextureSize,
+                    mapMouseTile.Item2 * TileTextureSize,
+                    TileTextureSize,
+                    TileTextureSize,
+                    Raylib.RED
+                );
+
+                // Draw a dot that marks the mouse cursors position on the map
+                Raylib.DrawCircleV(GetMapMousePosition(), 2.0f, Raylib.RED);
+            }
+        }
+
+        // Stop rendering to texture
         Raylib.EndMode2D();
         Raylib.EndTextureMode();
 
+        // Draw texture to screen
         _mapTexture.Draw(true);
     }
 
@@ -100,6 +142,28 @@ public class GameMap
     public int GetMapSize()
     {
         return MapSize;
+    }
+
+    /// <summary>
+    ///     Gets the position of the mouse cursor on the game map
+    /// </summary>
+    /// <returns> Vector2 containing the mouse cursor's position on the game map </returns>
+    public Vector2 GetMapMousePosition()
+    {
+        var gameCamera = ServiceManager.GetService<GameCamera>();
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+        var mousePosition = Raylib.GetMousePosition() / scalingManager.ScaleFactor;
+        return Raylib.GetScreenToWorld2D(mousePosition, gameCamera.Camera);
+    }
+
+    /// <summary>
+    ///     Gets the map tile that the mouse cursor is currently above
+    /// </summary>
+    /// <returns> Tuple containing the X and Y position of the tile the mouse is above </returns>
+    public (int, int) GetMapMouseTile()
+    {
+        var position = GetMapMousePosition();
+        return ((int)position.X / TileTextureSize, (int)position.Y / TileTextureSize);
     }
 
     /// <summary>

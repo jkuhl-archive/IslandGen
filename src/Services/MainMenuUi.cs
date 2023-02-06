@@ -67,9 +67,9 @@ public class MainMenuUi
         var scalingManager = ServiceManager.GetService<ScalingManager>();
         var windowWidthCenter = scalingManager.WindowWidth / 2;
         var windowHeightCenter = scalingManager.WindowHeight / 2;
-        _titleFontSize = scalingManager.FontSize * 4;
-        _titleFontSpacing = scalingManager.FontSpacing;
-        _versionFontSize = scalingManager.FontSize;
+        _titleFontSize = scalingManager.FontSize * 8;
+        _titleFontSpacing = scalingManager.FontSpacing * 2;
+        _versionFontSize = scalingManager.FontSize * 2;
         _versionFontSpacing = scalingManager.FontSpacing;
 
         var buttonsAreaHeight =

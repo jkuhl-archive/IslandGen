@@ -19,6 +19,7 @@ internal static class Game
 
         // Initialize game services
         ServiceManager.AddService(new GameCamera());
+        ServiceManager.AddService(new GameSettings());
         ServiceManager.AddService(new GameUi());
         ServiceManager.AddService(new InputManager());
         ServiceManager.AddService(new MainMenuUi());

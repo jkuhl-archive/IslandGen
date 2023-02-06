@@ -5,7 +5,7 @@ namespace IslandGen.Services;
 public class GameCamera
 {
     private const float MinZoom = 0.4f;
-    private const float MaxZoom = 1.5f;
+    private const float MaxZoom = 2.0f;
     private const float ZoomIncrement = 0.1f;
     private const float PanIncrement = 100.0f;
 

@@ -53,7 +53,7 @@ public class ScalingManager
         WindowHeight = Raylib.GetRenderHeight();
         ScaleFactor = GetScaleFactor();
         Padding = (int)(1 * ScaleFactor);
-        FontSize = (int)ScaleFactor * 10;
+        FontSize = (int)ScaleFactor * 5;
         FontSpacing = (int)(2 * ScaleFactor);
     }
 

@@ -1,6 +1,6 @@
 using System.Numerics;
-using IslandGen.Data;
 using IslandGen.Data.Enum;
+using IslandGen.Data.Textures;
 using IslandGen.Extensions;
 using IslandGen.UI;
 using Raylib_CsLo;
@@ -28,7 +28,6 @@ public class GameUi
     private Rectangle _buttonsArea;
     private string _debugInfo;
     private Rectangle _miniMapArea;
-    private bool _showDebugInfo;
     private Rectangle _sidebarArea;
 
     /// <summary>
@@ -44,7 +43,9 @@ public class GameUi
             new("Load Island", StateManager.LoadGame),
             new("New Island", StateManager.NewGame),
             new("Change Speed", ChangeSpeed),
-            new("Debug Stats", () => _showDebugInfo = !_showDebugInfo),
+            new("Debug Mode",
+                () => ServiceManager.GetService<GameSettings>().DebugMode =
+                    !ServiceManager.GetService<GameSettings>().DebugMode),
             new("Fullscreen", Raylib.ToggleFullscreen),
             new("Main Menu", ReturnToMainMenu)
         };
@@ -56,6 +57,7 @@ public class GameUi
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameMap = ServiceManager.GetService<GameMap>();
+        var gameSettings = ServiceManager.GetService<GameSettings>();
 
         // Render map to minimap texture
         Raylib.BeginTextureMode(_miniMapTexture.RenderTexture);
@@ -81,11 +83,12 @@ public class GameUi
         _miniMapTexture.Draw();
 
         // Draw debug info
-        if (_showDebugInfo) DrawPopUp(_debugInfo);
+        if (gameSettings.DebugMode) DrawPopUp(_debugInfo);
     }
 
     public void Update()
     {
+        var gameSettings = ServiceManager.GetService<GameSettings>();
         var scalingManager = ServiceManager.GetService<ScalingManager>();
         var sidebarWidthPadding = scalingManager.Padding * SidebarWidthPaddingSegments;
         var sidebarHeightPadding = scalingManager.Padding * SidebarHeightPaddingSegments;
@@ -135,7 +138,7 @@ public class GameUi
         _miniMapTexture.DestinationRectangle = _miniMapArea;
 
         // Set debug info
-        if (_showDebugInfo)
+        if (gameSettings.DebugMode)
         {
             var gameCamera = ServiceManager.GetService<GameCamera>();
             var gameLogic = ServiceManager.GetService<GameLogic>();
@@ -143,11 +146,16 @@ public class GameUi
 
             _debugInfo =
                 $"FPS: {Raylib.GetFPS()}\n" +
-                $"Current Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
+                $"Window Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
                 $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
                 $"Game Speed: {gameLogic.GameSpeed} ({gameLogic.GameSpeed.GetSpeedMultiplier()}x)\n" +
-                $"Camera Zoom: {gameCamera.Camera.zoom}\n" +
-                $"Camera Target: {gameCamera.Camera.target}\n" +
+                "\n" +
+                $"Mouse Window Position: {Raylib.GetMousePosition()}\n" +
+                $"Mouse Map Position: {gameMap.GetMapMousePosition()}\n" +
+                $"Mouse Highlighted Tile: {gameMap.GetMapMouseTile()}\n" +
+                "\n" +
+                $"Camera Zoom: {gameCamera.Camera.zoom}x\n" +
+                $"Camera Position: {gameCamera.Camera.target}\n" +
                 $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
         }
     }

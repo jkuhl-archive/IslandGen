@@ -1,4 +1,4 @@
-using IslandGen.Data;
+using IslandGen.Data.Textures;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
