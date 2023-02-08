@@ -8,21 +8,10 @@ public abstract class EntityBase
 {
     private readonly Dictionary<Type, IComponent> _components = new();
     private readonly Guid _id = Guid.NewGuid();
-
-    public (int, int) MapPosition;
-    public string ReadableName;
     protected Texture? Texture;
 
-    /// <summary>
-    ///     Base class for all entities
-    /// </summary>
-    /// <param name="readableName"> Entity's name </param>
-    /// <param name="mapPosition"> Entity's position on the game map </param>
-    protected EntityBase(string readableName, (int, int) mapPosition)
-    {
-        ReadableName = readableName;
-        MapPosition = mapPosition;
-    }
+    public (int, int) MapPosition { get; set; }
+    public string ReadableName { get; set; }
 
     public void Draw()
     {

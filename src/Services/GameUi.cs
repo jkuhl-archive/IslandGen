@@ -1,4 +1,5 @@
 using System.Numerics;
+using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
 using IslandGen.Data.Textures;
 using IslandGen.Extensions;
@@ -28,7 +29,6 @@ public class GameUi
     private Rectangle _buttonsArea;
     private string _debugInfo;
     private Rectangle _miniMapArea;
-    private Rectangle _sidebarArea;
 
     /// <summary>
     ///     Service that manages the game's UI
@@ -47,11 +47,14 @@ public class GameUi
                 () => ServiceManager.GetService<GameSettings>().DebugMode =
                     !ServiceManager.GetService<GameSettings>().DebugMode),
             new("Fullscreen", Raylib.ToggleFullscreen),
+            new("New Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
             new("Main Menu", ReturnToMainMenu)
         };
         _debugInfo = string.Empty;
         _miniMapTexture = new RenderTexturePro(new Vector2(MiniMapWidth, MiniMapHeight));
     }
+
+    public Rectangle SidebarArea { get; private set; }
 
     public void Draw()
     {
@@ -73,7 +76,7 @@ public class GameUi
         Raylib.EndTextureMode();
 
         // Draw sidebar backdrop
-        Raylib.DrawRectangleRec(_sidebarArea, Raylib.WHITE);
+        Raylib.DrawRectangleRec(SidebarArea, Raylib.WHITE);
         Raylib.DrawRectangleRec(_buttonsArea, Raylib.GRAY);
 
         // Draw buttons
@@ -94,7 +97,7 @@ public class GameUi
         var sidebarHeightPadding = scalingManager.Padding * SidebarHeightPaddingSegments;
 
         // Set sidebar area
-        _sidebarArea = new Rectangle(
+        SidebarArea = new Rectangle(
             scalingManager.WindowWidth - SidebarWidth * scalingManager.ScaleFactor - sidebarWidthPadding,
             scalingManager.WindowHeight - SidebarHeight * scalingManager.ScaleFactor - sidebarHeightPadding,
             (int)(SidebarWidth * scalingManager.ScaleFactor + sidebarWidthPadding),
@@ -102,15 +105,15 @@ public class GameUi
 
         // Set buttons area
         _buttonsArea = new Rectangle(
-            _sidebarArea.X + scalingManager.Padding,
-            _sidebarArea.Y + scalingManager.Padding,
+            SidebarArea.X + scalingManager.Padding,
+            SidebarArea.Y + scalingManager.Padding,
             (int)(ButtonsWidth * scalingManager.ScaleFactor),
             (int)(ButtonsHeight * scalingManager.ScaleFactor));
 
         // Set minimap area
         _miniMapArea = new Rectangle(
-            _sidebarArea.X + scalingManager.Padding,
-            _sidebarArea.Y + _buttonsArea.height + scalingManager.Padding * 2,
+            SidebarArea.X + scalingManager.Padding,
+            SidebarArea.Y + _buttonsArea.height + scalingManager.Padding * 2,
             (int)(MiniMapWidth * scalingManager.ScaleFactor),
             (int)(MiniMapHeight * scalingManager.ScaleFactor));
 

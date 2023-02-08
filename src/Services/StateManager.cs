@@ -52,7 +52,11 @@ public class StateManager
         ServiceManager.ReplaceService(gameMap);
 
         for (var i = 0; i < 10; i++)
-            gameLogic.Colonists.Add(new Colonist(Datasets.MaleNames.RandomItem(), gameMap.GetRandomTile()));
+            gameLogic.Colonists.Add(new Colonist
+            {
+                MapPosition = gameMap.GetRandomTile(),
+                ReadableName = Datasets.MaleNames.RandomItem()
+            });
 
         ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
     }
