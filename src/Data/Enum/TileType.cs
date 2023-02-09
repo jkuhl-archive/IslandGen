@@ -13,7 +13,10 @@ public enum TileType
     Ocean,
     River,
     Rock,
-    Sand
+    Sand,
+    VegetationDense,
+    VegetationModerate,
+    VegetationSparse
 }
 
 public static class TileTypeExtensions
@@ -27,14 +30,17 @@ public static class TileTypeExtensions
     {
         return tileType switch
         {
-            TileType.Debug => Raylib.PINK,
-            TileType.Dirt => Raylib.BROWN,
-            TileType.Lake => Raylib.DARKBLUE,
-            TileType.Ocean => Raylib.BLUE,
-            TileType.River => Raylib.DARKBLUE,
-            TileType.Rock => Raylib.GRAY,
-            TileType.Sand => Raylib.BEIGE,
-            _ => Raylib.PURPLE
+            TileType.Debug => Colors.TileDebug,
+            TileType.Dirt => Colors.TileDirt,
+            TileType.Lake => Colors.TileLake,
+            TileType.Ocean => Colors.TileOcean,
+            TileType.River => Colors.TileRiver,
+            TileType.Rock => Colors.TileRock,
+            TileType.Sand => Colors.TileSand,
+            TileType.VegetationDense => Colors.TileVegetationDense,
+            TileType.VegetationModerate => Colors.TileVegetationModerate,
+            TileType.VegetationSparse => Colors.TileVegetationSparse,
+            _ => Raylib.WHITE
         };
     }
 
@@ -54,6 +60,9 @@ public static class TileTypeExtensions
             TileType.River => "river",
             TileType.Rock => "rock",
             TileType.Sand => "sand",
+            TileType.VegetationDense => "vegetation_3",
+            TileType.VegetationModerate => "vegetation_2",
+            TileType.VegetationSparse => "vegetation_1",
             _ => "debug"
         };
     }
@@ -70,6 +79,23 @@ public static class TileTypeExtensions
             TileType.Lake => true,
             TileType.Ocean => true,
             TileType.River => true,
+            _ => false
+        };
+    }
+
+    /// <summary>
+    ///     Returns true if the tile is water
+    /// </summary>
+    /// <param name="tileType"> TileType that we are checking </param>
+    /// <returns> True if water, false if not </returns>
+    public static bool IsGrowable(this TileType tileType)
+    {
+        return tileType switch
+        {
+            TileType.Dirt => true,
+            TileType.VegetationDense => true,
+            TileType.VegetationModerate => true,
+            TileType.VegetationSparse => true,
             _ => false
         };
     }

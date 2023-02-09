@@ -16,20 +16,27 @@ public class GameMap
 
     private const int DirtDeform1Iterations = 10;
     private const int DirtDeform2Iterations = 20;
+    private const int LakeSeeding1Iterations = 5;
+    private const int RockSeeding1Iterations = 20;
     private const int SandDeform1Iterations = 15;
     private const int SandDeform2Iterations = 1000;
     private const int SandDeform3Iterations = 100;
-    private const int LakeSeeding1Iterations = 5;
-    private const int RockSeeding1Iterations = 20;
+    private const int VegetationDenseSeeding1Iterations = 10;
+    private const int VegetationGrowthAmount = 20;
+    private const int VegetationModerateSeeding1Iterations = 10;
+    private const int VegetationSparseSeeding1Iterations = 50;
     private const float DirtDeform1Multiplier = 0.15f;
     private const float DirtDeform2Multiplier = 0.06f;
+    private const float LakeSeeding1Multiplier = 0.02f;
+    private const float RockSeeding1Multiplier = 0.05f;
     private const float SandDeform1Multiplier = 0.10f;
     private const float SandDeform2Multiplier = 0.02f;
     private const float SandDeform3Multiplier = 0.06f;
-    private const float LakeSeeding1Multiplier = 0.02f;
-    private const float RockSeeding1Multiplier = 0.05f;
     private const float SandPad1Multiplier = 0.06f;
     private const float SandPad2Multiplier = 0.02f;
+    private const float VegetationDenseSeeding1Multiplier = 0.1f;
+    private const float VegetationModerateSeeding1Multiplier = 0.05f;
+    private const float VegetationSparseSeeding1Multiplier = 0.1f;
 
     private readonly Rectangle _baseIslandArea =
         new(MapBuffer, MapBuffer, MapSize - MapBuffer * 2, MapSize - MapBuffer * 2);
@@ -135,6 +142,11 @@ public class GameMap
         _mapTexture.Draw(true);
     }
 
+    public void Update()
+    {
+        ProcessVegetationGrowth();
+    }
+
     /// <summary>
     ///     Returns the size of the map
     /// </summary>
@@ -192,6 +204,22 @@ public class GameMap
     public Vector2 GetTileCoordinates((int, int) tilePosition)
     {
         return new Vector2(tilePosition.Item1 * TileTextureSize, tilePosition.Item2 * TileTextureSize);
+    }
+
+    /// <summary>
+    ///     Gets a list of tiles on the game map that match the given TileType
+    /// </summary>
+    /// <param name="tileType"> TileType of the tiles we want a list of </param>
+    /// <returns> List of tuples containing the X and Y positions of map tiles with the given TileType </returns>
+    public List<(int, int)> GetTileTypeList(TileType tileType)
+    {
+        var tileList = new List<(int, int)>();
+        for (var mapX = 0; mapX < MapSize; mapX++)
+        for (var mapY = 0; mapY < MapSize; mapY++)
+            if (TileMap[mapX, mapY] == tileType)
+                tileList.Add((mapX, mapY));
+
+        return tileList;
     }
 
     /// <summary>
@@ -278,6 +306,32 @@ public class GameMap
         // Ocean padding pass 1, this erodes river tiles that extend out into the ocean
         PadTileTransition(TileType.River, TileType.Ocean, TileType.Ocean);
         PadTileTransition(TileType.River, TileType.Ocean, TileType.Ocean);
+
+        // Vegetation sparse and vegetation moderate seeding pass 1
+        SeedTileType(VegetationSparseSeeding1Iterations, VegetationSparseSeeding1Multiplier,
+            TileType.Dirt, TileType.VegetationSparse);
+        SeedTileType(VegetationModerateSeeding1Iterations, VegetationModerateSeeding1Multiplier,
+            TileType.VegetationSparse, TileType.VegetationModerate);
+
+        // Vegetation sparse and vegetation moderate padding pass 1
+        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
+        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
+        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
+        PadTileTransition(TileType.Dirt, TileType.VegetationModerate, TileType.VegetationModerate);
+        PadTileTransition(TileType.VegetationSparse, TileType.VegetationModerate, TileType.VegetationModerate);
+        PadTileTransition(TileType.VegetationSparse, TileType.VegetationModerate, TileType.VegetationModerate);
+
+        // Vegetation dense seeding pass 1
+        SeedTileType(VegetationDenseSeeding1Iterations, VegetationDenseSeeding1Multiplier,
+            TileType.VegetationSparse, TileType.VegetationDense);
+        SeedTileType(VegetationDenseSeeding1Iterations, VegetationDenseSeeding1Multiplier,
+            TileType.VegetationModerate, TileType.VegetationDense);
+
+        // Vegetation dense padding pass 1
+        PadTileTransition(TileType.Dirt, TileType.VegetationDense, TileType.VegetationDense);
+        PadTileTransition(TileType.VegetationSparse, TileType.VegetationDense, TileType.VegetationDense);
+        PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
+        PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
     }
 
     /// <summary>
@@ -474,5 +528,47 @@ public class GameMap
         // Update all marked tiles
         foreach (var tileCoordinates in tilesPendingUpdate)
             TileMap[tileCoordinates.Item1, tileCoordinates.Item2] = fill;
+    }
+
+    /// <summary>
+    ///     Spreads vegetation across the game map
+    /// </summary>
+    private void ProcessVegetationGrowth()
+    {
+        var rnd = ServiceManager.GetService<Random>();
+
+        for (var i = 0; i < rnd.Next(MapSize / VegetationGrowthAmount); i++)
+        {
+            var startTile = GetRandomTile(true);
+            var startTileType = TileMap[startTile.Item1, startTile.Item2];
+            var adjacentTiles = new List<(int, int)>
+            {
+                startTile,
+                (startTile.Item1, startTile.Item2 + 1),
+                (startTile.Item1, startTile.Item2 - 1),
+                (startTile.Item1 + 1, startTile.Item2),
+                (startTile.Item1 - 1, startTile.Item2)
+            };
+
+            // If start tile contains sparse vegetation, lake, or river replace adjacent dirt with sparse vegetation
+            if (startTileType is TileType.VegetationSparse or TileType.Lake or TileType.River)
+                foreach (var tile in adjacentTiles.Where(adjacentTile =>
+                             TileMap[adjacentTile.Item1, adjacentTile.Item2] == TileType.Dirt))
+                    TileMap[tile.Item1, tile.Item2] = TileType.VegetationSparse;
+
+            // If start tile and all adjacent tiles contain vegetation, bump up the start tile's vegetation density
+            if (adjacentTiles.TrueForAll(tile =>
+                    TileMap[tile.Item1, tile.Item2] is TileType.VegetationSparse or TileType.VegetationModerate
+                        or TileType.VegetationDense))
+                switch (startTileType)
+                {
+                    case TileType.VegetationSparse:
+                        TileMap[startTile.Item1, startTile.Item2] = TileType.VegetationModerate;
+                        break;
+                    case TileType.VegetationModerate:
+                        TileMap[startTile.Item1, startTile.Item2] = TileType.VegetationDense;
+                        break;
+                }
+        }
     }
 }

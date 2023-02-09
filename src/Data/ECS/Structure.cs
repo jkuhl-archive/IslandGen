@@ -8,7 +8,6 @@ namespace IslandGen.Data.ECS;
 public class Structure : EntityBase
 {
     [JsonIgnore] public bool PlaceableOnWater { get; protected init; }
-
     public (int, int) Size { get; protected init; }
 
     /// <summary>
@@ -31,6 +30,7 @@ public class StructureConverter : CustomCreationConverter<Structure>
     /// <summary>
     ///     Handles converting serialized Structures into objects that implement the Structure class
     ///     TODO: Update this to properly determine structure sub class and return it
+    ///     TODO: Enabling `Trim unused assemblies` breaks this class for some reason?
     /// </summary>
     /// <param name="objectType"> Type of the object we are trying to convert </param>
     /// <returns> Structure sub class object </returns>

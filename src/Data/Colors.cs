@@ -4,5 +4,15 @@ namespace IslandGen.Data;
 
 public static class Colors
 {
+    public static readonly Color TileDebug = new(255, 0, 255, 255);
+    public static readonly Color TileDirt = new(121, 85, 58, 255);
+    public static readonly Color TileLake = new(0, 25, 110, 255);
+    public static readonly Color TileOcean = new(36, 53, 207, 255);
+    public static readonly Color TileRiver = new(0, 25, 110, 255);
+    public static readonly Color TileRock = new(104, 104, 104, 255);
+    public static readonly Color TileSand = new(227, 221, 164, 255);
+    public static readonly Color TileVegetationDense = new(11, 34, 6, 255);
+    public static readonly Color TileVegetationModerate = new(46, 73, 44, 255);
+    public static readonly Color TileVegetationSparse = new(66, 96, 64, 255);
     public static readonly Color TransparentGray = new(0, 0, 0, 40);
 }

@@ -11,7 +11,7 @@ public abstract class EntityBase
     protected Texture? Texture;
 
     public (int, int) MapPosition { get; set; }
-    public string ReadableName { get; set; }
+    public string? ReadableName { get; set; }
 
     public void Draw()
     {

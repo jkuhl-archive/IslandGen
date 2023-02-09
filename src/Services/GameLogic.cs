@@ -49,14 +49,16 @@ public class GameLogic
 
     public void Update()
     {
+        // Update objects that rely on in game time passage
         _updateTimer += Raylib.GetFrameTime();
-
         if (_updateTimer >= 1 * GameSpeed.GetSpeedMultiplier())
         {
-            foreach (var colonist in Colonists) colonist.Update();
             _updateTimer = 0;
+            foreach (var colonist in Colonists) colonist.Update();
+            ServiceManager.GetService<GameMap>().Update();
         }
 
+        // Update mouse structure position to match mouse cursor position 
         if (_mouseStructure != null)
         {
             var gameMap = ServiceManager.GetService<GameMap>();
