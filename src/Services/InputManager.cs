@@ -20,7 +20,10 @@ public class InputManager
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_RIGHT)) gameCamera.PanRight();
 
         // Process mouse inputs if we are not mousing over the sidebar
-        if (!gameUi.SidebarArea.PointInsideRectangle(Raylib.GetMousePosition()))
+        if (
+            !gameUi.SidebarArea.PointInsideRectangle(Raylib.GetMousePosition()) &&
+            !gameUi.CalendarArea.PointInsideRectangle(Raylib.GetMousePosition())
+        )
             if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
                 gameLogic.PlaceMouseStructure();
     }

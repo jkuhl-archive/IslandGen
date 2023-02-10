@@ -8,11 +8,16 @@ namespace IslandGen.Services;
 
 public class GameLogic
 {
+    private const int StartYear = 1600;
+    private const int StartMonth = 1;
+    private const int StartDay = 1;
+
     public readonly List<Colonist> Colonists;
+    [JsonIgnore] public readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
     public readonly List<Structure> Structures;
+
     private Structure? _mouseStructure;
     private float _updateTimer;
-    public GameSpeed GameSpeed;
 
     /// <summary>
     ///     Service that manages the game's logic
@@ -21,6 +26,7 @@ public class GameLogic
     {
         Colonists = new List<Colonist>();
         Structures = new List<Structure>();
+        CurrentDateTime = StartDateTime;
         GameSpeed = GameSpeed.Normal;
     }
 
@@ -29,14 +35,20 @@ public class GameLogic
     /// </summary>
     /// <param name="colonists"> List of colonists </param>
     /// <param name="structures"> List of structures </param>
+    /// <param name="currentDateTime"> Current DateTime in game </param>
     /// <param name="gameSpeed"> Current GameSpeed </param>
     [JsonConstructor]
-    private GameLogic(List<Colonist> colonists, List<Structure> structures, GameSpeed gameSpeed)
+    private GameLogic(List<Colonist> colonists, List<Structure> structures, DateTime currentDateTime,
+        GameSpeed gameSpeed)
     {
         Colonists = colonists;
         Structures = structures;
+        CurrentDateTime = currentDateTime;
         GameSpeed = gameSpeed;
     }
+
+    public DateTime CurrentDateTime { get; private set; }
+    public GameSpeed GameSpeed { get; private set; }
 
     public void Draw()
     {
@@ -54,8 +66,9 @@ public class GameLogic
         if (_updateTimer >= 1 * GameSpeed.GetSpeedMultiplier())
         {
             _updateTimer = 0;
-            foreach (var colonist in Colonists) colonist.Update();
+            CurrentDateTime = CurrentDateTime.AddHours(1);
             ServiceManager.GetService<GameMap>().Update();
+            foreach (var colonist in Colonists) colonist.Update();
         }
 
         // Update mouse structure position to match mouse cursor position 
@@ -64,6 +77,14 @@ public class GameLogic
             var gameMap = ServiceManager.GetService<GameMap>();
             _mouseStructure.MapPosition = gameMap.GetMapMouseTile();
         }
+    }
+
+    /// <summary>
+    ///     Toggles current GameSpeed to the next value
+    /// </summary>
+    public void ChangeSpeed()
+    {
+        GameSpeed = GameSpeed.GetNext();
     }
 
     /// <summary>
