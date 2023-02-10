@@ -28,7 +28,7 @@ public class GameLogic
         Colonists = new List<Colonist>();
         Entities = new List<EntityBase>();
         Structures = new List<Structure>();
-        
+
         CurrentDateTime = StartDateTime;
         GameSpeed = GameSpeed.Normal;
     }
@@ -51,7 +51,7 @@ public class GameLogic
         Colonists = colonists;
         Entities = entities;
         Structures = structures;
-        
+
         CurrentDateTime = currentDateTime;
         GameSpeed = gameSpeed;
     }

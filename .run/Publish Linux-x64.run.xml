@@ -1,7 +1,8 @@
 <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="Publish Linux-x64" type="ShConfigurationType"
                    activateToolWindowBeforeRun="false">
-        <option name="SCRIPT_TEXT" value="cp -r assets output/linux-x64 &amp;&amp; output/linux-x64/*.pdb"/>
+        <option name="SCRIPT_TEXT"
+                value="cp -r assets output/linux-x64 &amp;&amp; cd output &amp;&amp; zip -r linux-x64.zip linux-x64/assets linux-x64/IslandGen"/>
         <option name="INDEPENDENT_SCRIPT_PATH" value="true"/>
         <option name="SCRIPT_PATH" value=""/>
         <option name="SCRIPT_OPTIONS" value=""/>
