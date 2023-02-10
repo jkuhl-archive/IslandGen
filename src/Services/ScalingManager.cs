@@ -20,14 +20,6 @@ public class ScalingManager
     private const double ScaleFactor16By10 = 1 / BaseHeight16By10;
     private const double ScaleFactor32By9 = 1 / BaseHeight32By9;
 
-    /// <summary>
-    ///     Service that manages automatically scaling the game to fit the current window size / resolution
-    /// </summary>
-    public ScalingManager()
-    {
-        UpdateScaling();
-    }
-
     public int WindowWidth { get; private set; }
     public int WindowHeight { get; private set; }
     public float ScaleFactor { get; private set; }
@@ -55,6 +47,9 @@ public class ScalingManager
         Padding = (int)(1 * ScaleFactor);
         FontSize = (int)ScaleFactor * 5;
         FontSpacing = (int)(2 * ScaleFactor);
+
+        ServiceManager.GetService<MainMenuUi>().UpdateScaling();
+        ServiceManager.GetService<GameUi>().UpdateScaling();
     }
 
     /// <summary>

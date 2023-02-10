@@ -62,7 +62,10 @@ public class MainMenuUi
         foreach (var button in _buttonsList) button.Draw();
     }
 
-    public void Update()
+    /// <summary>
+    ///     Recalculates scaled UI elements
+    /// </summary>
+    public void UpdateScaling()
     {
         var scalingManager = ServiceManager.GetService<ScalingManager>();
         var windowWidthCenter = scalingManager.WindowWidth / 2;

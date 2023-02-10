@@ -36,9 +36,6 @@ internal static class Game
             switch (ServiceManager.GetService<StateManager>().GameState)
             {
                 case GameState.MainMenu:
-                    // Update Main Menu
-                    ServiceManager.GetService<MainMenuUi>().Update();
-
                     // Draw Main Menu
                     Raylib.BeginDrawing();
                     Raylib.ClearBackground(Raylib.BLACK);

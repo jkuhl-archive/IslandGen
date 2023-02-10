@@ -104,6 +104,39 @@ public class GameUi
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameSettings = ServiceManager.GetService<GameSettings>();
+
+        // Set calendar string
+        _calendarString = $"{gameLogic.CurrentDateTime.ToLongDateString()}\n" +
+                          $"{gameLogic.CurrentDateTime.ToLongTimeString()}";
+
+        // Set debug info
+        if (gameSettings.DebugMode)
+        {
+            var gameCamera = ServiceManager.GetService<GameCamera>();
+            var gameMap = ServiceManager.GetService<GameMap>();
+            var scalingManager = ServiceManager.GetService<ScalingManager>();
+
+            _debugInfo =
+                $"FPS: {Raylib.GetFPS()}\n" +
+                $"Window Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
+                $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
+                $"Game Speed: {gameLogic.GameSpeed} ({gameLogic.GameSpeed.GetSpeedMultiplier()}x)\n" +
+                "\n" +
+                $"Mouse Window Position: {Raylib.GetMousePosition()}\n" +
+                $"Mouse Map Position: {gameMap.GetMapMousePosition()}\n" +
+                $"Mouse Highlighted Tile: {gameMap.GetMapMouseTile()}\n" +
+                "\n" +
+                $"Camera Zoom: {gameCamera.Camera.zoom}x\n" +
+                $"Camera Position: {gameCamera.Camera.target}\n" +
+                $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
+        }
+    }
+
+    /// <summary>
+    ///     Recalculates scaled UI elements
+    /// </summary>
+    public void UpdateScaling()
+    {
         var scalingManager = ServiceManager.GetService<ScalingManager>();
         var calendarWidthPadding = scalingManager.Padding * CalendarWidthPaddingSegments;
         var calendarHeightPadding = scalingManager.Padding * CalendarHeightPaddingSegments;
@@ -160,31 +193,6 @@ public class GameUi
 
         // Apply minimap area to texture
         _miniMapTexture.DestinationRectangle = _miniMapArea;
-
-        // Set calendar string
-        _calendarString = $"{gameLogic.CurrentDateTime.ToLongDateString()}\n" +
-                          $"{gameLogic.CurrentDateTime.ToLongTimeString()}";
-
-        // Set debug info
-        if (gameSettings.DebugMode)
-        {
-            var gameCamera = ServiceManager.GetService<GameCamera>();
-            var gameMap = ServiceManager.GetService<GameMap>();
-
-            _debugInfo =
-                $"FPS: {Raylib.GetFPS()}\n" +
-                $"Window Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
-                $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
-                $"Game Speed: {gameLogic.GameSpeed} ({gameLogic.GameSpeed.GetSpeedMultiplier()}x)\n" +
-                "\n" +
-                $"Mouse Window Position: {Raylib.GetMousePosition()}\n" +
-                $"Mouse Map Position: {gameMap.GetMapMousePosition()}\n" +
-                $"Mouse Highlighted Tile: {gameMap.GetMapMouseTile()}\n" +
-                "\n" +
-                $"Camera Zoom: {gameCamera.Camera.zoom}x\n" +
-                $"Camera Position: {gameCamera.Camera.target}\n" +
-                $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
-        }
     }
 
     /// <summary>
