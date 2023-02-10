@@ -11,6 +11,12 @@ public class StateManager
     private const string GameLogicFile = "game_logic.json";
     private const string MapFile = "game_map.json";
 
+    private static readonly JsonSerializerSettings JsonSettings = new()
+    {
+        Formatting = Formatting.Indented,
+        TypeNameHandling = TypeNameHandling.All
+    };
+
     public GameState GameState;
 
     /// <summary>
@@ -27,16 +33,16 @@ public class StateManager
     /// </summary>
     public static void LoadGame()
     {
-        if (!File.Exists(MapFile)) return;
         if (!File.Exists(GameLogicFile)) return;
+        if (!File.Exists(MapFile)) return;
 
-        var gameMap = JsonConvert.DeserializeObject<GameMap>(File.ReadAllText(MapFile));
+        var gameLogic = JsonConvert.DeserializeObject<GameLogic>(File.ReadAllText(GameLogicFile), JsonSettings);
+        if (gameLogic == null) return;
+        var gameMap = JsonConvert.DeserializeObject<GameMap>(File.ReadAllText(MapFile), JsonSettings);
         if (gameMap == null) return;
-        var entitiesManager = JsonConvert.DeserializeObject<GameLogic>(File.ReadAllText(GameLogicFile));
-        if (entitiesManager == null) return;
 
+        ServiceManager.ReplaceService(gameLogic);
         ServiceManager.ReplaceService(gameMap);
-        ServiceManager.ReplaceService(entitiesManager);
 
         ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
     }
@@ -46,15 +52,13 @@ public class StateManager
     /// </summary>
     public static void NewGame()
     {
-        var gameLogic = new GameLogic();
-        var gameMap = new GameMap();
-        ServiceManager.ReplaceService(gameLogic);
-        ServiceManager.ReplaceService(gameMap);
+        ServiceManager.ReplaceService(new GameLogic());
+        ServiceManager.ReplaceService(new GameMap());
 
         for (var i = 0; i < 10; i++)
-            gameLogic.Colonists.Add(new Colonist
+            ServiceManager.GetService<GameLogic>().Colonists.Add(new Colonist
             {
-                MapPosition = gameMap.GetRandomTile(),
+                MapPosition = ServiceManager.GetService<GameMap>().GetRandomTile(),
                 ReadableName = Datasets.MaleNames.RandomItem()
             });
 
@@ -66,9 +70,8 @@ public class StateManager
     /// </summary>
     public static void SaveGame()
     {
-        var jsonSettings = new JsonSerializerSettings { Formatting = Formatting.Indented };
-        File.WriteAllText(MapFile, JsonConvert.SerializeObject(ServiceManager.GetService<GameMap>(), jsonSettings));
+        File.WriteAllText(MapFile, JsonConvert.SerializeObject(ServiceManager.GetService<GameMap>(), JsonSettings));
         File.WriteAllText(GameLogicFile,
-            JsonConvert.SerializeObject(ServiceManager.GetService<GameLogic>(), jsonSettings));
+            JsonConvert.SerializeObject(ServiceManager.GetService<GameLogic>(), JsonSettings));
     }
 }

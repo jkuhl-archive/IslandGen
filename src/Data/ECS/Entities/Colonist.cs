@@ -10,6 +10,7 @@ public class Colonist : EntityBase
     /// </summary>
     public Colonist()
     {
+        Size = (1, 1);
         Texture = ServiceManager.GetService<TextureManager>().Textures["colonist"];
 
         AddComponent(new Health());

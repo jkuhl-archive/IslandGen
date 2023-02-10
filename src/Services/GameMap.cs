@@ -1,5 +1,6 @@
 using System.Numerics;
 using IslandGen.Data;
+using IslandGen.Data.ECS.Entities;
 using IslandGen.Data.Enum;
 using IslandGen.Data.Textures;
 using IslandGen.Extensions;
@@ -144,7 +145,7 @@ public class GameMap
 
     public void Update()
     {
-        ProcessVegetationGrowth();
+        VegetationGrowth();
     }
 
     /// <summary>
@@ -242,7 +243,57 @@ public class GameMap
     }
 
     /// <summary>
-    ///     Randomly generates a new map and returns it
+    ///     Deforms the perimeter of the GameMap's BaseIslandArea by replacing random subsections of it
+    /// </summary>
+    /// <param name="maxIterations"> Max number of time deform workflow should run </param>
+    /// <param name="sizeMultiplier"> Multiplier used to scale size of deform sections based on MapSize </param>
+    /// <param name="replaceTileType"> TileType that should be replaced if located in a subsection </param>
+    /// <param name="fillTileType"> TileType the subsections should be filled with </param>
+    private void DeformPerimeter(int maxIterations, float sizeMultiplier, TileType replaceTileType,
+        TileType fillTileType)
+    {
+        var rnd = ServiceManager.GetService<Random>();
+        var start = _baseIslandArea.Start();
+        var end = _baseIslandArea.End();
+
+        for (var i = 0; i < rnd.Next(maxIterations); i++)
+        {
+            var deformStartPoints = new List<Vector2>
+            {
+                start with { X = rnd.Next(start.X_int(), end.X_int()) },
+                start with { Y = rnd.Next(start.Y_int(), end.Y_int()) },
+                end with { X = rnd.Next(start.X_int(), end.X_int()) },
+                end with { Y = rnd.Next(start.Y_int(), end.Y_int()) }
+            };
+
+            foreach (var deformStart in deformStartPoints)
+            {
+                var deformSize = rnd.Next((int)(MapSize * sizeMultiplier));
+
+                for (var mapX = deformStart.X_int() - deformSize; mapX < deformStart.X_int() + deformSize; mapX++)
+                for (var mapY = deformStart.Y_int() - deformSize; mapY < deformStart.Y_int() + deformSize; mapY++)
+                    if (TileMap.InRange(mapX, mapY) && TileMap[mapX, mapY] == replaceTileType)
+                        TileMap[mapX, mapY] = fillTileType;
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Fills a section of the map
+    /// </summary>
+    /// <param name="start"> Starting point for the fill operation (top left corner) </param>
+    /// <param name="end"> Ending point for the fill operation (bottom right corner) </param>
+    /// <param name="fill"> TileType the section should be filled with </param>
+    private void FillMapSection(Vector2 start, Vector2 end, TileType fill)
+    {
+        for (var mapX = start.X_int(); mapX < end.X_int(); mapX++)
+        for (var mapY = start.Y_int(); mapY < end.Y_int(); mapY++)
+            if (TileMap.InRange(mapX, mapY))
+                TileMap[mapX, mapY] = fill;
+    }
+
+    /// <summary>
+    ///     Randomly generates an island on the game map
     /// </summary>
     private void GenerateMap()
     {
@@ -332,56 +383,84 @@ public class GameMap
         PadTileTransition(TileType.VegetationSparse, TileType.VegetationDense, TileType.VegetationDense);
         PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
         PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
+
+        // Place trees
+        PlaceTrees();
     }
 
     /// <summary>
-    ///     Deforms the perimeter of the GameMap's BaseIslandArea by replacing random subsections of it
+    ///     Pads transitions between TileTypes
     /// </summary>
-    /// <param name="maxIterations"> Max number of time deform workflow should run </param>
-    /// <param name="sizeMultiplier"> Multiplier used to scale size of deform sections based on MapSize </param>
-    /// <param name="replaceTileType"> TileType that should be replaced if located in a subsection </param>
-    /// <param name="fillTileType"> TileType the subsections should be filled with </param>
-    private void DeformPerimeter(int maxIterations, float sizeMultiplier, TileType replaceTileType,
-        TileType fillTileType)
+    /// <param name="tileType1"> TileType that we are checking for as the transition, replaced if valid </param>
+    /// <param name="tileType2"> TileType that we are checking for as the edge </param>
+    /// <param name="fill"> TileType that valid transition tiles should be replaced with </param>
+    private void PadTileTransition(TileType tileType1, TileType tileType2, TileType fill)
     {
-        var rnd = ServiceManager.GetService<Random>();
-        var start = _baseIslandArea.Start();
-        var end = _baseIslandArea.End();
+        var tilesPendingUpdate = new List<(int, int)>();
 
-        for (var i = 0; i < rnd.Next(maxIterations); i++)
+        // Find tiles that exist at the edge of tileType1 and tileType2 and mark them to be updated
+        for (var mapX = 0; mapX < MapSize; mapX++)
+        for (var mapY = 0; mapY < MapSize; mapY++)
         {
-            var deformStartPoints = new List<Vector2>
+            var currentTile = TileMap[mapX, mapY];
+            var adjacentTiles = new List<(int, int)>
             {
-                start with { X = rnd.Next(start.X_int(), end.X_int()) },
-                start with { Y = rnd.Next(start.Y_int(), end.Y_int()) },
-                end with { X = rnd.Next(start.X_int(), end.X_int()) },
-                end with { Y = rnd.Next(start.Y_int(), end.Y_int()) }
+                (mapX, mapY + 1),
+                (mapX, mapY - 1),
+                (mapX + 1, mapY),
+                (mapX - 1, mapY)
             };
 
-            foreach (var deformStart in deformStartPoints)
-            {
-                var deformSize = rnd.Next((int)(MapSize * sizeMultiplier));
-
-                for (var mapX = deformStart.X_int() - deformSize; mapX < deformStart.X_int() + deformSize; mapX++)
-                for (var mapY = deformStart.Y_int() - deformSize; mapY < deformStart.Y_int() + deformSize; mapY++)
-                    if (TileMap.InRange(mapX, mapY) && TileMap[mapX, mapY] == replaceTileType)
-                        TileMap[mapX, mapY] = fillTileType;
-            }
+            foreach (var adjacentTile in adjacentTiles)
+                if (TileMap.InRange(adjacentTile.Item1, adjacentTile.Item2) &&
+                    currentTile == tileType1 &&
+                    TileMap[adjacentTile.Item1, adjacentTile.Item2] == tileType2)
+                {
+                    tilesPendingUpdate.Add((mapX, mapY));
+                    break;
+                }
         }
+
+        // Update all marked tiles
+        foreach (var tileCoordinates in tilesPendingUpdate)
+            TileMap[tileCoordinates.Item1, tileCoordinates.Item2] = fill;
     }
 
     /// <summary>
-    ///     Fills a section of the map
+    ///     Randomly seeds trees around the map based on the types of tiles the tree's roots will be in
     /// </summary>
-    /// <param name="start"> Starting point for the fill operation (top left corner) </param>
-    /// <param name="end"> Ending point for the fill operation (bottom right corner) </param>
-    /// <param name="fill"> TileType the section should be filled with </param>
-    private void FillMapSection(Vector2 start, Vector2 end, TileType fill)
+    private void PlaceTrees()
     {
-        for (var mapX = start.X_int(); mapX < end.X_int(); mapX++)
-        for (var mapY = start.Y_int(); mapY < end.Y_int(); mapY++)
-            if (TileMap.InRange(mapX, mapY))
-                TileMap[mapX, mapY] = fill;
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+        var rnd = ServiceManager.GetService<Random>();
+
+        for (var mapX = 0; mapX < MapSize; mapX++)
+        for (var mapY = 0; mapY < MapSize; mapY++)
+        {
+            var treeBaseY = mapY + 1;
+            if (treeBaseY >= MapSize) continue;
+
+            switch (TileMap[mapX, treeBaseY])
+            {
+                case TileType.Dirt:
+                case TileType.Sand:
+                    if (rnd.Next(100) < 95) continue;
+                    break;
+                case TileType.VegetationSparse:
+                    if (rnd.Next(100) < 70) continue;
+                    break;
+                case TileType.VegetationModerate:
+                    if (rnd.Next(100) < 50) continue;
+                    break;
+                case TileType.VegetationDense:
+                    if (rnd.Next(100) < 20) continue;
+                    break;
+                default:
+                    continue;
+            }
+
+            gameLogic.Entities.Add(new Tree { MapPosition = (mapX, mapY) });
+        }
     }
 
     /// <summary>
@@ -493,47 +572,9 @@ public class GameMap
     }
 
     /// <summary>
-    ///     Pads transitions between TileTypes
-    /// </summary>
-    /// <param name="tileType1"> TileType that we are checking for as the transition, replaced if valid </param>
-    /// <param name="tileType2"> TileType that we are checking for as the edge </param>
-    /// <param name="fill"> TileType that valid transition tiles should be replaced with </param>
-    private void PadTileTransition(TileType tileType1, TileType tileType2, TileType fill)
-    {
-        var tilesPendingUpdate = new List<(int, int)>();
-
-        // Find tiles that exist at the edge of tileType1 and tileType2 and mark them to be updated
-        for (var mapX = 0; mapX < MapSize; mapX++)
-        for (var mapY = 0; mapY < MapSize; mapY++)
-        {
-            var currentTile = TileMap[mapX, mapY];
-            var adjacentTiles = new List<(int, int)>
-            {
-                (mapX, mapY + 1),
-                (mapX, mapY - 1),
-                (mapX + 1, mapY),
-                (mapX - 1, mapY)
-            };
-
-            foreach (var adjacentTile in adjacentTiles)
-                if (TileMap.InRange(adjacentTile.Item1, adjacentTile.Item2) &&
-                    currentTile == tileType1 &&
-                    TileMap[adjacentTile.Item1, adjacentTile.Item2] == tileType2)
-                {
-                    tilesPendingUpdate.Add((mapX, mapY));
-                    break;
-                }
-        }
-
-        // Update all marked tiles
-        foreach (var tileCoordinates in tilesPendingUpdate)
-            TileMap[tileCoordinates.Item1, tileCoordinates.Item2] = fill;
-    }
-
-    /// <summary>
     ///     Spreads vegetation across the game map
     /// </summary>
-    private void ProcessVegetationGrowth()
+    private void VegetationGrowth()
     {
         var rnd = ServiceManager.GetService<Random>();
 
@@ -550,16 +591,11 @@ public class GameMap
                 (startTile.Item1 - 1, startTile.Item2)
             };
 
-            // If start tile contains sparse vegetation, lake, or river replace adjacent dirt with sparse vegetation
-            if (startTileType is TileType.VegetationSparse or TileType.Lake or TileType.River)
-                foreach (var tile in adjacentTiles.Where(adjacentTile =>
-                             TileMap[adjacentTile.Item1, adjacentTile.Item2] == TileType.Dirt))
-                    TileMap[tile.Item1, tile.Item2] = TileType.VegetationSparse;
-
             // If start tile and all adjacent tiles contain vegetation, bump up the start tile's vegetation density
             if (adjacentTiles.TrueForAll(tile =>
                     TileMap[tile.Item1, tile.Item2] is TileType.VegetationSparse or TileType.VegetationModerate
                         or TileType.VegetationDense))
+            {
                 switch (startTileType)
                 {
                     case TileType.VegetationSparse:
@@ -569,6 +605,15 @@ public class GameMap
                         TileMap[startTile.Item1, startTile.Item2] = TileType.VegetationDense;
                         break;
                 }
+
+                return;
+            }
+
+            // If start tile contains sparse vegetation, lake, or river replace adjacent dirt with sparse vegetation
+            if (startTileType is TileType.VegetationSparse or TileType.Lake or TileType.River)
+                foreach (var tile in adjacentTiles.Where(adjacentTile =>
+                             TileMap[adjacentTile.Item1, adjacentTile.Item2] == TileType.Dirt))
+                    TileMap[tile.Item1, tile.Item2] = TileType.VegetationSparse;
         }
     }
 }

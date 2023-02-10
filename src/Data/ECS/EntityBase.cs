@@ -12,6 +12,7 @@ public abstract class EntityBase
 
     public (int, int) MapPosition { get; set; }
     public string? ReadableName { get; set; }
+    protected (int, int) Size { get; init; }
 
     public void Draw()
     {
@@ -67,6 +68,20 @@ public abstract class EntityBase
     public (int, int) GetMapPosition()
     {
         return MapPosition;
+    }
+
+    /// <summary>
+    ///     Gets the tiles on the game map that this structure is occupying
+    /// </summary>
+    /// <returns> List to tuples containing the X and Y positions of all occupied map tiles </returns>
+    public List<(int, int)> GetOccupiedTiles()
+    {
+        var tiles = new List<(int, int)>();
+        for (var mapX = MapPosition.Item1; mapX < MapPosition.Item1 + Size.Item1; mapX++)
+        for (var mapY = MapPosition.Item2; mapY < MapPosition.Item2 + Size.Item2; mapY++)
+            tiles.Add((mapX, mapY));
+
+        return tiles;
     }
 
     /// <summary>

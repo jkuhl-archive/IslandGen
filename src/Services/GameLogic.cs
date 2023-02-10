@@ -13,6 +13,7 @@ public class GameLogic
     private const int StartDay = 1;
 
     public readonly List<Colonist> Colonists;
+    public readonly List<EntityBase> Entities;
     [JsonIgnore] public readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
     public readonly List<Structure> Structures;
 
@@ -25,7 +26,9 @@ public class GameLogic
     public GameLogic()
     {
         Colonists = new List<Colonist>();
+        Entities = new List<EntityBase>();
         Structures = new List<Structure>();
+        
         CurrentDateTime = StartDateTime;
         GameSpeed = GameSpeed.Normal;
     }
@@ -34,15 +37,21 @@ public class GameLogic
     ///     Constructor for loading a saved GameLogic
     /// </summary>
     /// <param name="colonists"> List of colonists </param>
+    /// <param name="entities"> List of other entities </param>
     /// <param name="structures"> List of structures </param>
     /// <param name="currentDateTime"> Current DateTime in game </param>
     /// <param name="gameSpeed"> Current GameSpeed </param>
     [JsonConstructor]
-    private GameLogic(List<Colonist> colonists, List<Structure> structures, DateTime currentDateTime,
+    private GameLogic(List<Colonist> colonists,
+        List<EntityBase> entities,
+        List<Structure> structures,
+        DateTime currentDateTime,
         GameSpeed gameSpeed)
     {
         Colonists = colonists;
+        Entities = entities;
         Structures = structures;
+        
         CurrentDateTime = currentDateTime;
         GameSpeed = gameSpeed;
     }
@@ -53,8 +62,9 @@ public class GameLogic
     public void Draw()
     {
         // TODO: Add map culling here
-        foreach (var colonist in Colonists) colonist.Draw();
         foreach (var structure in Structures) structure.Draw();
+        foreach (var tree in Entities) tree.Draw();
+        foreach (var colonist in Colonists) colonist.Draw();
 
         _mouseStructure?.Draw();
     }
@@ -93,7 +103,7 @@ public class GameLogic
     public void PlaceMouseStructure()
     {
         if (_mouseStructure == null) return;
-        var occupiedTiles = _mouseStructure.GetStructureOccupiedTiles();
+        var occupiedTiles = _mouseStructure.GetOccupiedTiles();
 
         // Check if structure is on water
         if (!_mouseStructure.PlaceableOnWater)
@@ -105,7 +115,7 @@ public class GameLogic
         }
 
         // Check if the structure will overlap with any existing structures
-        if (Structures.Any(structure => occupiedTiles.Intersect(structure.GetStructureOccupiedTiles()).Any())) return;
+        if (Structures.Any(structure => occupiedTiles.Intersect(structure.GetOccupiedTiles()).Any())) return;
 
         // If all checks pass, add the structure to the main list and remove it from the mouse
         Structures.Add(_mouseStructure);
