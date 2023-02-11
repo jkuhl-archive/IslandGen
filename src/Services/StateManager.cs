@@ -56,7 +56,7 @@ public class StateManager
         ServiceManager.ReplaceService(new GameMap());
 
         for (var i = 0; i < 10; i++)
-            ServiceManager.GetService<GameLogic>().Colonists.Add(new Colonist
+            ServiceManager.GetService<GameLogic>().AddEntity(new Colonist
             {
                 MapPosition = ServiceManager.GetService<GameMap>().GetRandomTile(),
                 ReadableName = Datasets.MaleNames.RandomItem()

@@ -45,14 +45,14 @@ public class GameMap
     private readonly RenderTexturePro _mapTexture =
         new(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
 
-    public readonly TileType[,] TileMap;
+    [JsonProperty] private readonly TileType[,] _tileMap;
 
     /// <summary>
     ///     Service that manages the game's map and entities
     /// </summary>
     public GameMap()
     {
-        TileMap = new TileType[MapSize, MapSize];
+        _tileMap = new TileType[MapSize, MapSize];
         GenerateMap();
     }
 
@@ -63,7 +63,7 @@ public class GameMap
     [JsonConstructor]
     private GameMap(TileType[,] tileMap)
     {
-        TileMap = tileMap;
+        _tileMap = tileMap;
     }
 
     public void Draw()
@@ -85,7 +85,7 @@ public class GameMap
         {
             if (!visibleArea.PointInsideRectangle(mapX, mapY)) continue;
 
-            var currentTile = TileMap[mapX, mapY];
+            var currentTile = _tileMap[mapX, mapY];
             if (currentTile.IsAnimated())
             {
                 var texture = textureManager.AnimatedTextures[currentTile.GetTileTextureName()];
@@ -191,10 +191,20 @@ public class GameMap
         while (true)
         {
             var position = (rnd.Next(MapSize), rnd.Next(MapSize));
-            if (!allowWater && TileMap[position.Item1, position.Item2].IsWater()) continue;
+            if (!allowWater && _tileMap[position.Item1, position.Item2].IsWater()) continue;
 
             return position;
         }
+    }
+
+    /// <summary>
+    ///     Gets the TileType of the tile at the given position on the game map
+    /// </summary>
+    /// <param name="tilePosition"> Tuple containing position of tile </param>
+    /// <returns> TileType of the given tile </returns>
+    public TileType GetTileType((int, int) tilePosition)
+    {
+        return _tileMap[tilePosition.Item1, tilePosition.Item2];
     }
 
     /// <summary>
@@ -217,7 +227,7 @@ public class GameMap
         var tileList = new List<(int, int)>();
         for (var mapX = 0; mapX < MapSize; mapX++)
         for (var mapY = 0; mapY < MapSize; mapY++)
-            if (TileMap[mapX, mapY] == tileType)
+            if (_tileMap[mapX, mapY] == tileType)
                 tileList.Add((mapX, mapY));
 
         return tileList;
@@ -240,6 +250,16 @@ public class GameMap
         var mapViewHeight = (int)Math.Round(MapSize * scalingManager.WindowHeight / cameraViewHeight);
 
         return new Rectangle(mapViewX, mapViewY, mapViewWidth, mapViewHeight);
+    }
+
+    /// <summary>
+    ///     Checks if the given tile position is in the range of the game map
+    /// </summary>
+    /// <param name="tilePosition"> Tuple containing position of tile </param>
+    /// <returns> True if in range, false if not </returns>
+    public bool PositionInRange((int, int) tilePosition)
+    {
+        return _tileMap.InRange(tilePosition);
     }
 
     /// <summary>
@@ -272,8 +292,8 @@ public class GameMap
 
                 for (var mapX = deformStart.X_int() - deformSize; mapX < deformStart.X_int() + deformSize; mapX++)
                 for (var mapY = deformStart.Y_int() - deformSize; mapY < deformStart.Y_int() + deformSize; mapY++)
-                    if (TileMap.InRange(mapX, mapY) && TileMap[mapX, mapY] == replaceTileType)
-                        TileMap[mapX, mapY] = fillTileType;
+                    if (_tileMap.InRange(mapX, mapY) && _tileMap[mapX, mapY] == replaceTileType)
+                        _tileMap[mapX, mapY] = fillTileType;
             }
         }
     }
@@ -288,8 +308,8 @@ public class GameMap
     {
         for (var mapX = start.X_int(); mapX < end.X_int(); mapX++)
         for (var mapY = start.Y_int(); mapY < end.Y_int(); mapY++)
-            if (TileMap.InRange(mapX, mapY))
-                TileMap[mapX, mapY] = fill;
+            if (_tileMap.InRange(mapX, mapY))
+                _tileMap[mapX, mapY] = fill;
     }
 
     /// <summary>
@@ -402,7 +422,7 @@ public class GameMap
         for (var mapX = 0; mapX < MapSize; mapX++)
         for (var mapY = 0; mapY < MapSize; mapY++)
         {
-            var currentTile = TileMap[mapX, mapY];
+            var currentTile = _tileMap[mapX, mapY];
             var adjacentTiles = new List<(int, int)>
             {
                 (mapX, mapY + 1),
@@ -412,9 +432,9 @@ public class GameMap
             };
 
             foreach (var adjacentTile in adjacentTiles)
-                if (TileMap.InRange(adjacentTile.Item1, adjacentTile.Item2) &&
+                if (_tileMap.InRange(adjacentTile.Item1, adjacentTile.Item2) &&
                     currentTile == tileType1 &&
-                    TileMap[adjacentTile.Item1, adjacentTile.Item2] == tileType2)
+                    _tileMap[adjacentTile.Item1, adjacentTile.Item2] == tileType2)
                 {
                     tilesPendingUpdate.Add((mapX, mapY));
                     break;
@@ -423,7 +443,7 @@ public class GameMap
 
         // Update all marked tiles
         foreach (var tileCoordinates in tilesPendingUpdate)
-            TileMap[tileCoordinates.Item1, tileCoordinates.Item2] = fill;
+            _tileMap[tileCoordinates.Item1, tileCoordinates.Item2] = fill;
     }
 
     /// <summary>
@@ -440,7 +460,7 @@ public class GameMap
             var treeBaseY = mapY + 1;
             if (treeBaseY >= MapSize) continue;
 
-            switch (TileMap[mapX, treeBaseY])
+            switch (_tileMap[mapX, treeBaseY])
             {
                 case TileType.Dirt:
                 case TileType.Sand:
@@ -459,7 +479,7 @@ public class GameMap
                     continue;
             }
 
-            gameLogic.Entities.Add(new Tree { MapPosition = (mapX, mapY) });
+            gameLogic.AddEntity(new Tree { MapPosition = (mapX, mapY) });
         }
     }
 
@@ -510,7 +530,7 @@ public class GameMap
                     _ => nextTile
                 };
 
-                if (!TileMap.InRange(nextTile.X_int(), nextTile.Y_int())) continue;
+                if (!_tileMap.InRange(nextTile.X_int(), nextTile.Y_int())) continue;
 
                 tilesPendingUpdate.Add(nextTile);
                 lastTile = nextTile;
@@ -519,7 +539,7 @@ public class GameMap
             // Set marked tiles to river tiles
             foreach (var tileCoordinate in tilesPendingUpdate)
             {
-                TileMap[tileCoordinate.X_int(), tileCoordinate.Y_int()] = TileType.River;
+                _tileMap[tileCoordinate.X_int(), tileCoordinate.Y_int()] = TileType.River;
                 riverCurrentTile = tileCoordinate;
 
                 // Once the river hits a map edge, return to stop river generation
@@ -565,8 +585,8 @@ public class GameMap
                      mapY++)
                     if (_baseIslandArea.PointInsideRectangle(mapX, mapY))
                     {
-                        if (replaceTileType != null && TileMap[mapX, mapY] != replaceTileType) continue;
-                        TileMap[mapX, mapY] = fillTileType;
+                        if (replaceTileType != null && _tileMap[mapX, mapY] != replaceTileType) continue;
+                        _tileMap[mapX, mapY] = fillTileType;
                     }
         }
     }
@@ -581,7 +601,7 @@ public class GameMap
         for (var i = 0; i < rnd.Next(MapSize / VegetationGrowthAmount); i++)
         {
             var startTile = GetRandomTile(true);
-            var startTileType = TileMap[startTile.Item1, startTile.Item2];
+            var startTileType = _tileMap[startTile.Item1, startTile.Item2];
             var adjacentTiles = new List<(int, int)>
             {
                 startTile,
@@ -593,16 +613,16 @@ public class GameMap
 
             // If start tile and all adjacent tiles contain vegetation, bump up the start tile's vegetation density
             if (adjacentTiles.TrueForAll(tile =>
-                    TileMap[tile.Item1, tile.Item2] is TileType.VegetationSparse or TileType.VegetationModerate
+                    _tileMap[tile.Item1, tile.Item2] is TileType.VegetationSparse or TileType.VegetationModerate
                         or TileType.VegetationDense))
             {
                 switch (startTileType)
                 {
                     case TileType.VegetationSparse:
-                        TileMap[startTile.Item1, startTile.Item2] = TileType.VegetationModerate;
+                        _tileMap[startTile.Item1, startTile.Item2] = TileType.VegetationModerate;
                         break;
                     case TileType.VegetationModerate:
-                        TileMap[startTile.Item1, startTile.Item2] = TileType.VegetationDense;
+                        _tileMap[startTile.Item1, startTile.Item2] = TileType.VegetationDense;
                         break;
                 }
 
@@ -612,8 +632,8 @@ public class GameMap
             // If start tile contains sparse vegetation, lake, or river replace adjacent dirt with sparse vegetation
             if (startTileType is TileType.VegetationSparse or TileType.Lake or TileType.River)
                 foreach (var tile in adjacentTiles.Where(adjacentTile =>
-                             TileMap[adjacentTile.Item1, adjacentTile.Item2] == TileType.Dirt))
-                    TileMap[tile.Item1, tile.Item2] = TileType.VegetationSparse;
+                             _tileMap[adjacentTile.Item1, adjacentTile.Item2] == TileType.Dirt))
+                    _tileMap[tile.Item1, tile.Item2] = TileType.VegetationSparse;
         }
     }
 }

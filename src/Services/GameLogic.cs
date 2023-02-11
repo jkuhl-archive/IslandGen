@@ -1,5 +1,4 @@
 using IslandGen.Data.ECS;
-using IslandGen.Data.ECS.Entities;
 using IslandGen.Data.Enum;
 using Newtonsoft.Json;
 using Raylib_CsLo;
@@ -12,10 +11,8 @@ public class GameLogic
     private const int StartMonth = 1;
     private const int StartDay = 1;
 
-    public readonly List<Colonist> Colonists;
-    public readonly List<EntityBase> Entities;
+    [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities;
     [JsonIgnore] public readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
-    public readonly List<Structure> Structures;
 
     private Structure? _mouseStructure;
     private float _updateTimer;
@@ -25,10 +22,7 @@ public class GameLogic
     /// </summary>
     public GameLogic()
     {
-        Colonists = new List<Colonist>();
-        Entities = new List<EntityBase>();
-        Structures = new List<Structure>();
-
+        _entities = new Dictionary<Type, List<EntityBase>>();
         CurrentDateTime = StartDateTime;
         GameSpeed = GameSpeed.Normal;
     }
@@ -36,35 +30,27 @@ public class GameLogic
     /// <summary>
     ///     Constructor for loading a saved GameLogic
     /// </summary>
-    /// <param name="colonists"> List of colonists </param>
-    /// <param name="entities"> List of other entities </param>
-    /// <param name="structures"> List of structures </param>
+    /// <param name="entities"> Dictionary containing lists of entities active in game </param>
     /// <param name="currentDateTime"> Current DateTime in game </param>
     /// <param name="gameSpeed"> Current GameSpeed </param>
     [JsonConstructor]
-    private GameLogic(List<Colonist> colonists,
-        List<EntityBase> entities,
-        List<Structure> structures,
-        DateTime currentDateTime,
+    private GameLogic(Dictionary<Type, List<EntityBase>> entities, DateTime currentDateTime,
         GameSpeed gameSpeed)
     {
-        Colonists = colonists;
-        Entities = entities;
-        Structures = structures;
-
+        _entities = entities;
         CurrentDateTime = currentDateTime;
         GameSpeed = gameSpeed;
     }
 
-    public DateTime CurrentDateTime { get; private set; }
-    public GameSpeed GameSpeed { get; private set; }
+    [JsonProperty] public DateTime CurrentDateTime { get; private set; }
+    [JsonProperty] public GameSpeed GameSpeed { get; private set; }
 
     public void Draw()
     {
         // TODO: Add map culling here
-        foreach (var structure in Structures) structure.Draw();
-        foreach (var tree in Entities) tree.Draw();
-        foreach (var colonist in Colonists) colonist.Draw();
+        foreach (var entityList in _entities.Values)
+        foreach (var entity in entityList)
+            entity.Draw();
 
         _mouseStructure?.Draw();
     }
@@ -78,7 +64,10 @@ public class GameLogic
             _updateTimer = 0;
             CurrentDateTime = CurrentDateTime.AddHours(1);
             ServiceManager.GetService<GameMap>().Update();
-            foreach (var colonist in Colonists) colonist.Update();
+
+            foreach (var entityList in _entities.Values)
+            foreach (var entity in entityList)
+                entity.Update();
         }
 
         // Update mouse structure position to match mouse cursor position 
@@ -90,11 +79,41 @@ public class GameLogic
     }
 
     /// <summary>
+    ///     Adds an entity to the entity dictionary
+    /// </summary>
+    /// <param name="entity"> Entity that we want to add to the dictionary </param>
+    /// <exception cref="ArgumentNullException"> If entity is null </exception>
+    public void AddEntity(EntityBase entity)
+    {
+        var entityType = entity.GetType();
+        if (entityType == null)
+            throw new ArgumentNullException(nameof(entityType));
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
+
+        var list = _entities.GetValueOrDefault(entityType) ?? new List<EntityBase>();
+
+        list.Add(entity);
+        _entities[entityType] = list;
+    }
+
+    /// <summary>
     ///     Toggles current GameSpeed to the next value
     /// </summary>
     public void ChangeSpeed()
     {
         GameSpeed = GameSpeed.GetNext();
+    }
+
+    /// <summary>
+    ///     Gets a list of entities with the given type
+    /// </summary>
+    /// <typeparam name="T"> Entity type that we are getting a list of </typeparam>
+    /// <returns> List of entity objects of the given type </returns>
+    public List<EntityBase> GetEntityList<T>() where T : class
+    {
+        var entityType = typeof(T);
+        return _entities.GetValueOrDefault(entityType) ?? new List<EntityBase>();
     }
 
     /// <summary>
@@ -110,15 +129,18 @@ public class GameLogic
         {
             var gameMap = ServiceManager.GetService<GameMap>();
             foreach (var tile in occupiedTiles)
-                if (gameMap.TileMap[tile.Item1, tile.Item2].IsWater())
+                if (gameMap.GetTileType(tile).IsWater())
                     return;
         }
 
         // Check if the structure will overlap with any existing structures
-        if (Structures.Any(structure => occupiedTiles.Intersect(structure.GetOccupiedTiles()).Any())) return;
+        if (_entities.Keys.Where(entityType => entityType.BaseType == typeof(Structure)).Any(entityType =>
+                _entities[entityType]
+                    .Any(structure => occupiedTiles.Intersect(structure.GetOccupiedTiles()).Any())))
+            return;
 
         // If all checks pass, add the structure to the main list and remove it from the mouse
-        Structures.Add(_mouseStructure);
+        AddEntity(_mouseStructure);
         _mouseStructure = null;
     }
 

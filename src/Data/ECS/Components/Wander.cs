@@ -1,5 +1,4 @@
 using IslandGen.Data.Enum;
-using IslandGen.Extensions;
 using IslandGen.Services;
 
 namespace IslandGen.Data.ECS.Components;
@@ -68,8 +67,8 @@ public class Wander : IComponent
         {
             destination = (currentMapPosition.Item1 + rnd.Next(-_distance, _distance),
                 currentMapPosition.Item2 + rnd.Next(-_distance, _distance));
-            if (!gameMap.TileMap.InRange(destination)) continue;
-            if (!gameMap.TileMap[destination.Item1, destination.Item2].IsWater()) break;
+            if (!gameMap.PositionInRange(destination)) continue;
+            if (!gameMap.GetTileType(destination).IsWater()) break;
         }
 
         _destination = destination;

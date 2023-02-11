@@ -1,4 +1,5 @@
 using System.Numerics;
+using IslandGen.Data.ECS.Entities;
 using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
 using IslandGen.Data.Textures;
@@ -75,10 +76,10 @@ public class GameUi
         Raylib.ClearBackground(Raylib.BLACK);
         for (var mapX = 0; mapX < gameMap.GetMapSize(); mapX++)
         for (var mapY = 0; mapY < gameMap.GetMapSize(); mapY++)
-            Raylib.DrawPixelV(new Vector2(mapX, mapY), gameMap.TileMap[mapX, mapY].GetTileColor());
+            Raylib.DrawPixelV(new Vector2(mapX, mapY), gameMap.GetTileType((mapX, mapY)).GetTileColor());
 
         // Render entities to minimap texture
-        foreach (var entity in gameLogic.Colonists)
+        foreach (var entity in gameLogic.GetEntityList<Colonist>())
             Raylib.DrawPixelV(new Vector2(entity.GetMapPosition().Item1, entity.GetMapPosition().Item2), Raylib.BLACK);
         Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapArea(), 1, Raylib.RED);
         Raylib.EndTextureMode();
