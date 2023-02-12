@@ -68,7 +68,7 @@ public class GameMap
 
     public void Draw()
     {
-        var gameCamera = ServiceManager.GetService<GameCamera>();
+        var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameSettings = ServiceManager.GetService<GameSettings>();
         var textureManager = ServiceManager.GetService<TextureManager>();
         var visibleArea = GetVisibleMapArea();
@@ -76,7 +76,7 @@ public class GameMap
         // Begin rendering map to texture
         Raylib.BeginTextureMode(_mapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
-        Raylib.BeginMode2D(gameCamera.Camera);
+        Raylib.BeginMode2D(gameLogic.GameCamera.Camera);
 
         // Draw tiles
         // TODO: This can be optimized to use the visible area as the for loop start and end
@@ -163,10 +163,10 @@ public class GameMap
     /// <returns> Vector2 containing the mouse cursor's position on the game map </returns>
     public Vector2 GetMapMousePosition()
     {
-        var gameCamera = ServiceManager.GetService<GameCamera>();
+        var gameLogic = ServiceManager.GetService<GameLogic>();
         var scalingManager = ServiceManager.GetService<ScalingManager>();
         var mousePosition = Raylib.GetMousePosition() / scalingManager.ScaleFactor;
-        return Raylib.GetScreenToWorld2D(mousePosition, gameCamera.Camera);
+        return Raylib.GetScreenToWorld2D(mousePosition, gameLogic.GameCamera.Camera);
     }
 
     /// <summary>
@@ -248,7 +248,7 @@ public class GameMap
     /// <returns> Rectangle that represents the area of the map that the camera can currently see </returns>
     public Rectangle GetVisibleMapArea()
     {
-        var camera = ServiceManager.GetService<GameCamera>().Camera;
+        var camera = ServiceManager.GetService<GameLogic>().GameCamera.Camera;
         var scalingManager = ServiceManager.GetService<ScalingManager>();
 
         var cameraViewWidth = _mapTexture.RenderTexture.texture.width * camera.zoom * scalingManager.ScaleFactor;

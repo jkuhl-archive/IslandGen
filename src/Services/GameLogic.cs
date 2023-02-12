@@ -12,25 +12,14 @@ public class GameLogic
     private const int StartYear = 1600;
     private const int StartMonth = 1;
     private const int StartDay = 1;
-
-    [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities;
-    [JsonIgnore] public readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
+    [JsonIgnore] public static readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
+    [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities = new();
     [JsonProperty] private float _updateTimer;
     [JsonIgnore] public EntityBase? SelectedEntity;
-
-    /// <summary>
-    ///     Service that manages the game's logic
-    /// </summary>
-    public GameLogic()
-    {
-        _entities = new Dictionary<Type, List<EntityBase>>();
-        CurrentDateTime = StartDateTime;
-        GameSpeed = GameSpeed.Normal;
-    }
-
     [JsonIgnore] public StructureBase? MouseStructure { get; private set; }
-    [JsonProperty] public DateTime CurrentDateTime { get; private set; }
-    [JsonProperty] public GameSpeed GameSpeed { get; private set; }
+    [JsonProperty] public DateTime CurrentDateTime { get; private set; } = StartDateTime;
+    [JsonProperty] public GameSpeed GameSpeed { get; private set; } = GameSpeed.Normal;
+    [JsonProperty] public GameCamera GameCamera { get; private set; } = new();
 
     public void Draw()
     {
@@ -39,7 +28,8 @@ public class GameLogic
         foreach (var entity in entityList)
             entity.Draw();
 
-        if (SelectedEntity != null) Raylib.DrawRectangleLinesEx(SelectedEntity.GetMapSpaceRectangle(), 2, Colors.TransparentGray);
+        if (SelectedEntity != null)
+            Raylib.DrawRectangleLinesEx(SelectedEntity.GetMapSpaceRectangle(), 2, Colors.TransparentGray);
         MouseStructure?.Draw();
     }
 

@@ -13,9 +13,9 @@ public class Colonist : EntityBase
         Size = (1, 1);
         Texture = ServiceManager.GetService<TextureManager>().Textures["colonist"];
 
-        AddComponent(new Health());
-        AddComponent(new Inventory());
-        AddComponent(new MovementSpeed());
+        AddComponent(new Health { MaxHealthPoints = 100, HealthPoints = 100 });
+        AddComponent(new Inventory { InventorySize = 10 });
+        AddComponent(new MovementSpeed { Speed = 1 });
         AddComponent(new Wander());
     }
 }

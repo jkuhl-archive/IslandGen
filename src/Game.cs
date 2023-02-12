@@ -18,7 +18,6 @@ internal static class Game
         Raylib.SetTargetFPS(TargetFrameRate);
 
         // Initialize game services
-        ServiceManager.AddService(new GameCamera());
         ServiceManager.AddService(new GameSettings());
         ServiceManager.AddService(new GameUi());
         ServiceManager.AddService(new InputManager());

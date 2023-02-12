@@ -1,26 +1,17 @@
+using Newtonsoft.Json;
 using Raylib_CsLo;
 
-namespace IslandGen.Services;
+namespace IslandGen.Data;
 
 public class GameCamera
 {
+    private const float DefaultZoom = 1.0f;
     private const float MinZoom = 0.4f;
     private const float MaxZoom = 2.0f;
     private const float ZoomIncrement = 0.1f;
     private const float PanIncrement = 100.0f;
 
-    public Camera2D Camera;
-
-    /// <summary>
-    ///     Service that manages the game's camera
-    /// </summary>
-    public GameCamera()
-    {
-        Camera = new Camera2D
-        {
-            zoom = 1.0f
-        };
-    }
+    [JsonProperty] public Camera2D Camera = new() { zoom = DefaultZoom };
 
     /// <summary>
     ///     Pans the camera up

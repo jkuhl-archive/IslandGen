@@ -6,25 +6,12 @@ namespace IslandGen.Data.ECS.Components;
 
 public class Wander : IComponent
 {
-    [JsonProperty] private readonly int _delay;
-    [JsonProperty] private readonly int _distance;
-    [JsonProperty] private bool _delayActive;
+    private const int Delay = 3;
+    private const int Distance = 5;
+
+    [JsonProperty] private bool _delayActive = true;
     [JsonProperty] private int _delayCounter;
     [JsonProperty] private (int, int) _destination;
-
-    /// <summary>
-    ///     Component that enables the entity to wander around the game map
-    /// </summary>
-    /// <param name="delay"> Amount of idle between destinations </param>
-    /// <param name="distance"> Max distance the entity can wander at a time </param>
-    public Wander(int delay = 3, int distance = 5)
-    {
-        _delay = delay;
-        _distance = distance;
-
-        _delayActive = true;
-        _delayCounter = 0;
-    }
 
     public void Update(EntityBase entity)
     {
@@ -32,7 +19,7 @@ public class Wander : IComponent
         {
             _delayCounter++;
 
-            if (_delayCounter >= _delay)
+            if (_delayCounter >= Delay)
             {
                 _delayActive = false;
                 _delayCounter = 0;
@@ -74,8 +61,8 @@ public class Wander : IComponent
         (int, int) destination;
         while (true)
         {
-            destination = (currentMapPosition.Item1 + rnd.Next(-_distance, _distance),
-                currentMapPosition.Item2 + rnd.Next(-_distance, _distance));
+            destination = (currentMapPosition.Item1 + rnd.Next(-Distance, Distance),
+                currentMapPosition.Item2 + rnd.Next(-Distance, Distance));
             if (!gameMap.PositionInRange(destination)) continue;
             if (!gameMap.GetTileType(destination).IsWater()) break;
         }

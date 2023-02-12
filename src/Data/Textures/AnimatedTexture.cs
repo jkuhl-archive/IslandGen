@@ -20,7 +20,6 @@ public class AnimatedTexture
     /// <param name="texture"> Texture containing animation frames stored horizontally </param>
     /// <param name="targetFrameRate"> Framerate the game should be running at </param>
     /// <param name="frameWidth"> Width of animation frames </param>
-    /// TODO: We may want to replace this logic with a time based solution instead of frame counts
     public AnimatedTexture(Texture texture, int targetFrameRate, int frameWidth = 16)
     {
         _texture = texture;

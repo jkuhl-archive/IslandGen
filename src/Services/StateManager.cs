@@ -17,16 +17,7 @@ public class StateManager
         TypeNameHandling = TypeNameHandling.All
     };
 
-    public GameState GameState;
-
-    /// <summary>
-    ///     Service that manages the game's state
-    /// </summary>
-    /// <param name="gameState"> GameState that should be applied on service start </param>
-    public StateManager(GameState gameState = GameState.MainMenu)
-    {
-        GameState = gameState;
-    }
+    public GameState GameState = GameState.MainMenu;
 
     /// <summary>
     ///     Loads the saved game

@@ -44,8 +44,8 @@ public class GameUi
     {
         _buttonsList = new List<Button>
         {
-            new("Zoom In", () => ServiceManager.GetService<GameCamera>().ZoomIn()),
-            new("Zoom Out", () => ServiceManager.GetService<GameCamera>().ZoomOut()),
+            new("Zoom In", () => ServiceManager.GetService<GameLogic>().GameCamera.ZoomIn()),
+            new("Zoom Out", () => ServiceManager.GetService<GameLogic>().GameCamera.ZoomOut()),
             new("Save Island", StateManager.SaveGame),
             new("Load Island", StateManager.LoadGame),
             new("New Island", StateManager.NewGame),
@@ -121,7 +121,6 @@ public class GameUi
         // Set debug info string
         if (gameSettings.DebugMode)
         {
-            var gameCamera = ServiceManager.GetService<GameCamera>();
             var gameMap = ServiceManager.GetService<GameMap>();
             var scalingManager = ServiceManager.GetService<ScalingManager>();
 
@@ -135,8 +134,8 @@ public class GameUi
                 $"Mouse Map Position: {gameMap.GetMapMousePosition()}\n" +
                 $"Mouse Highlighted Tile: {gameMap.GetMapMouseTile()}\n" +
                 "\n" +
-                $"Camera Zoom: {gameCamera.Camera.zoom}x\n" +
-                $"Camera Position: {gameCamera.Camera.target}\n" +
+                $"Camera Zoom: {gameLogic.GameCamera.Camera.zoom}x\n" +
+                $"Camera Position: {gameLogic.GameCamera.Camera.target}\n" +
                 $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
         }
     }
