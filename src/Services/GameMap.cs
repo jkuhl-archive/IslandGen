@@ -39,10 +39,10 @@ public class GameMap
     private const float VegetationModerateSeeding1Multiplier = 0.05f;
     private const float VegetationSparseSeeding1Multiplier = 0.1f;
 
-    private readonly Rectangle _baseIslandArea =
+    [JsonIgnore] private readonly Rectangle _baseIslandArea =
         new(MapBuffer, MapBuffer, MapSize - MapBuffer * 2, MapSize - MapBuffer * 2);
 
-    private readonly RenderTexturePro _mapTexture =
+    [JsonIgnore] private readonly RenderTexturePro _mapTexture =
         new(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
 
     [JsonProperty] private readonly TileType[,] _tileMap;
@@ -98,7 +98,7 @@ public class GameMap
             }
         }
 
-        // Draw entities
+        // Draw game logic objects
         ServiceManager.GetService<GameLogic>().Draw();
 
         // Draw debug elements
@@ -215,6 +215,15 @@ public class GameMap
     public Vector2 GetTileCoordinates((int, int) tilePosition)
     {
         return new Vector2(tilePosition.Item1 * TileTextureSize, tilePosition.Item2 * TileTextureSize);
+    }
+
+    /// <summary>
+    ///     Returns the texture size of tiles on the game map
+    /// </summary>
+    /// <returns> Int that represents the width and height of tiles on game map </returns>
+    public int GetTileTextureSize()
+    {
+        return TileTextureSize;
     }
 
     /// <summary>

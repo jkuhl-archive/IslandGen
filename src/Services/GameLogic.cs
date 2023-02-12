@@ -1,4 +1,6 @@
+using IslandGen.Data;
 using IslandGen.Data.ECS;
+using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
 using Newtonsoft.Json;
 using Raylib_CsLo;
@@ -13,9 +15,8 @@ public class GameLogic
 
     [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities;
     [JsonIgnore] public readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
-
-    private Structure? _mouseStructure;
-    private float _updateTimer;
+    [JsonProperty] private float _updateTimer;
+    [JsonIgnore] public EntityBase? SelectedEntity;
 
     /// <summary>
     ///     Service that manages the game's logic
@@ -27,21 +28,7 @@ public class GameLogic
         GameSpeed = GameSpeed.Normal;
     }
 
-    /// <summary>
-    ///     Constructor for loading a saved GameLogic
-    /// </summary>
-    /// <param name="entities"> Dictionary containing lists of entities active in game </param>
-    /// <param name="currentDateTime"> Current DateTime in game </param>
-    /// <param name="gameSpeed"> Current GameSpeed </param>
-    [JsonConstructor]
-    private GameLogic(Dictionary<Type, List<EntityBase>> entities, DateTime currentDateTime,
-        GameSpeed gameSpeed)
-    {
-        _entities = entities;
-        CurrentDateTime = currentDateTime;
-        GameSpeed = gameSpeed;
-    }
-
+    [JsonIgnore] public StructureBase? MouseStructure { get; private set; }
     [JsonProperty] public DateTime CurrentDateTime { get; private set; }
     [JsonProperty] public GameSpeed GameSpeed { get; private set; }
 
@@ -52,7 +39,8 @@ public class GameLogic
         foreach (var entity in entityList)
             entity.Draw();
 
-        _mouseStructure?.Draw();
+        if (SelectedEntity != null) Raylib.DrawRectangleLinesEx(SelectedEntity.GetMapSpaceRectangle(), 2, Colors.TransparentGray);
+        MouseStructure?.Draw();
     }
 
     public void Update()
@@ -71,10 +59,10 @@ public class GameLogic
         }
 
         // Update mouse structure position to match mouse cursor position 
-        if (_mouseStructure != null)
+        if (MouseStructure != null)
         {
             var gameMap = ServiceManager.GetService<GameMap>();
-            _mouseStructure.MapPosition = gameMap.GetMapMouseTile();
+            MouseStructure.MapPosition = gameMap.GetMapMouseTile();
         }
     }
 
@@ -106,6 +94,18 @@ public class GameLogic
     }
 
     /// <summary>
+    ///     Gets a list of all entities
+    /// </summary>
+    /// <returns> List containing all active entities </returns>
+    public List<EntityBase> GetAllEntities()
+    {
+        var allEntities = new List<EntityBase>();
+        foreach (var entityList in _entities.Values) allEntities.AddRange(entityList);
+
+        return allEntities;
+    }
+
+    /// <summary>
     ///     Gets a list of entities with the given type
     /// </summary>
     /// <typeparam name="T"> Entity type that we are getting a list of </typeparam>
@@ -121,11 +121,11 @@ public class GameLogic
     /// </summary>
     public void PlaceMouseStructure()
     {
-        if (_mouseStructure == null) return;
-        var occupiedTiles = _mouseStructure.GetOccupiedTiles();
+        if (MouseStructure == null) return;
+        var occupiedTiles = MouseStructure.GetOccupiedTiles();
 
         // Check if structure is on water
-        if (!_mouseStructure.PlaceableOnWater)
+        if (!MouseStructure.PlaceableOnWater)
         {
             var gameMap = ServiceManager.GetService<GameMap>();
             foreach (var tile in occupiedTiles)
@@ -134,22 +134,23 @@ public class GameLogic
         }
 
         // Check if the structure will overlap with any existing structures
-        if (_entities.Keys.Where(entityType => entityType.BaseType == typeof(Structure)).Any(entityType =>
+        if (_entities.Keys.Where(entityType => entityType.BaseType == typeof(StructureBase)).Any(entityType =>
                 _entities[entityType]
                     .Any(structure => occupiedTiles.Intersect(structure.GetOccupiedTiles()).Any())))
             return;
 
         // If all checks pass, add the structure to the main list and remove it from the mouse
-        AddEntity(_mouseStructure);
-        _mouseStructure = null;
+        AddEntity(MouseStructure);
+        MouseStructure = null;
     }
 
     /// <summary>
     ///     Sets a structure to the mouse cursor
     /// </summary>
     /// <param name="structure"> Structure that is being set to the mouse cursor </param>
-    public void SetMouseStructure(Structure structure)
+    public void SetMouseStructure(StructureBase structure)
     {
-        _mouseStructure = structure;
+        SelectedEntity = null;
+        MouseStructure = structure;
     }
 }

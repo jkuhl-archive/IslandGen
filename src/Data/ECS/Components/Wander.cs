@@ -1,16 +1,16 @@
 using IslandGen.Data.Enum;
 using IslandGen.Services;
+using Newtonsoft.Json;
 
 namespace IslandGen.Data.ECS.Components;
 
 public class Wander : IComponent
 {
-    private readonly int _delay;
-    private readonly int _distance;
-
-    private bool _delayActive;
-    private int _delayCounter;
-    private (int, int) _destination;
+    [JsonProperty] private readonly int _delay;
+    [JsonProperty] private readonly int _distance;
+    [JsonProperty] private bool _delayActive;
+    [JsonProperty] private int _delayCounter;
+    [JsonProperty] private (int, int) _destination;
 
     /// <summary>
     ///     Component that enables the entity to wander around the game map
@@ -36,7 +36,7 @@ public class Wander : IComponent
             {
                 _delayActive = false;
                 _delayCounter = 0;
-                SetDestination(entity.GetMapPosition());
+                SetDestination(entity.MapPosition);
             }
             else
             {
@@ -44,13 +44,22 @@ public class Wander : IComponent
             }
         }
 
-        if (entity.GetMapPosition() == _destination)
+        if (entity.MapPosition == _destination)
         {
             _delayActive = true;
             return;
         }
 
         entity.MoveTo(_destination);
+    }
+
+    /// <summary>
+    ///     Returns info about entity wandering
+    /// </summary>
+    /// <returns> Wander status as a string </returns>
+    public string GetInfoString()
+    {
+        return $"Wandering: {!_delayActive}, Destination: {_destination}";
     }
 
     /// <summary>

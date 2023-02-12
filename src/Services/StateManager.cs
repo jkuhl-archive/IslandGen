@@ -1,5 +1,5 @@
 using IslandGen.Data;
-using IslandGen.Data.ECS.Entities;
+using IslandGen.Data.ECS.Entities.Creatures;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using Newtonsoft.Json;

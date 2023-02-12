@@ -2,7 +2,7 @@ using IslandGen.Services;
 
 namespace IslandGen.Data.ECS.Entities.Structures;
 
-public class Shelter : Structure
+public class Shelter : StructureBase
 {
     /// <summary>
     ///     Structure that provides basic housing for colonists

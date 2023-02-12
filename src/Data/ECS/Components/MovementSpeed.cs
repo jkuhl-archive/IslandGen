@@ -1,7 +1,11 @@
+using Newtonsoft.Json;
+
 namespace IslandGen.Data.ECS.Components;
 
 public class MovementSpeed : IComponent
 {
+    [JsonProperty] public readonly int Speed;
+
     /// <summary>
     ///     Component that manages the entity's movement speed
     /// </summary>
@@ -11,5 +15,12 @@ public class MovementSpeed : IComponent
         Speed = speed;
     }
 
-    public int Speed { get; }
+    /// <summary>
+    ///     Returns info about entity's movement speed
+    /// </summary>
+    /// <returns> Movement speed as a string </returns>
+    public string GetInfoString()
+    {
+        return $"{Speed}";
+    }
 }

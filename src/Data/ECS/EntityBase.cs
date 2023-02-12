@@ -1,18 +1,18 @@
 using IslandGen.Data.ECS.Components;
 using IslandGen.Services;
+using Newtonsoft.Json;
 using Raylib_CsLo;
 
 namespace IslandGen.Data.ECS;
 
 public abstract class EntityBase
 {
-    private readonly Dictionary<Type, IComponent> _components = new();
-    private readonly Guid _id = Guid.NewGuid();
-    protected Texture? Texture;
-
-    public (int, int) MapPosition { get; set; }
-    public string? ReadableName { get; set; }
-    protected (int, int) Size { get; init; }
+    [JsonProperty] private readonly Dictionary<Type, IComponent> _components = new();
+    [JsonProperty] private readonly Guid _id = Guid.NewGuid();
+    [JsonIgnore] protected Texture? Texture;
+    [JsonProperty] public (int, int) MapPosition { get; set; }
+    [JsonProperty] public string? ReadableName { get; set; }
+    [JsonIgnore] protected (int, int) Size { get; init; }
 
     public void Draw()
     {
@@ -62,12 +62,35 @@ public abstract class EntityBase
     }
 
     /// <summary>
-    ///     Gets the entity's current position on the game map
+    ///     Returns a string containing basic information about the entity
     /// </summary>
-    /// <returns> Tuple containing the entity's X and Y position on the game map </returns>
-    public (int, int) GetMapPosition()
+    /// <returns> String containing entity info </returns>
+    public string GetInfoString()
     {
-        return MapPosition;
+        return $"Type: {GetType().Name}\n" +
+               $"Name: {ReadableName}\n" +
+               $"Map Position: {MapPosition}\n" +
+               $"Occupied Tiles: {GetOccupiedTiles().Aggregate("", (x, tiles) => x + tiles)}\n\n" +
+               string.Join("\n",
+                   _components.Values.Select(component => $"{component.GetType().Name}: {component.GetInfoString()}")
+                       .ToList());
+    }
+
+    /// <summary>
+    ///     Gets the space the entity occupying on the game map as a rectangle
+    /// </summary>
+    /// <returns> Rectangle containing the space the entity is occupies on the game map </returns>
+    public Rectangle GetMapSpaceRectangle()
+    {
+        var gameMap = ServiceManager.GetService<GameMap>();
+        var position = gameMap.GetTileCoordinates(MapPosition);
+
+        return new Rectangle(
+            position.X,
+            position.Y,
+            Size.Item1 * gameMap.GetTileTextureSize(),
+            Size.Item2 * gameMap.GetTileTextureSize()
+        );
     }
 
     /// <summary>

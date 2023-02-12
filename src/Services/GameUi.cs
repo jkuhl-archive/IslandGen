@@ -1,5 +1,5 @@
 using System.Numerics;
-using IslandGen.Data.ECS.Entities;
+using IslandGen.Data.ECS.Entities.Creatures;
 using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
 using IslandGen.Data.Textures;
@@ -18,11 +18,11 @@ public class GameUi
     private const int ButtonsRows = ButtonsWidth / ButtonWidth;
     private const int ButtonsColumns = ButtonsHeight / ButtonHeight;
     private const int CalendarWidth = 115;
-    private const int CalendarHeight = 17;
-    private const int CalendarWidthPaddingSegments = 2;
-    private const int CalendarHeightPaddingSegments = 3;
+    private const int CalendarHeight = 20;
     private const int MiniMapWidth = 100;
     private const int MiniMapHeight = 100;
+    private const int SelectedEntityMenuWidth = 250;
+    private const int SelectedEntityMenuHeight = 80;
     private const int SidebarWidth = 100;
     private const int SidebarHeight = 200;
     private const int SidebarWidthPaddingSegments = 2;
@@ -33,8 +33,9 @@ public class GameUi
 
     private Rectangle _buttonsArea;
     private string _calendarString;
-    private string _debugInfo;
+    private string _debugInfoString;
     private Rectangle _miniMapArea;
+    private string? _selectedEntityString;
 
     /// <summary>
     ///     Service that manages the game's UI
@@ -58,11 +59,12 @@ public class GameUi
         };
 
         _calendarString = string.Empty;
-        _debugInfo = string.Empty;
+        _debugInfoString = string.Empty;
         _miniMapTexture = new RenderTexturePro(new Vector2(MiniMapWidth, MiniMapHeight));
     }
 
     public Rectangle CalendarArea { get; private set; }
+    public Rectangle SelectedEntityMenuArea { get; private set; }
     public Rectangle SidebarArea { get; private set; }
 
     public void Draw()
@@ -70,6 +72,12 @@ public class GameUi
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameMap = ServiceManager.GetService<GameMap>();
         var gameSettings = ServiceManager.GetService<GameSettings>();
+
+        // Draw calendar
+        DrawPopUp(_calendarString, CalendarArea);
+
+        // Draw selected entity menu
+        if (_selectedEntityString != null) DrawPopUp(_selectedEntityString, SelectedEntityMenuArea);
 
         // Render map to minimap texture
         Raylib.BeginTextureMode(_miniMapTexture.RenderTexture);
@@ -80,12 +88,9 @@ public class GameUi
 
         // Render entities to minimap texture
         foreach (var entity in gameLogic.GetEntityList<Colonist>())
-            Raylib.DrawPixelV(new Vector2(entity.GetMapPosition().Item1, entity.GetMapPosition().Item2), Raylib.BLACK);
+            Raylib.DrawPixelV(new Vector2(entity.MapPosition.Item1, entity.MapPosition.Item2), Raylib.BLACK);
         Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapArea(), 1, Raylib.RED);
         Raylib.EndTextureMode();
-
-        // Draw calendar popup
-        DrawPopUp(_calendarString, CalendarArea);
 
         // Draw sidebar backdrop
         Raylib.DrawRectangleRec(SidebarArea, Raylib.WHITE);
@@ -98,7 +103,7 @@ public class GameUi
         _miniMapTexture.Draw();
 
         // Draw debug info
-        if (gameSettings.DebugMode) DrawPopUp(_debugInfo, new Rectangle(), true);
+        if (gameSettings.DebugMode) DrawPopUp(_debugInfoString, new Rectangle(), true);
     }
 
     public void Update()
@@ -110,14 +115,17 @@ public class GameUi
         _calendarString = $"{gameLogic.CurrentDateTime.ToLongDateString()}\n" +
                           $"{gameLogic.CurrentDateTime.ToLongTimeString()}";
 
-        // Set debug info
+        // Set selected entity string
+        _selectedEntityString = gameLogic.SelectedEntity?.GetInfoString();
+
+        // Set debug info string
         if (gameSettings.DebugMode)
         {
             var gameCamera = ServiceManager.GetService<GameCamera>();
             var gameMap = ServiceManager.GetService<GameMap>();
             var scalingManager = ServiceManager.GetService<ScalingManager>();
 
-            _debugInfo =
+            _debugInfoString =
                 $"FPS: {Raylib.GetFPS()}\n" +
                 $"Window Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
                 $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
@@ -139,17 +147,22 @@ public class GameUi
     public void UpdateScaling()
     {
         var scalingManager = ServiceManager.GetService<ScalingManager>();
-        var calendarWidthPadding = scalingManager.Padding * CalendarWidthPaddingSegments;
-        var calendarHeightPadding = scalingManager.Padding * CalendarHeightPaddingSegments;
         var sidebarWidthPadding = scalingManager.Padding * SidebarWidthPaddingSegments;
         var sidebarHeightPadding = scalingManager.Padding * SidebarHeightPaddingSegments;
 
         // Set calendar area
         CalendarArea = new Rectangle(
-            scalingManager.WindowWidth - CalendarWidth * scalingManager.ScaleFactor - calendarWidthPadding,
+            scalingManager.WindowWidth - CalendarWidth * scalingManager.ScaleFactor,
             0,
-            (int)(CalendarWidth * scalingManager.ScaleFactor + calendarWidthPadding),
-            (int)(CalendarHeight * scalingManager.ScaleFactor + calendarHeightPadding));
+            (int)(CalendarWidth * scalingManager.ScaleFactor),
+            (int)(CalendarHeight * scalingManager.ScaleFactor));
+
+        // Set selected entity menu area
+        SelectedEntityMenuArea = new Rectangle(
+            (scalingManager.WindowWidth - SelectedEntityMenuWidth * scalingManager.ScaleFactor) / 2,
+            scalingManager.WindowHeight - SelectedEntityMenuHeight * scalingManager.ScaleFactor,
+            (int)(SelectedEntityMenuWidth * scalingManager.ScaleFactor),
+            (int)(SelectedEntityMenuHeight * scalingManager.ScaleFactor));
 
         // Set sidebar area
         SidebarArea = new Rectangle(

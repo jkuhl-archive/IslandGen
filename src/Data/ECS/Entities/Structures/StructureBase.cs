@@ -1,8 +1,8 @@
 using Newtonsoft.Json;
 
-namespace IslandGen.Data.ECS;
+namespace IslandGen.Data.ECS.Entities.Structures;
 
-public class Structure : EntityBase
+public class StructureBase : EntityBase
 {
     [JsonIgnore] public bool PlaceableOnWater { get; protected init; }
 }
