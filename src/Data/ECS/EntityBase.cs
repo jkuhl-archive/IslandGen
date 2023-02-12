@@ -12,7 +12,8 @@ public abstract class EntityBase
     [JsonIgnore] protected Texture? Texture;
     [JsonProperty] public (int, int) MapPosition { get; set; }
     [JsonProperty] public string? ReadableName { get; set; }
-    [JsonIgnore] protected (int, int) Size { get; init; }
+    [JsonIgnore] public (int, int) Size { get; protected init; }
+    [JsonIgnore] public Color MiniMapColor { get; protected init; }
 
     public void Draw()
     {
@@ -70,7 +71,7 @@ public abstract class EntityBase
         return $"Type: {GetType().Name}\n" +
                $"Name: {ReadableName}\n" +
                $"Map Position: {MapPosition}\n" +
-               $"Occupied Tiles: {GetOccupiedTiles().Aggregate("", (x, tiles) => x + tiles)}\n\n" +
+               $"Size: {Size}\n\n" +
                string.Join("\n",
                    _components.Values.Select(component => $"{component.GetType().Name}: {component.GetInfoString()}")
                        .ToList());

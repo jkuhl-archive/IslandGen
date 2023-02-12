@@ -1,5 +1,6 @@
 using IslandGen.Data.ECS.Components;
 using IslandGen.Services;
+using Raylib_CsLo;
 
 namespace IslandGen.Data.ECS.Entities.Creatures;
 
@@ -10,6 +11,7 @@ public class Colonist : EntityBase
     /// </summary>
     public Colonist()
     {
+        MiniMapColor = Raylib.YELLOW;
         Size = (1, 1);
         Texture = ServiceManager.GetService<TextureManager>().Textures["colonist"];
 

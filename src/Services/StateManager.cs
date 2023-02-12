@@ -1,5 +1,6 @@
 using IslandGen.Data;
 using IslandGen.Data.ECS.Entities.Creatures;
+using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using Newtonsoft.Json;
@@ -43,13 +44,14 @@ public class StateManager
     /// </summary>
     public static void NewGame()
     {
-        ServiceManager.ReplaceService(new GameLogic());
+        var gameLogic = new GameLogic();
+        ServiceManager.ReplaceService(gameLogic);
         ServiceManager.ReplaceService(new GameMap());
 
         for (var i = 0; i < 10; i++)
-            ServiceManager.GetService<GameLogic>().AddEntity(new Colonist
+            gameLogic.AddEntity(new Colonist
             {
-                MapPosition = ServiceManager.GetService<GameMap>().GetRandomTile(),
+                MapPosition = ((Wreckage)gameLogic.GetEntityList<Wreckage>()[0]).GetShipExitTile(),
                 ReadableName = Datasets.MaleNames.RandomItem()
             });
 

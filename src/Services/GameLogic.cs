@@ -12,6 +12,7 @@ public class GameLogic
     private const int StartYear = 1600;
     private const int StartMonth = 1;
     private const int StartDay = 1;
+
     [JsonIgnore] public static readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
     [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities = new();
     [JsonProperty] private float _updateTimer;
@@ -110,27 +111,26 @@ public class GameLogic
     }
 
     /// <summary>
+    ///     Gets a list of entities with the given base type
+    /// </summary>
+    /// <typeparam name="T"> Entity base type that we are getting a list of </typeparam>
+    /// <returns> List of entity objects of the given base type </returns>
+    public List<EntityBase> GetEntityBaseTypeList<T>() where T : class
+    {
+        var entityList = new List<EntityBase>();
+        foreach (var entityType in _entities.Keys.Where(entityType => entityType.BaseType == typeof(T)))
+            entityList.AddRange(_entities[entityType]);
+
+        return entityList;
+    }
+
+    /// <summary>
     ///     Attempts to place the selected structure on the map at the mouse cursors position
     /// </summary>
     public void PlaceMouseStructure()
     {
         if (MouseStructure == null) return;
-        var occupiedTiles = MouseStructure.GetOccupiedTiles();
-
-        // Check if structure is on water
-        if (!MouseStructure.PlaceableOnWater)
-        {
-            var gameMap = ServiceManager.GetService<GameMap>();
-            foreach (var tile in occupiedTiles)
-                if (gameMap.GetTileType(tile).IsWater())
-                    return;
-        }
-
-        // Check if the structure will overlap with any existing structures
-        if (_entities.Keys.Where(entityType => entityType.BaseType == typeof(StructureBase)).Any(entityType =>
-                _entities[entityType]
-                    .Any(structure => occupiedTiles.Intersect(structure.GetOccupiedTiles()).Any())))
-            return;
+        if (!MouseStructure.ValidPlacement(ServiceManager.GetService<GameMap>())) return;
 
         // If all checks pass, add the structure to the main list and remove it from the mouse
         AddEntity(MouseStructure);

@@ -1,6 +1,7 @@
 using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Data.ECS.Entities;
+using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
 using IslandGen.Data.Textures;
 using IslandGen.Extensions;
@@ -41,10 +42,8 @@ public class GameMap
 
     [JsonIgnore] private readonly Rectangle _baseIslandArea =
         new(MapBuffer, MapBuffer, MapSize - MapBuffer * 2, MapSize - MapBuffer * 2);
-
     [JsonIgnore] private readonly RenderTexturePro _mapTexture =
         new(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
-
     [JsonProperty] private readonly TileType[,] _tileMap;
 
     /// <summary>
@@ -413,6 +412,9 @@ public class GameMap
         PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
         PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
 
+        // Place wreckage
+        PlaceWreckage();
+
         // Place trees
         PlaceTrees();
     }
@@ -462,12 +464,14 @@ public class GameMap
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var rnd = ServiceManager.GetService<Random>();
+        var wreckageTiles = gameLogic.GetEntityList<Wreckage>()[0].GetOccupiedTiles();
 
         for (var mapX = 0; mapX < MapSize; mapX++)
         for (var mapY = 0; mapY < MapSize; mapY++)
         {
             var treeBaseY = mapY + 1;
             if (treeBaseY >= MapSize) continue;
+            if (wreckageTiles.Contains((mapX, mapY)) || wreckageTiles.Contains((mapX, treeBaseY))) continue;
 
             switch (_tileMap[mapX, treeBaseY])
             {
@@ -493,6 +497,25 @@ public class GameMap
     }
 
     /// <summary>
+    ///     Places ship wreckage on the game map
+    /// </summary>
+    private void PlaceWreckage()
+    {
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+        var rnd = ServiceManager.GetService<Random>();
+        var wreckage = new Wreckage();
+
+        for (var attempt = 0; attempt < MapSize * 10; attempt++)
+        {
+            wreckage.MapPosition = (rnd.Next(MapBuffer), rnd.Next(MapBuffer, MapSize - MapBuffer));
+            if (!wreckage.ValidPlacement(this)) continue;
+
+            gameLogic.AddEntity(wreckage);
+            break;
+        }
+    }
+
+    /// <summary>
     ///     Randomly generates a river that starts on one side of the map and meanders until it hits a map edge
     /// </summary>
     private void RiverGenerator()
@@ -509,21 +532,16 @@ public class GameMap
             _ => Vector2.One
         };
         var riverCurrentTile = riverStartTile;
-        var attemptCounter = 0;
 
         // Remove direction the river started from list of directions, this prevents the river from flowing backwards
         directionsArray = directionsArray.Where(val => val != riverStartDirection).ToArray();
 
         // Continuously place river segments until we hit the map edge again
-        while (true)
+        for (var attempt = 0; attempt < MapSize * 10; attempt++)
         {
             var tilesPendingUpdate = new List<Vector2>();
             var riverDirection = directionsArray[rnd.Next(directionsArray.Length)];
             var flowDistance = rnd.Next(1, MapSize / 25);
-            attemptCounter++;
-
-            // If river generation has not found a map edge after a large number of iterations, return now to stop
-            if (attemptCounter > MapSize * 10) return;
 
             // Add tiles to list of tiles to be converted to river tiles
             var lastTile = riverCurrentTile;

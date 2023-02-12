@@ -1,4 +1,5 @@
 using IslandGen.Services;
+using Raylib_CsLo;
 
 namespace IslandGen.Data.ECS.Entities.Structures;
 
@@ -9,6 +10,7 @@ public class Shelter : StructureBase
     /// </summary>
     public Shelter()
     {
+        MiniMapColor = Raylib.BROWN;
         PlaceableOnWater = false;
         ReadableName = "Shelter";
         Size = (2, 2);

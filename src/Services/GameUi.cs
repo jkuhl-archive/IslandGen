@@ -79,17 +79,29 @@ public class GameUi
         // Draw selected entity menu
         if (_selectedEntityString != null) DrawPopUp(_selectedEntityString, SelectedEntityMenuArea);
 
-        // Render map to minimap texture
+        // Start minimap texture rendering
         Raylib.BeginTextureMode(_miniMapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
+
+        // Render map to minimap texture
         for (var mapX = 0; mapX < gameMap.GetMapSize(); mapX++)
         for (var mapY = 0; mapY < gameMap.GetMapSize(); mapY++)
             Raylib.DrawPixelV(new Vector2(mapX, mapY), gameMap.GetTileType((mapX, mapY)).GetTileColor());
 
-        // Render entities to minimap texture
-        foreach (var entity in gameLogic.GetEntityList<Colonist>())
-            Raylib.DrawPixelV(new Vector2(entity.MapPosition.Item1, entity.MapPosition.Item2), Raylib.BLACK);
+        // Render structures to minimap texture
+        foreach (var structure in gameLogic.GetEntityBaseTypeList<StructureBase>())
+        foreach (var tile in structure.GetOccupiedTiles())
+            Raylib.DrawPixelV(new Vector2(tile.Item1, tile.Item2), structure.MiniMapColor);
+
+        // Render colonists to minimap texture
+        foreach (var colonist in gameLogic.GetEntityList<Colonist>())
+            Raylib.DrawPixelV(new Vector2(colonist.MapPosition.Item1, colonist.MapPosition.Item2),
+                colonist.MiniMapColor);
+
+        // Draw box on minimap texture that represents the area of the map currently visible
         Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapArea(), 1, Raylib.RED);
+
+        // End minimap texture rendering
         Raylib.EndTextureMode();
 
         // Draw sidebar backdrop
