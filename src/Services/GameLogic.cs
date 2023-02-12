@@ -86,11 +86,14 @@ public class GameLogic
     /// <summary>
     ///     Gets a list of all entities
     /// </summary>
+    /// <param name="reverse"> Reverses the list before returning it </param>
     /// <returns> List containing all active entities </returns>
-    public List<EntityBase> GetAllEntities()
+    public List<EntityBase> GetAllEntities(bool reverse = false)
     {
         var allEntities = new List<EntityBase>();
         foreach (var entityList in _entities.Values) allEntities.AddRange(entityList);
+
+        if (reverse) allEntities.Reverse();
 
         return allEntities;
     }

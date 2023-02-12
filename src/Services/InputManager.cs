@@ -38,7 +38,7 @@ public class InputManager
                 gameLogic.SelectedEntity = null;
 
                 // Attempt to select entity under mouse cursor
-                foreach (var entity in gameLogic.GetAllEntities().Where(entity =>
+                foreach (var entity in gameLogic.GetAllEntities(true).Where(entity =>
                              entity.GetOccupiedTiles().Any(occupiedTile => occupiedTile == gameMap.GetMapMouseTile())))
                 {
                     gameLogic.SelectedEntity = entity;
