@@ -12,11 +12,11 @@ public class GameLogic
     private const int StartYear = 1600;
     private const int StartMonth = 1;
     private const int StartDay = 1;
-
     [JsonIgnore] public static readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
     [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities = new();
     [JsonProperty] private float _updateTimer;
     [JsonIgnore] public EntityBase? SelectedEntity;
+    [JsonProperty] public bool GamePaused { get; private set; }
     [JsonIgnore] public StructureBase? MouseStructure { get; private set; }
     [JsonProperty] public DateTime CurrentDateTime { get; private set; } = StartDateTime;
     [JsonProperty] public GameSpeed GameSpeed { get; private set; } = GameSpeed.Normal;
@@ -30,24 +30,14 @@ public class GameLogic
             entity.Draw();
 
         if (SelectedEntity != null)
-            Raylib.DrawRectangleLinesEx(SelectedEntity.GetMapSpaceRectangle(), 2, Colors.TransparentGray);
+            Raylib.DrawRectangleLinesEx(SelectedEntity.GetMapSpaceRectangle(), 1, Colors.Selected);
         MouseStructure?.Draw();
     }
 
     public void Update()
     {
         // Update objects that rely on in game time passage
-        _updateTimer += Raylib.GetFrameTime();
-        if (_updateTimer >= 1 * GameSpeed.GetSpeedMultiplier())
-        {
-            _updateTimer = 0;
-            CurrentDateTime = CurrentDateTime.AddHours(1);
-            ServiceManager.GetService<GameMap>().Update();
-
-            foreach (var entityList in _entities.Values)
-            foreach (var entity in entityList)
-                entity.Update();
-        }
+        UpdateGameObjects();
 
         // Update mouse structure position to match mouse cursor position 
         if (MouseStructure != null)
@@ -145,5 +135,39 @@ public class GameLogic
     {
         SelectedEntity = null;
         MouseStructure = structure;
+    }
+
+    /// <summary>
+    ///     Toggles pausing the game
+    /// </summary>
+    public void ToggleGamePaused()
+    {
+        GamePaused = !GamePaused;
+    }
+
+    /// <summary>
+    ///     Updates game objects that rely on the in game passage of time
+    /// </summary>
+    private void UpdateGameObjects()
+    {
+        _updateTimer += Raylib.GetFrameTime();
+        if (_updateTimer >= 1 * GameSpeed.GetSpeedMultiplier())
+        {
+            _updateTimer = 0;
+
+            // If game is paused don't update anything
+            if (GamePaused) return;
+
+            // Advance in game clock
+            CurrentDateTime = CurrentDateTime.AddHours(1);
+
+            // Update game map
+            ServiceManager.GetService<GameMap>().Update();
+
+            // Update entities
+            foreach (var entityList in _entities.Values)
+            foreach (var entity in entityList)
+                entity.Update();
+        }
     }
 }

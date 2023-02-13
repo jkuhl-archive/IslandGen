@@ -7,9 +7,14 @@ public class InputManager
 {
     public void Update()
     {
+        if (ServiceManager.GetService<GameSettingsUi>().SettingsMenuActive) return;
+
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameMap = ServiceManager.GetService<GameMap>();
         var gameUi = ServiceManager.GetService<GameUi>();
+
+        // Pause game
+        if (Raylib.IsKeyReleased(KeyboardKey.KEY_SPACE)) gameLogic.ToggleGamePaused();
 
         // Camera controls
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_UP)) gameLogic.GameCamera.ZoomOut();
@@ -23,7 +28,8 @@ public class InputManager
         if (
             !gameUi.SidebarArea.PointInsideRectangle(Raylib.GetMousePosition()) &&
             !gameUi.CalendarArea.PointInsideRectangle(Raylib.GetMousePosition()) &&
-            !gameUi.SelectedEntityMenuArea.PointInsideRectangle(Raylib.GetMousePosition())
+            !(gameLogic.SelectedEntity != null &&
+              gameUi.SelectedEntityMenuArea.PointInsideRectangle(Raylib.GetMousePosition()))
         )
             if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
             {

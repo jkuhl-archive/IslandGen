@@ -18,7 +18,16 @@ public class StateManager
         TypeNameHandling = TypeNameHandling.All
     };
 
-    public GameState GameState = GameState.MainMenu;
+    public GameState GameState { get; private set; } = GameState.MainMenu;
+
+    /// <summary>
+    ///     Sets the game state
+    /// </summary>
+    /// <param name="gameState"> GameState that we want to set the game to </param>
+    public void SetGameState(GameState gameState)
+    {
+        GameState = gameState;
+    }
 
     /// <summary>
     ///     Loads the saved game
@@ -36,7 +45,7 @@ public class StateManager
         ServiceManager.ReplaceService(gameLogic);
         ServiceManager.ReplaceService(gameMap);
 
-        ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
+        ServiceManager.GetService<StateManager>().SetGameState(GameState.InGame);
     }
 
     /// <summary>
@@ -55,7 +64,7 @@ public class StateManager
                 ReadableName = Datasets.MaleNames.RandomItem()
             });
 
-        ServiceManager.GetService<StateManager>().GameState = GameState.InGame;
+        ServiceManager.GetService<StateManager>().SetGameState(GameState.InGame);
     }
 
     /// <summary>

@@ -28,6 +28,8 @@ public class GameUi
     private const int SidebarWidthPaddingSegments = 2;
     private const int SidebarHeightPaddingSegments = 3;
 
+    private const string PausedString = "Paused";
+
     private readonly List<Button> _buttonsList;
     private readonly RenderTexturePro _miniMapTexture;
 
@@ -50,12 +52,9 @@ public class GameUi
             new("Load Island", StateManager.LoadGame),
             new("New Island", StateManager.NewGame),
             new("Change Speed", () => ServiceManager.GetService<GameLogic>().ChangeSpeed()),
-            new("Debug Mode",
-                () => ServiceManager.GetService<GameSettings>().DebugMode =
-                    !ServiceManager.GetService<GameSettings>().DebugMode),
-            new("Fullscreen", Raylib.ToggleFullscreen),
             new("New Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
-            new("Main Menu", ReturnToMainMenu)
+            new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
+            new("Main Menu", () => ServiceManager.GetService<StateManager>().SetGameState(GameState.MainMenu))
         };
 
         _calendarString = string.Empty;
@@ -126,6 +125,9 @@ public class GameUi
         // Set calendar string
         _calendarString = $"{gameLogic.CurrentDateTime.ToLongDateString()}\n" +
                           $"{gameLogic.CurrentDateTime.ToLongTimeString()}";
+
+        // Append paused string if game is paused
+        if (gameLogic.GamePaused) _calendarString += $" - {PausedString}";
 
         // Set selected entity string
         _selectedEntityString = gameLogic.SelectedEntity?.GetInfoString();
@@ -256,13 +258,5 @@ public class GameUi
         Raylib.DrawTextEx(Raylib.GetFontDefault(), message,
             new Vector2(popupArea.X + padding * 4, popupArea.Y + padding * 4),
             fontSize, fontSpacing, Raylib.WHITE);
-    }
-
-    /// <summary>
-    ///     Unloads the map and returns to the main menu
-    /// </summary>
-    private void ReturnToMainMenu()
-    {
-        ServiceManager.GetService<StateManager>().GameState = GameState.MainMenu;
     }
 }

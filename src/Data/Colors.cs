@@ -4,6 +4,9 @@ namespace IslandGen.Data;
 
 public static class Colors
 {
+    public static readonly Color GridLine = new(0, 0, 0, 40);
+    public static readonly Color Selected = new(0, 0, 0, 100);
+    public static readonly Color SettingsMenuShade = new(0, 0, 0, 80);
     public static readonly Color TileDebug = new(255, 0, 255, 255);
     public static readonly Color TileDirt = new(121, 85, 58, 255);
     public static readonly Color TileLake = new(0, 25, 110, 255);
@@ -14,5 +17,4 @@ public static class Colors
     public static readonly Color TileVegetationDense = new(11, 34, 6, 255);
     public static readonly Color TileVegetationModerate = new(46, 73, 44, 255);
     public static readonly Color TileVegetationSparse = new(66, 96, 64, 255);
-    public static readonly Color TransparentGray = new(0, 0, 0, 40);
 }

@@ -35,7 +35,7 @@ public class MainMenuUi
         {
             new("New Island", StateManager.NewGame),
             new("Load Island", StateManager.LoadGame),
-            new("Fullscreen", Raylib.ToggleFullscreen),
+            new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
             new("Exit Game", Raylib.CloseWindow)
         };
 
@@ -58,7 +58,6 @@ public class MainMenuUi
         Raylib.DrawTextEx(Raylib.GetFontDefault(), _versionString, _versionArea.Start(), _versionFontSize,
             _versionFontSpacing, Raylib.WHITE);
 
-
         foreach (var button in _buttonsList) button.Draw();
     }
 
@@ -68,13 +67,12 @@ public class MainMenuUi
     public void UpdateScaling()
     {
         var scalingManager = ServiceManager.GetService<ScalingManager>();
-        var windowWidthCenter = scalingManager.WindowWidth / 2;
-        var windowHeightCenter = scalingManager.WindowHeight / 2;
         _titleFontSize = scalingManager.FontSize * 8;
         _titleFontSpacing = scalingManager.FontSpacing * 2;
         _versionFontSize = scalingManager.FontSize * 2;
         _versionFontSpacing = scalingManager.FontSpacing;
-
+        var windowWidthCenter = scalingManager.WindowWidth / 2;
+        var windowHeightCenter = scalingManager.WindowHeight / 2;
         var buttonsAreaHeight =
             (ButtonHeight + scalingManager.Padding) * scalingManager.ScaleFactor * _buttonsList.Count -
             scalingManager.Padding;

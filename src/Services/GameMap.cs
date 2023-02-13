@@ -42,8 +42,10 @@ public class GameMap
 
     [JsonIgnore] private readonly Rectangle _baseIslandArea =
         new(MapBuffer, MapBuffer, MapSize - MapBuffer * 2, MapSize - MapBuffer * 2);
+
     [JsonIgnore] private readonly RenderTexturePro _mapTexture =
         new(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
+
     [JsonProperty] private readonly TileType[,] _tileMap;
 
     /// <summary>
@@ -109,13 +111,13 @@ public class GameMap
             for (var mapX = 1; mapX < MapSize; mapX++)
             {
                 var x = mapX * TileTextureSize;
-                Raylib.DrawLine(x, 0, x, _mapTexture.RenderTexture.texture.height, Colors.TransparentGray);
+                Raylib.DrawLine(x, 0, x, _mapTexture.RenderTexture.texture.height, Colors.GridLine);
             }
 
             for (var mapY = 1; mapY < MapSize; mapY++)
             {
                 var y = mapY * TileTextureSize;
-                Raylib.DrawLine(0, y, _mapTexture.RenderTexture.texture.width, y, Colors.TransparentGray);
+                Raylib.DrawLine(0, y, _mapTexture.RenderTexture.texture.width, y, Colors.GridLine);
             }
 
             if (_mapTexture.DestinationRectangle.PointInsideRectangle(GetMapMousePosition()))

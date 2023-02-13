@@ -50,6 +50,7 @@ public class ScalingManager
 
         ServiceManager.GetService<MainMenuUi>().UpdateScaling();
         ServiceManager.GetService<GameUi>().UpdateScaling();
+        ServiceManager.GetService<GameSettingsUi>().UpdateScaling();
     }
 
     /// <summary>

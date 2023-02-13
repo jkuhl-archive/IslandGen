@@ -19,6 +19,7 @@ internal static class Game
 
         // Initialize game services
         ServiceManager.AddService(new GameSettings());
+        ServiceManager.AddService(new GameSettingsUi());
         ServiceManager.AddService(new GameUi());
         ServiceManager.AddService(new InputManager());
         ServiceManager.AddService(new MainMenuUi());
@@ -32,14 +33,15 @@ internal static class Game
             // Update scaling
             ServiceManager.GetService<ScalingManager>().Update();
 
+            // Start drawing
+            Raylib.BeginDrawing();
+            Raylib.ClearBackground(Raylib.BLACK);
+
             switch (ServiceManager.GetService<StateManager>().GameState)
             {
                 case GameState.MainMenu:
                     // Draw Main Menu
-                    Raylib.BeginDrawing();
-                    Raylib.ClearBackground(Raylib.BLACK);
                     ServiceManager.GetService<MainMenuUi>().Draw();
-                    Raylib.EndDrawing();
                     break;
 
                 case GameState.InGame:
@@ -50,13 +52,16 @@ internal static class Game
                     ServiceManager.GetService<GameUi>().Update();
 
                     // Draw Game
-                    Raylib.BeginDrawing();
-                    Raylib.ClearBackground(Raylib.BLACK);
                     ServiceManager.GetService<GameMap>().Draw();
                     ServiceManager.GetService<GameUi>().Draw();
-                    Raylib.EndDrawing();
                     break;
             }
+
+            // Draw settings menu overlay if enabled
+            ServiceManager.GetService<GameSettingsUi>().Draw();
+
+            // End drawing
+            Raylib.EndDrawing();
         }
 
         Raylib.CloseWindow();
