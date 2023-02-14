@@ -98,7 +98,7 @@ public class GameUi
                 colonist.MiniMapColor);
 
         // Draw box on minimap texture that represents the area of the map currently visible
-        Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapArea(), 1, Raylib.RED);
+        Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapTiles(), 1, Raylib.RED);
 
         // End minimap texture rendering
         Raylib.EndTextureMode();
@@ -150,7 +150,8 @@ public class GameUi
                 "\n" +
                 $"Camera Zoom: {gameLogic.GameCamera.Camera.zoom}x\n" +
                 $"Camera Position: {gameLogic.GameCamera.Camera.target}\n" +
-                $"Camera Visible Map Tiles: {gameMap.GetVisibleMapArea().String()}";
+                $"Camera Pan Limits: {gameMap.GetCameraPanLimits()}\n" +
+                $"Camera Visible Map Tiles: {gameMap.GetVisibleMapTiles().String()}";
         }
     }
 

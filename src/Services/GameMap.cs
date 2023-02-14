@@ -72,20 +72,17 @@ public class GameMap
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameSettings = ServiceManager.GetService<GameSettings>();
         var textureManager = ServiceManager.GetService<TextureManager>();
-        var visibleArea = GetVisibleMapArea();
 
-        // Begin rendering map to texture
+        // Begin rendering game map to texture
         Raylib.BeginTextureMode(_mapTexture.RenderTexture);
         Raylib.ClearBackground(Raylib.BLACK);
         Raylib.BeginMode2D(gameLogic.GameCamera.Camera);
 
         // Draw tiles
-        // TODO: This can be optimized to use the visible area as the for loop start and end
+        // TODO: Implement culling to prevent wasted time drawing stuff off screen
         for (var mapX = 0; mapX < MapSize; mapX++)
         for (var mapY = 0; mapY < MapSize; mapY++)
         {
-            if (!visibleArea.PointInsideRectangle(mapX, mapY)) continue;
-
             var currentTile = _tileMap[mapX, mapY];
             if (currentTile.IsAnimated())
             {
@@ -147,6 +144,24 @@ public class GameMap
     public void Update()
     {
         VegetationGrowth();
+    }
+
+    /// <summary>
+    ///     Gets the positions the camera should stop at to prevent panning off the of the game map
+    /// </summary>
+    /// <returns> Tuple containing the maximum positions the camera can pan to </returns>
+    public (int, int) GetCameraPanLimits()
+    {
+        var camera = ServiceManager.GetService<GameLogic>().GameCamera.Camera;
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+        var cameraViewWidth = _mapTexture.RenderTexture.texture.width * camera.zoom * scalingManager.ScaleFactor;
+        var cameraViewHeight = _mapTexture.RenderTexture.texture.height * camera.zoom * scalingManager.ScaleFactor;
+        var mapViewWidth = MapSize * scalingManager.WindowWidth / cameraViewWidth;
+        var mapViewHeight = MapSize * scalingManager.WindowHeight / cameraViewHeight;
+
+        return (
+            (int)((MapSize - mapViewWidth) * TileTextureSize),
+            (int)((MapSize - mapViewHeight) * TileTextureSize));
     }
 
     /// <summary>
@@ -244,16 +259,16 @@ public class GameMap
     }
 
     /// <summary>
-    ///     Determines the area of the map that the camera can currently see
+    ///     Determines the tiles on the map that the camera can currently see
     /// </summary>
-    /// <returns> Rectangle that represents the area of the map that the camera can currently see </returns>
-    public Rectangle GetVisibleMapArea()
+    /// <returns> Rectangle that represents the tiles on the map that the camera can currently see </returns>
+    public Rectangle GetVisibleMapTiles()
     {
         var camera = ServiceManager.GetService<GameLogic>().GameCamera.Camera;
         var scalingManager = ServiceManager.GetService<ScalingManager>();
-
         var cameraViewWidth = _mapTexture.RenderTexture.texture.width * camera.zoom * scalingManager.ScaleFactor;
         var cameraViewHeight = _mapTexture.RenderTexture.texture.height * camera.zoom * scalingManager.ScaleFactor;
+
         var mapViewX = (int)Math.Round(camera.target.X / TileTextureSize);
         var mapViewY = (int)Math.Round(camera.target.Y / TileTextureSize);
         var mapViewWidth = (int)Math.Round(MapSize * scalingManager.WindowWidth / cameraViewWidth);

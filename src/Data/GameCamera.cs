@@ -1,3 +1,4 @@
+using IslandGen.Services;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
@@ -18,8 +19,10 @@ public class GameCamera
     /// </summary>
     public void PanUp()
     {
-        var limit = -PanIncrement * 2;
-        if (Camera.target.Y - PanIncrement >= limit) Camera.target.Y -= PanIncrement;
+        const int panLimit = 0;
+
+        Camera.target.Y -= PanIncrement;
+        if (Camera.target.Y < panLimit) Camera.target.Y = panLimit;
     }
 
     /// <summary>
@@ -27,8 +30,11 @@ public class GameCamera
     /// </summary>
     public void PanDown()
     {
-        // TODO: Add auto calculated limit
+        var gameMap = ServiceManager.GetService<GameMap>();
+        var panLimit = gameMap.GetCameraPanLimits().Item2;
+
         Camera.target.Y += PanIncrement;
+        if (Camera.target.Y > panLimit) Camera.target.Y = panLimit;
     }
 
     /// <summary>
@@ -36,8 +42,10 @@ public class GameCamera
     /// </summary>
     public void PanLeft()
     {
-        var limit = -PanIncrement * 2;
-        if (Camera.target.X - PanIncrement >= limit) Camera.target.X -= PanIncrement;
+        const int panLimit = 0;
+
+        Camera.target.X -= PanIncrement;
+        if (Camera.target.X < panLimit) Camera.target.X = panLimit;
     }
 
     /// <summary>
@@ -45,8 +53,11 @@ public class GameCamera
     /// </summary>
     public void PanRight()
     {
-        // TODO: Add auto calculated limit
+        var gameMap = ServiceManager.GetService<GameMap>();
+        var panLimit = gameMap.GetCameraPanLimits().Item1;
+
         Camera.target.X += PanIncrement;
+        if (Camera.target.X > panLimit) Camera.target.X = panLimit;
     }
 
     /// <summary>
@@ -55,7 +66,6 @@ public class GameCamera
     public void ZoomIn()
     {
         Camera.zoom = (float)Math.Round(Camera.zoom + ZoomIncrement, 2);
-
         if (Camera.zoom > MaxZoom) Camera.zoom = MaxZoom;
     }
 
@@ -64,8 +74,19 @@ public class GameCamera
     /// </summary>
     public void ZoomOut()
     {
-        Camera.zoom = (float)Math.Round(Camera.zoom - ZoomIncrement, 2);
+        var previousZoom = Camera.zoom;
 
+        Camera.zoom = (float)Math.Round(Camera.zoom - ZoomIncrement, 2);
         if (Camera.zoom < MinZoom) Camera.zoom = MinZoom;
+
+        // Adjust camera target to fit in pan limits, this prevents zooming out into the space outside the game map
+        if (Math.Abs(Camera.zoom - previousZoom) > 0)
+        {
+            var gameMap = ServiceManager.GetService<GameMap>();
+            var panLimits = gameMap.GetCameraPanLimits();
+
+            if (Camera.target.X > panLimits.Item1) Camera.target.X = panLimits.Item1;
+            if (Camera.target.Y > panLimits.Item2) Camera.target.Y = panLimits.Item2;
+        }
     }
 }
