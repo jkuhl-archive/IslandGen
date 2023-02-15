@@ -1,3 +1,4 @@
+using System.Numerics;
 using IslandGen.Extensions;
 using Raylib_CsLo;
 
@@ -5,51 +6,138 @@ namespace IslandGen.Services;
 
 public class InputManager
 {
+    private const float MouseCameraPanSpeed = 20;
+    private const int MouseCameraPanThreshold = 5;
+
     public void Update()
     {
         if (ServiceManager.GetService<GameSettingsUi>().SettingsMenuActive) return;
 
+        KeyboardInputs();
+        MouseCameraInputs();
+        MouseClickInputs();
+    }
+
+    /// <summary>
+    ///     Gets the mouse position within the game window.
+    ///     Holding a mouse button down will cause Raylib's built in GetMousePosition() method
+    ///     to return strange values if the mouse cursor leaves the game window.
+    ///     This method always returns a value within the game window even when the cursor is not in the game window.
+    /// </summary>
+    /// <returns> Mouse position as a Vector2 </returns>
+    public static Vector2 GetMousePosition()
+    {
+        var mousePosition = Raylib.GetMousePosition();
+        var windowWidth = Raylib.GetRenderWidth();
+        var windowHeight = Raylib.GetRenderHeight();
+
+        if (mousePosition.X < 0)
+            mousePosition.X = 0;
+        else if (mousePosition.X > windowWidth) mousePosition.X = windowWidth;
+
+        if (mousePosition.Y < 0)
+            mousePosition.Y = 0;
+        else if (mousePosition.Y > windowHeight) mousePosition.Y = windowHeight;
+
+        return mousePosition;
+    }
+
+    /// <summary>
+    ///     Processes keyboard input events
+    /// </summary>
+    private void KeyboardInputs()
+    {
         var gameLogic = ServiceManager.GetService<GameLogic>();
-        var gameMap = ServiceManager.GetService<GameMap>();
-        var gameUi = ServiceManager.GetService<GameUi>();
 
         // Pause game
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_SPACE)) gameLogic.ToggleGamePaused();
 
-        // Camera controls
+        // Camera keyboard controls
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_UP)) gameLogic.GameCamera.ZoomOut();
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_PAGE_DOWN)) gameLogic.GameCamera.ZoomIn();
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_UP)) gameLogic.GameCamera.PanUp();
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_DOWN)) gameLogic.GameCamera.PanDown();
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_LEFT)) gameLogic.GameCamera.PanLeft();
         if (Raylib.IsKeyReleased(KeyboardKey.KEY_RIGHT)) gameLogic.GameCamera.PanRight();
+    }
 
-        // Process mouse inputs if we are not mousing over the sidebar
+    /// <summary>
+    ///     Processes camera mouse controls
+    /// </summary>
+    private void MouseCameraInputs()
+    {
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+        var mousePosition = GetMousePosition();
+        var mouseWheelState = Raylib.GetMouseWheelMove();
+        var horizontalThreshold = scalingManager.WindowWidth / MouseCameraPanThreshold;
+        var verticalThreshold = scalingManager.WindowHeight / MouseCameraPanThreshold;
+
+        // Right mouse button held
+        if (Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_RIGHT))
+        {
+            // Handle horizontal panning if mouse cursor is close to window left or right edges
+            if (mousePosition.X <= horizontalThreshold)
+                gameLogic.GameCamera.PanLeft(MouseCameraPanSpeed);
+            else if (mousePosition.X >= scalingManager.WindowWidth - horizontalThreshold)
+                gameLogic.GameCamera.PanRight(MouseCameraPanSpeed);
+
+            // Handle vertical panning if mouse cursor is close to window top or bottom edges
+            if (mousePosition.Y <= verticalThreshold)
+                gameLogic.GameCamera.PanUp(MouseCameraPanSpeed);
+            else if (mousePosition.Y >= scalingManager.WindowHeight - verticalThreshold)
+                gameLogic.GameCamera.PanDown(MouseCameraPanSpeed);
+        }
+
+        // If mouse wheel has been scrolled, adjust camera zoom
+        switch (mouseWheelState)
+        {
+            case 1:
+                gameLogic.GameCamera.ZoomIn();
+                break;
+            case -1:
+                gameLogic.GameCamera.ZoomOut();
+                break;
+        }
+    }
+
+    /// <summary>
+    ///     Processes mouse click input events
+    /// </summary>
+    private void MouseClickInputs()
+    {
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+        var gameMap = ServiceManager.GetService<GameMap>();
+        var gameUi = ServiceManager.GetService<GameUi>();
+        var mousePosition = GetMousePosition();
+
+        // Return if mouse position is over a UI element
         if (
-            !gameUi.SidebarArea.PointInsideRectangle(Raylib.GetMousePosition()) &&
-            !gameUi.CalendarArea.PointInsideRectangle(Raylib.GetMousePosition()) &&
-            !(gameLogic.SelectedEntity != null &&
-              gameUi.SelectedEntityMenuArea.PointInsideRectangle(Raylib.GetMousePosition()))
-        )
-            if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
+            gameUi.SidebarArea.PointInsideRectangle(mousePosition) ||
+            gameUi.CalendarArea.PointInsideRectangle(mousePosition) ||
+            (gameLogic.SelectedEntity != null && gameUi.SelectedEntityMenuArea.PointInsideRectangle(mousePosition))
+        ) return;
+
+        // Left mouse click
+        if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
+        {
+            // Attempt to place the structure attached to the mouse
+            if (gameLogic.MouseStructure != null)
             {
-                // Attempt to place the structure attached to the mouse
-                if (gameLogic.MouseStructure != null)
-                {
-                    gameLogic.PlaceMouseStructure();
-                    return;
-                }
-
-                // Unset selected entity
-                gameLogic.SelectedEntity = null;
-
-                // Attempt to select entity under mouse cursor
-                foreach (var entity in gameLogic.GetAllEntities(true).Where(entity =>
-                             entity.GetOccupiedTiles().Any(occupiedTile => occupiedTile == gameMap.GetMapMouseTile())))
-                {
-                    gameLogic.SelectedEntity = entity;
-                    break;
-                }
+                gameLogic.PlaceMouseStructure();
+                return;
             }
+
+            // Unset selected entity
+            gameLogic.SelectedEntity = null;
+
+            // Attempt to select entity under mouse cursor
+            foreach (var entity in gameLogic.GetAllEntities(true).Where(entity =>
+                         entity.GetOccupiedTiles().Any(occupiedTile => occupiedTile == gameMap.GetMapMouseTile())))
+            {
+                gameLogic.SelectedEntity = entity;
+                break;
+            }
+        }
     }
 }

@@ -181,7 +181,7 @@ public class GameMap
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var scalingManager = ServiceManager.GetService<ScalingManager>();
-        var mousePosition = Raylib.GetMousePosition() / scalingManager.ScaleFactor;
+        var mousePosition = InputManager.GetMousePosition() / scalingManager.ScaleFactor;
         return Raylib.GetScreenToWorld2D(mousePosition, gameLogic.GameCamera.Camera);
     }
 

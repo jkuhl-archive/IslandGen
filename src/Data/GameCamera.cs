@@ -9,54 +9,58 @@ public class GameCamera
     private const float DefaultZoom = 1.0f;
     private const float MinZoom = 0.4f;
     private const float MaxZoom = 2.0f;
-    private const float ZoomIncrement = 0.1f;
-    private const float PanIncrement = 100.0f;
+    private const float ZoomAmount = 0.1f;
+    private const float DefaultPanAmount = 100.0f;
 
     [JsonProperty] public Camera2D Camera = new() { zoom = DefaultZoom };
 
     /// <summary>
     ///     Pans the camera up
+    ///     <param name="amount"> Distance the camera should be panned </param>
     /// </summary>
-    public void PanUp()
+    public void PanUp(float amount = DefaultPanAmount)
     {
         const int panLimit = 0;
 
-        Camera.target.Y -= PanIncrement;
+        Camera.target.Y -= amount;
         if (Camera.target.Y < panLimit) Camera.target.Y = panLimit;
     }
 
     /// <summary>
     ///     Pans the camera down
+    ///     <param name="amount"> Distance the camera should be panned </param>
     /// </summary>
-    public void PanDown()
+    public void PanDown(float amount = DefaultPanAmount)
     {
         var gameMap = ServiceManager.GetService<GameMap>();
         var panLimit = gameMap.GetCameraPanLimits().Item2;
 
-        Camera.target.Y += PanIncrement;
+        Camera.target.Y += amount;
         if (Camera.target.Y > panLimit) Camera.target.Y = panLimit;
     }
 
     /// <summary>
     ///     Pans the camera left
+    ///     <param name="amount"> Distance the camera should be panned </param>
     /// </summary>
-    public void PanLeft()
+    public void PanLeft(float amount = DefaultPanAmount)
     {
         const int panLimit = 0;
 
-        Camera.target.X -= PanIncrement;
+        Camera.target.X -= amount;
         if (Camera.target.X < panLimit) Camera.target.X = panLimit;
     }
 
     /// <summary>
     ///     Pans the camera right
+    ///     <param name="amount"> Distance the camera should be panned </param>
     /// </summary>
-    public void PanRight()
+    public void PanRight(float amount = DefaultPanAmount)
     {
         var gameMap = ServiceManager.GetService<GameMap>();
         var panLimit = gameMap.GetCameraPanLimits().Item1;
 
-        Camera.target.X += PanIncrement;
+        Camera.target.X += amount;
         if (Camera.target.X > panLimit) Camera.target.X = panLimit;
     }
 
@@ -65,7 +69,7 @@ public class GameCamera
     /// </summary>
     public void ZoomIn()
     {
-        Camera.zoom = (float)Math.Round(Camera.zoom + ZoomIncrement, 2);
+        Camera.zoom = (float)Math.Round(Camera.zoom + ZoomAmount, 2);
         if (Camera.zoom > MaxZoom) Camera.zoom = MaxZoom;
     }
 
@@ -76,7 +80,7 @@ public class GameCamera
     {
         var previousZoom = Camera.zoom;
 
-        Camera.zoom = (float)Math.Round(Camera.zoom - ZoomIncrement, 2);
+        Camera.zoom = (float)Math.Round(Camera.zoom - ZoomAmount, 2);
         if (Camera.zoom < MinZoom) Camera.zoom = MinZoom;
 
         // Adjust camera target to fit in pan limits, this prevents zooming out into the space outside the game map

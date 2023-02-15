@@ -46,8 +46,6 @@ public class GameUi
     {
         _buttonsList = new List<Button>
         {
-            new("Zoom In", () => ServiceManager.GetService<GameLogic>().GameCamera.ZoomIn()),
-            new("Zoom Out", () => ServiceManager.GetService<GameLogic>().GameCamera.ZoomOut()),
             new("Save Island", StateManager.SaveGame),
             new("Load Island", StateManager.LoadGame),
             new("New Island", StateManager.NewGame),
@@ -144,7 +142,7 @@ public class GameUi
                 $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
                 $"Game Speed: {gameLogic.GameSpeed} ({gameLogic.GameSpeed.GetSpeedMultiplier()}x)\n" +
                 "\n" +
-                $"Mouse Window Position: {Raylib.GetMousePosition()}\n" +
+                $"Mouse Window Position: {InputManager.GetMousePosition()}\n" +
                 $"Mouse Map Position: {gameMap.GetMapMousePosition()}\n" +
                 $"Mouse Highlighted Tile: {gameMap.GetMapMouseTile()}\n" +
                 "\n" +
