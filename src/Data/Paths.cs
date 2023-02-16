@@ -1,10 +1,8 @@
-using System.Reflection;
-
 namespace IslandGen.Data;
 
 public static class Paths
 {
-    public static readonly string GameDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+    public static readonly string GameDirectory = Path.GetDirectoryName(AppContext.BaseDirectory)!;
     public static readonly string AssetsDirectory = Path.Join(GameDirectory, "assets");
 
     // Game save file paths
