@@ -1,9 +1,9 @@
-using IslandGen.Data.ECS.Components;
+using IslandGen.Objects.ECS.Components;
 using IslandGen.Services;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
-namespace IslandGen.Data.ECS;
+namespace IslandGen.Objects.ECS;
 
 public abstract class EntityBase
 {

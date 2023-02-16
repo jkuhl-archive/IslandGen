@@ -1,6 +1,6 @@
 using IslandGen.Data;
 using IslandGen.Extensions;
-using IslandGen.UI;
+using IslandGen.Objects.UI;
 using IslandGen.Utils;
 using Raylib_CsLo;
 
@@ -144,7 +144,7 @@ public class GameSettingsUi
     /// <summary>
     ///     Toggles debug mode
     /// </summary>
-    public void ToggleDebugMode()
+    private void ToggleDebugMode()
     {
         var gameSettings = ServiceManager.GetService<GameSettings>();
 
@@ -155,7 +155,7 @@ public class GameSettingsUi
     /// <summary>
     ///     Toggles fullscreen / windowed mode
     /// </summary>
-    public void ToggleFullscreen()
+    private void ToggleFullscreen()
     {
         var gameSettings = ServiceManager.GetService<GameSettings>();
 

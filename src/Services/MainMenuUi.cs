@@ -1,7 +1,8 @@
 using System.Numerics;
+using IslandGen.Data;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
-using IslandGen.UI;
+using IslandGen.Objects.UI;
 using IslandGen.Utils;
 using Raylib_CsLo;
 
@@ -46,7 +47,7 @@ public class MainMenuUi
 
     public void Draw()
     {
-        var texture = ServiceManager.GetService<TextureManager>().Textures[TileType.Dirt.GetTileTextureName()];
+        var texture = Assets.Textures[TileType.Dirt.GetTileTextureName()];
         Raylib.DrawTextureTiled(texture, new Rectangle(0, 0, texture.width, texture.height), _backgroundArea,
             Vector2.Zero, 0, BackgroundTileScale, Raylib.WHITE);
 

@@ -1,8 +1,9 @@
+using IslandGen.Data;
 using IslandGen.Data.Enum;
 using IslandGen.Services;
 using Raylib_CsLo;
 
-namespace IslandGen.Data.ECS.Entities.Structures;
+namespace IslandGen.Objects.ECS.Entities.Structures;
 
 public class Wreckage : StructureBase
 {
@@ -15,7 +16,7 @@ public class Wreckage : StructureBase
         PlaceableOnWater = true;
         ReadableName = "Ship Wreckage";
         Size = (5, 4);
-        Texture = ServiceManager.GetService<TextureManager>().Textures["wreckage"];
+        Texture = Assets.Textures["wreckage"];
     }
 
     public (int, int) GetShipExitTile()

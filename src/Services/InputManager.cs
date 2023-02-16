@@ -129,14 +129,14 @@ public class InputManager
                 return;
             }
 
-            // Unset selected entity
-            gameLogic.SelectedEntity = null;
+            // Unset previously selected entity
+            gameLogic.UnsetSelectedEntity();
 
             // Attempt to select entity under mouse cursor
             foreach (var entity in gameLogic.GetAllEntities(true).Where(entity =>
                          entity.GetOccupiedTiles().Any(occupiedTile => occupiedTile == gameMap.GetMapMouseTile())))
             {
-                gameLogic.SelectedEntity = entity;
+                gameLogic.SetSelectedEntity(entity);
                 break;
             }
         }

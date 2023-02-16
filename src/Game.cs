@@ -1,4 +1,5 @@
-﻿using IslandGen.Data.Enum;
+﻿using IslandGen.Data;
+using IslandGen.Data.Enum;
 using IslandGen.Services;
 using IslandGen.Utils;
 using Raylib_CsLo;
@@ -15,6 +16,7 @@ internal static class Game
     {
         // Initialize game window
         Raylib.InitWindow(DefaultWindowWidth, DefaultWindowHeight, WindowName);
+        Raylib.InitAudioDevice();
 
         // Load game settings
         ServiceManager.AddService(SaveUtils.LoadSettings());
@@ -28,7 +30,6 @@ internal static class Game
         ServiceManager.AddService(new Random());
         ServiceManager.AddService(new ScalingManager());
         ServiceManager.AddService(new StateManager());
-        ServiceManager.AddService(new TextureManager());
 
         while (!Raylib.WindowShouldClose())
         {
@@ -48,8 +49,8 @@ internal static class Game
 
                 case GameState.InGame:
                     // Update Game
+                    Assets.Update();
                     ServiceManager.GetService<InputManager>().Update();
-                    ServiceManager.GetService<TextureManager>().Update();
                     ServiceManager.GetService<GameLogic>().Update();
                     ServiceManager.GetService<GameUi>().Update();
 
@@ -66,6 +67,8 @@ internal static class Game
             Raylib.EndDrawing();
         }
 
+        Assets.UnloadAssets();
+        Raylib.CloseAudioDevice();
         Raylib.CloseWindow();
     }
 }

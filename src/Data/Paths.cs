@@ -15,4 +15,7 @@ public static class Paths
     public static readonly string TexturesDirectory = Path.Join(AssetsDirectory, "textures");
     public static readonly string AnimatedTexturesDirectory = Path.Join(TexturesDirectory, "animated");
     public static readonly string StaticTexturesDirectory = Path.Join(TexturesDirectory, "static");
+
+    // Audio paths
+    public static readonly string SoundsDirectory = Path.Join(AssetsDirectory, "sounds");
 }

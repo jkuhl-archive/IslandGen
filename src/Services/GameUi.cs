@@ -1,10 +1,10 @@
 using System.Numerics;
-using IslandGen.Data.ECS.Entities.Creatures;
-using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
-using IslandGen.Data.Textures;
 using IslandGen.Extensions;
-using IslandGen.UI;
+using IslandGen.Objects.ECS.Entities.Creatures;
+using IslandGen.Objects.ECS.Entities.Structures;
+using IslandGen.Objects.Textures;
+using IslandGen.Objects.UI;
 using IslandGen.Utils;
 using Raylib_CsLo;
 

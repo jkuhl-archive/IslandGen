@@ -1,4 +1,4 @@
-namespace IslandGen.Data.ECS;
+namespace IslandGen.Objects.ECS;
 
 public interface IComponent
 {

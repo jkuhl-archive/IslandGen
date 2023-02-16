@@ -2,7 +2,7 @@ using System.Numerics;
 using IslandGen.Services;
 using Raylib_CsLo;
 
-namespace IslandGen.Data.Textures;
+namespace IslandGen.Objects.Textures;
 
 public class AnimatedTexture
 {
@@ -51,5 +51,13 @@ public class AnimatedTexture
 
             _textureRectangle.X = _currentFrame * _frameWidth;
         }
+    }
+
+    /// <summary>
+    ///     Unloads texture data from memory
+    /// </summary>
+    public void Unload()
+    {
+        Raylib.UnloadTexture(_texture);
     }
 }

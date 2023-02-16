@@ -1,6 +1,6 @@
-using IslandGen.Services;
+using IslandGen.Data;
 
-namespace IslandGen.Data.ECS.Entities;
+namespace IslandGen.Objects.ECS.Entities;
 
 public class Tree : EntityBase
 {
@@ -11,6 +11,6 @@ public class Tree : EntityBase
     {
         ReadableName = "Tree";
         Size = (1, 2);
-        Texture = ServiceManager.GetService<TextureManager>().Textures["tree"];
+        Texture = Assets.Textures["tree"];
     }
 }

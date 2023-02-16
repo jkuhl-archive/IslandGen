@@ -2,7 +2,7 @@ using IslandGen.Data.Enum;
 using IslandGen.Services;
 using Newtonsoft.Json;
 
-namespace IslandGen.Data.ECS.Entities.Structures;
+namespace IslandGen.Objects.ECS.Entities.Structures;
 
 public class StructureBase : EntityBase
 {

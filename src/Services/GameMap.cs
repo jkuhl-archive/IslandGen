@@ -1,10 +1,10 @@
 using System.Numerics;
 using IslandGen.Data;
-using IslandGen.Data.ECS.Entities;
-using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
-using IslandGen.Data.Textures;
 using IslandGen.Extensions;
+using IslandGen.Objects.ECS.Entities;
+using IslandGen.Objects.ECS.Entities.Structures;
+using IslandGen.Objects.Textures;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
@@ -71,7 +71,6 @@ public class GameMap
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameSettings = ServiceManager.GetService<GameSettings>();
-        var textureManager = ServiceManager.GetService<TextureManager>();
 
         // Begin rendering game map to texture
         Raylib.BeginTextureMode(_mapTexture.RenderTexture);
@@ -86,12 +85,12 @@ public class GameMap
             var currentTile = _tileMap[mapX, mapY];
             if (currentTile.IsAnimated())
             {
-                var texture = textureManager.AnimatedTextures[currentTile.GetTileTextureName()];
+                var texture = Assets.AnimatedTextures[currentTile.GetTileTextureName()];
                 texture.Draw(GetTileCoordinates((mapX, mapY)));
             }
             else
             {
-                var texture = textureManager.Textures[currentTile.GetTileTextureName()];
+                var texture = Assets.Textures[currentTile.GetTileTextureName()];
                 Raylib.DrawTexture(texture, mapX * TileTextureSize, mapY * TileTextureSize, Raylib.WHITE);
             }
         }

@@ -1,8 +1,8 @@
 using IslandGen.Data;
-using IslandGen.Data.ECS.Entities.Creatures;
-using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
+using IslandGen.Objects.ECS.Entities.Creatures;
+using IslandGen.Objects.ECS.Entities.Structures;
 using IslandGen.Services;
 using Newtonsoft.Json;
 

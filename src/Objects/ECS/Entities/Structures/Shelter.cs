@@ -1,7 +1,7 @@
-using IslandGen.Services;
+using IslandGen.Data;
 using Raylib_CsLo;
 
-namespace IslandGen.Data.ECS.Entities.Structures;
+namespace IslandGen.Objects.ECS.Entities.Structures;
 
 public class Shelter : StructureBase
 {
@@ -14,6 +14,6 @@ public class Shelter : StructureBase
         PlaceableOnWater = false;
         ReadableName = "Shelter";
         Size = (2, 2);
-        Texture = ServiceManager.GetService<TextureManager>().Textures["shelter"];
+        Texture = Assets.Textures["shelter"];
     }
 }

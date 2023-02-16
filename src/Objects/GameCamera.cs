@@ -2,7 +2,7 @@ using IslandGen.Services;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
-namespace IslandGen.Data;
+namespace IslandGen.Objects;
 
 public class GameCamera
 {

@@ -1,7 +1,8 @@
 using IslandGen.Data;
-using IslandGen.Data.ECS;
-using IslandGen.Data.ECS.Entities.Structures;
 using IslandGen.Data.Enum;
+using IslandGen.Objects;
+using IslandGen.Objects.ECS;
+using IslandGen.Objects.ECS.Entities.Structures;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
@@ -15,7 +16,7 @@ public class GameLogic
     [JsonIgnore] public static readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
     [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities = new();
     [JsonProperty] private float _updateTimer;
-    [JsonIgnore] public EntityBase? SelectedEntity;
+    [JsonIgnore] public EntityBase? SelectedEntity { get; private set; }
     [JsonProperty] public bool GamePaused { get; private set; }
     [JsonIgnore] public StructureBase? MouseStructure { get; private set; }
     [JsonProperty] public DateTime CurrentDateTime { get; private set; } = StartDateTime;
@@ -136,6 +137,7 @@ public class GameLogic
 
         // If all checks pass, add the structure to the main list and remove it from the mouse
         AddEntity(MouseStructure);
+        Raylib.PlaySound(Assets.Sounds["click"]); // TODO: Replace this with a 'construction' sound
         MouseStructure = null;
     }
 
@@ -145,8 +147,18 @@ public class GameLogic
     /// <param name="structure"> Structure that is being set to the mouse cursor </param>
     public void SetMouseStructure(StructureBase structure)
     {
-        SelectedEntity = null;
+        UnsetSelectedEntity();
         MouseStructure = structure;
+    }
+
+    /// <summary>
+    ///     Sets the selected entity
+    /// </summary>
+    /// <param name="entity"> Entity that has been selected </param>
+    public void SetSelectedEntity(EntityBase entity)
+    {
+        SelectedEntity = entity;
+        Raylib.PlaySound(Assets.Sounds["click"]); // TODO: Replace this with a unique sound for each entity type
     }
 
     /// <summary>
@@ -155,6 +167,14 @@ public class GameLogic
     public void ToggleGamePaused()
     {
         GamePaused = !GamePaused;
+    }
+
+    /// <summary>
+    ///     Unsets the selected entity by setting it to null
+    /// </summary>
+    public void UnsetSelectedEntity()
+    {
+        SelectedEntity = null;
     }
 
     /// <summary>

@@ -2,7 +2,7 @@ using IslandGen.Data.Enum;
 using IslandGen.Services;
 using Newtonsoft.Json;
 
-namespace IslandGen.Data.ECS.Components;
+namespace IslandGen.Objects.ECS.Components;
 
 public class Wander : IComponent
 {

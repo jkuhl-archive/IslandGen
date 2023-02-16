@@ -1,7 +1,8 @@
+using IslandGen.Data;
 using IslandGen.Services;
 using Raylib_CsLo;
 
-namespace IslandGen.UI;
+namespace IslandGen.Objects.UI;
 
 public class Button
 {
@@ -29,6 +30,10 @@ public class Button
     public void Draw()
     {
         if (ServiceManager.GetService<GameSettingsUi>().SettingsMenuActive != _settingsButton) return;
-        if (RayGui.GuiButton(Area, Label)) _function();
+        if (RayGui.GuiButton(Area, Label))
+        {
+            _function();
+            Raylib.PlaySound(Assets.Sounds["click"]);
+        }
     }
 }

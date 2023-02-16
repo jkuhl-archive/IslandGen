@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace IslandGen.Data.ECS.Components;
+namespace IslandGen.Objects.ECS.Components;
 
 public class Inventory : IComponent
 {
