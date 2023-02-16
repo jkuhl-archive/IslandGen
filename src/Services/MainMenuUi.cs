@@ -2,6 +2,7 @@ using System.Numerics;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.UI;
+using IslandGen.Utils;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -33,8 +34,8 @@ public class MainMenuUi
     {
         _buttonsList = new List<Button>
         {
-            new("New Island", StateManager.NewGame),
-            new("Load Island", StateManager.LoadGame),
+            new("New Island", SaveUtils.NewGame),
+            new("Load Island", SaveUtils.LoadGame),
             new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
             new("Exit Game", Raylib.CloseWindow)
         };

@@ -1,6 +1,7 @@
 using IslandGen.Data;
 using IslandGen.Extensions;
 using IslandGen.UI;
+using IslandGen.Utils;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -11,10 +12,16 @@ public class GameSettingsUi
     private const int ExitButtonSize = 12;
     private const int SettingsMenuWidth = 150;
     private const int SettingsMenuHeight = 200;
+    private const string DebugModeDisabledLabel = "Debug Mode: Disabled";
+    private const string DebugModeEnabledLabel = "Debug Mode: Enabled";
+    private const string FullscreenDisabledLabel = "Fullscreen";
+    private const string FullscreenEnabledLabel = "Windowed";
     private const string SettingsMenuTitle = "Settings";
-
-    private readonly List<Button> _buttonsList;
+    private readonly Button _debugModeButton;
     private readonly Button _exitButton;
+    private readonly Button _fullscreenButton;
+    private readonly List<Button> _settingsButtonsList;
+
     private Rectangle _buttonsArea;
     private Rectangle _menuBackdrop;
     private Rectangle _menuInnerBackdrop;
@@ -25,12 +32,21 @@ public class GameSettingsUi
 
     public GameSettingsUi()
     {
-        _buttonsList = new List<Button>
+        var gameSettings = ServiceManager.GetService<GameSettings>();
+
+        // Initialize settings buttons
+        _debugModeButton = new Button(DebugModeDisabledLabel, ToggleDebugMode, settingsButton: true);
+        _fullscreenButton = new Button(FullscreenDisabledLabel, ToggleFullscreen, settingsButton: true);
+
+        // Update button labels to match settings state
+        if (gameSettings.DebugMode) _debugModeButton.Label = DebugModeEnabledLabel;
+        if (gameSettings.Fullscreen) _fullscreenButton.Label = FullscreenEnabledLabel;
+
+        // Add buttons to a list so they can be iterated over
+        _settingsButtonsList = new List<Button>
         {
-            new("Fullscreen", Raylib.ToggleFullscreen, settingsButton: true),
-            new("Debug Mode",
-                () => ServiceManager.GetService<GameSettings>().DebugMode =
-                    !ServiceManager.GetService<GameSettings>().DebugMode, settingsButton: true)
+            _fullscreenButton,
+            _debugModeButton
         };
 
         _exitButton = new Button("X", ToggleSettingsMenu, settingsButton: true);
@@ -48,7 +64,7 @@ public class GameSettingsUi
         Raylib.DrawTextEx(Raylib.GetFontDefault(), SettingsMenuTitle, _titleArea.Start(), _titleFontSize,
             _titleFontSpacing, Raylib.WHITE);
         _exitButton.Draw();
-        foreach (var button in _buttonsList) button.Draw();
+        foreach (var button in _settingsButtonsList) button.Draw();
     }
 
     /// <summary>
@@ -104,8 +120,8 @@ public class GameSettingsUi
             _menuInnerBackdrop.height - _titleArea.height - scalingManager.Padding * 3);
 
         // Set area for each button in the buttons list
-        for (var i = 0; i < _buttonsList.Count; i++)
-            _buttonsList[i].Area = _buttonsArea with
+        for (var i = 0; i < _settingsButtonsList.Count; i++)
+            _settingsButtonsList[i].Area = _buttonsArea with
             {
                 Y = _buttonsArea.Y + i * (ButtonHeight * scalingManager.ScaleFactor + scalingManager.Padding),
                 height = ButtonHeight * scalingManager.ScaleFactor
@@ -117,9 +133,35 @@ public class GameSettingsUi
     /// </summary>
     public void ToggleSettingsMenu()
     {
+        SaveUtils.SaveGameSettings();
+
         var gameLogic = ServiceManager.GetService<GameLogic>();
         if (gameLogic != null) gameLogic.ToggleGamePaused();
 
         SettingsMenuActive = !SettingsMenuActive;
+    }
+
+    /// <summary>
+    ///     Toggles debug mode
+    /// </summary>
+    public void ToggleDebugMode()
+    {
+        var gameSettings = ServiceManager.GetService<GameSettings>();
+
+        gameSettings.DebugMode = !gameSettings.DebugMode;
+        _debugModeButton.Label = gameSettings.DebugMode ? DebugModeEnabledLabel : DebugModeDisabledLabel;
+    }
+
+    /// <summary>
+    ///     Toggles fullscreen / windowed mode
+    /// </summary>
+    public void ToggleFullscreen()
+    {
+        var gameSettings = ServiceManager.GetService<GameSettings>();
+
+        gameSettings.Fullscreen = !gameSettings.Fullscreen;
+        if (gameSettings.Fullscreen != Raylib.IsWindowFullscreen()) Raylib.ToggleFullscreen();
+
+        _fullscreenButton.Label = gameSettings.Fullscreen ? FullscreenEnabledLabel : FullscreenDisabledLabel;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using IslandGen.Data.Enum;
 using IslandGen.Services;
+using IslandGen.Utils;
 using Raylib_CsLo;
 
 namespace IslandGen;
@@ -8,17 +9,18 @@ internal static class Game
 {
     private const int DefaultWindowWidth = 1280;
     private const int DefaultWindowHeight = 720;
-    private const int TargetFrameRate = 60;
     private const string WindowName = "IslandGen";
 
     public static void Main()
     {
         // Initialize game window
         Raylib.InitWindow(DefaultWindowWidth, DefaultWindowHeight, WindowName);
-        Raylib.SetTargetFPS(TargetFrameRate);
 
-        // Initialize game services
-        ServiceManager.AddService(new GameSettings());
+        // Load game settings
+        ServiceManager.AddService(SaveUtils.LoadSettings());
+        ServiceManager.GetService<GameSettings>().ApplySettings();
+
+        // Initialize core game services
         ServiceManager.AddService(new GameSettingsUi());
         ServiceManager.AddService(new GameUi());
         ServiceManager.AddService(new InputManager());
@@ -26,7 +28,7 @@ internal static class Game
         ServiceManager.AddService(new Random());
         ServiceManager.AddService(new ScalingManager());
         ServiceManager.AddService(new StateManager());
-        ServiceManager.AddService(new TextureManager(TargetFrameRate));
+        ServiceManager.AddService(new TextureManager());
 
         while (!Raylib.WindowShouldClose())
         {

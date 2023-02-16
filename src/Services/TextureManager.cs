@@ -1,3 +1,4 @@
+using IslandGen.Data;
 using IslandGen.Data.Textures;
 using Raylib_CsLo;
 
@@ -5,26 +6,21 @@ namespace IslandGen.Services;
 
 public class TextureManager
 {
-    private const string TexturesDirectory = "assets/textures";
-    private const string AnimatedTexturesDirectory = $"{TexturesDirectory}/animated";
-    private const string StaticTexturesDirectory = $"{TexturesDirectory}/static";
-
     public readonly Dictionary<string, AnimatedTexture> AnimatedTextures;
     public readonly Dictionary<string, Texture> Textures;
 
     /// <summary>
     ///     Service that manages loading and serving textures
     /// </summary>
-    /// <param name="targetFrameRate"> Framerate the game should be running at, used for animations </param>
-    public TextureManager(int targetFrameRate)
+    public TextureManager()
     {
-        var animatedTexturesDir = new DirectoryInfo(AnimatedTexturesDirectory);
+        var animatedTexturesDir = new DirectoryInfo(Paths.AnimatedTexturesDirectory);
         var animatedTextureFiles = animatedTexturesDir.GetFiles();
         AnimatedTextures = animatedTextureFiles.ToDictionary(
             textureFile => Path.ChangeExtension(textureFile.Name, null),
-            textureFile => new AnimatedTexture(Raylib.LoadTexture(textureFile.FullName), targetFrameRate));
+            textureFile => new AnimatedTexture(Raylib.LoadTexture(textureFile.FullName)));
 
-        var textureDirectory = new DirectoryInfo(StaticTexturesDirectory);
+        var textureDirectory = new DirectoryInfo(Paths.StaticTexturesDirectory);
         var textureFileList = textureDirectory.GetFiles();
         Textures = textureFileList.ToDictionary(textureFile => Path.ChangeExtension(textureFile.Name, null),
             textureFile => Raylib.LoadTexture(textureFile.FullName));

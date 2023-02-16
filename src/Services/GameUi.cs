@@ -5,6 +5,7 @@ using IslandGen.Data.Enum;
 using IslandGen.Data.Textures;
 using IslandGen.Extensions;
 using IslandGen.UI;
+using IslandGen.Utils;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -46,9 +47,9 @@ public class GameUi
     {
         _buttonsList = new List<Button>
         {
-            new("Save Island", StateManager.SaveGame),
-            new("Load Island", StateManager.LoadGame),
-            new("New Island", StateManager.NewGame),
+            new("Save Island", SaveUtils.SaveGame),
+            new("Load Island", SaveUtils.LoadGame),
+            new("New Island", SaveUtils.NewGame),
             new("Change Speed", () => ServiceManager.GetService<GameLogic>().ChangeSpeed()),
             new("New Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
             new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),

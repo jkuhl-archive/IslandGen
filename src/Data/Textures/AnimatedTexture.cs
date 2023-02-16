@@ -1,4 +1,5 @@
 using System.Numerics;
+using IslandGen.Services;
 using Raylib_CsLo;
 
 namespace IslandGen.Data.Textures;
@@ -18,14 +19,15 @@ public class AnimatedTexture
     ///     Constructor for the AnimatedTexture
     /// </summary>
     /// <param name="texture"> Texture containing animation frames stored horizontally </param>
-    /// <param name="targetFrameRate"> Framerate the game should be running at </param>
     /// <param name="frameWidth"> Width of animation frames </param>
-    public AnimatedTexture(Texture texture, int targetFrameRate, int frameWidth = 16)
+    public AnimatedTexture(Texture texture, int frameWidth = 16)
     {
+        var gameSettings = ServiceManager.GetService<GameSettings>();
+
         _texture = texture;
         _frameWidth = frameWidth;
         _totalFrames = texture.width / _frameWidth;
-        _frameDelay = (int)Math.Round(targetFrameRate / (float)_totalFrames);
+        _frameDelay = (int)Math.Round(gameSettings.TargetFrameRate / (float)_totalFrames);
 
         _currentFrame = 0;
         _textureRectangle = new Rectangle(0, 0, _frameWidth, _texture.height);
