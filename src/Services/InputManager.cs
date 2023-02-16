@@ -113,8 +113,9 @@ public class InputManager
 
         // Return if mouse position is over a UI element
         if (
-            gameUi.SidebarArea.PointInsideRectangle(mousePosition) ||
             gameUi.CalendarArea.PointInsideRectangle(mousePosition) ||
+            gameUi.SidebarArea.PointInsideRectangle(mousePosition) ||
+            gameUi.SpeedControlsArea.PointInsideRectangle(mousePosition) ||
             (gameLogic.SelectedEntity != null && gameUi.SelectedEntityMenuArea.PointInsideRectangle(mousePosition))
         ) return;
 

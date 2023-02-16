@@ -67,11 +67,13 @@ public class GameLogic
     }
 
     /// <summary>
-    ///     Toggles current GameSpeed to the next value
+    ///     Slows down passage of in game time
     /// </summary>
-    public void ChangeSpeed()
+    public void DecreaseGameSpeed()
     {
-        GameSpeed = GameSpeed.GetNext();
+        if (GameSpeed == GameSpeed.Slowest) return;
+
+        GameSpeed = GameSpeed.GetPrevious();
     }
 
     /// <summary>
@@ -112,6 +114,16 @@ public class GameLogic
             entityList.AddRange(_entities[entityType]);
 
         return entityList;
+    }
+
+    /// <summary>
+    ///     Speeds up passage of in game time
+    /// </summary>
+    public void IncreaseGameSpeed()
+    {
+        if (GameSpeed == GameSpeed.Fastest) return;
+
+        GameSpeed = GameSpeed.GetNext();
     }
 
     /// <summary>

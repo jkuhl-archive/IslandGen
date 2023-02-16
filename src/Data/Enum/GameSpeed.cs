@@ -37,10 +37,10 @@ public static class GameSpeedExtensions
     }
 
     /// <summary>
-    ///     Returns the next GameSpeed in the enum, cycles through Slowest to Fastest
+    ///     Returns the GameSpeed after the current value
     /// </summary>
     /// <param name="gameSpeed"> Current GameSpeed </param>
-    /// <returns> Next GameSpeed after the current GameSpeed </returns>
+    /// <returns> GameSpeed after the current GameSpeed </returns>
     public static GameSpeed GetNext(this GameSpeed gameSpeed)
     {
         return gameSpeed switch
@@ -51,7 +51,27 @@ public static class GameSpeedExtensions
             GameSpeed.Normal => GameSpeed.Fast,
             GameSpeed.Fast => GameSpeed.Faster,
             GameSpeed.Faster => GameSpeed.Fastest,
-            GameSpeed.Fastest => GameSpeed.Slowest,
+            GameSpeed.Fastest => GameSpeed.Fastest,
+            _ => GameSpeed.Normal
+        };
+    }
+
+    /// <summary>
+    ///     Returns the GameSpeed before the current value
+    /// </summary>
+    /// <param name="gameSpeed"> Current GameSpeed </param>
+    /// <returns> GameSpeed before the current GameSpeed </returns>
+    public static GameSpeed GetPrevious(this GameSpeed gameSpeed)
+    {
+        return gameSpeed switch
+        {
+            GameSpeed.Slowest => GameSpeed.Slowest,
+            GameSpeed.Slower => GameSpeed.Slowest,
+            GameSpeed.Slow => GameSpeed.Slower,
+            GameSpeed.Normal => GameSpeed.Slow,
+            GameSpeed.Fast => GameSpeed.Normal,
+            GameSpeed.Faster => GameSpeed.Fast,
+            GameSpeed.Fastest => GameSpeed.Faster,
             _ => GameSpeed.Normal
         };
     }

@@ -12,48 +12,57 @@ namespace IslandGen.Services;
 
 public class GameUi
 {
-    private const int ButtonsWidth = 100;
-    private const int ButtonsHeight = 100;
-    private const int ButtonWidth = 50;
-    private const int ButtonHeight = 20;
-    private const int ButtonsRows = ButtonsWidth / ButtonWidth;
-    private const int ButtonsColumns = ButtonsHeight / ButtonHeight;
     private const int CalendarWidth = 115;
     private const int CalendarHeight = 20;
     private const int MiniMapWidth = 100;
     private const int MiniMapHeight = 100;
     private const int SelectedEntityMenuWidth = 250;
     private const int SelectedEntityMenuHeight = 80;
+    private const int SidebarButtonsWidth = 100;
+    private const int SidebarButtonsHeight = 100;
+    private const int SidebarButtonWidth = 50;
+    private const int SidebarButtonHeight = 20;
+    private const int SidebarButtonsRows = SidebarButtonsWidth / SidebarButtonWidth;
+    private const int SidebarButtonsColumns = SidebarButtonsHeight / SidebarButtonHeight;
     private const int SidebarWidth = 100;
     private const int SidebarHeight = 200;
     private const int SidebarWidthPaddingSegments = 2;
     private const int SidebarHeightPaddingSegments = 3;
+    private const int SpeedControlsButtonWidth = 25;
+    private const int SpeedControlsWidth = SpeedControlsButtonWidth * 3;
+    private const int SpeedControlsHeight = 15;
 
     private const string PausedString = "Paused";
-
-    private readonly List<Button> _buttonsList;
     private readonly RenderTexturePro _miniMapTexture;
 
-    private Rectangle _buttonsArea;
+    private readonly List<Button> _sidebarButtonsList;
+    private readonly List<Button> _speedControlButtonsList;
     private string _calendarString;
     private string _debugInfoString;
     private Rectangle _miniMapArea;
     private string? _selectedEntityString;
+
+    private Rectangle _sidebarButtonsArea;
 
     /// <summary>
     ///     Service that manages the game's UI
     /// </summary>
     public GameUi()
     {
-        _buttonsList = new List<Button>
+        _sidebarButtonsList = new List<Button>
         {
             new("Save Island", SaveUtils.SaveGame),
             new("Load Island", SaveUtils.LoadGame),
             new("New Island", SaveUtils.NewGame),
-            new("Change Speed", () => ServiceManager.GetService<GameLogic>().ChangeSpeed()),
             new("New Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
             new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
             new("Main Menu", () => ServiceManager.GetService<StateManager>().SetGameState(GameState.MainMenu))
+        };
+        _speedControlButtonsList = new List<Button>
+        {
+            new("<|<|", () => ServiceManager.GetService<GameLogic>().DecreaseGameSpeed()),
+            new("| |", () => ServiceManager.GetService<GameLogic>().ToggleGamePaused()),
+            new("|>|>", () => ServiceManager.GetService<GameLogic>().IncreaseGameSpeed())
         };
 
         _calendarString = string.Empty;
@@ -64,6 +73,7 @@ public class GameUi
     public Rectangle CalendarArea { get; private set; }
     public Rectangle SelectedEntityMenuArea { get; private set; }
     public Rectangle SidebarArea { get; private set; }
+    public Rectangle SpeedControlsArea { get; private set; }
 
     public void Draw()
     {
@@ -73,6 +83,9 @@ public class GameUi
 
         // Draw calendar
         DrawPopUp(_calendarString, CalendarArea);
+
+        // Draw speed controls
+        foreach (var button in _speedControlButtonsList) button.Draw();
 
         // Draw selected entity menu
         if (_selectedEntityString != null) DrawPopUp(_selectedEntityString, SelectedEntityMenuArea);
@@ -104,10 +117,10 @@ public class GameUi
 
         // Draw sidebar backdrop
         Raylib.DrawRectangleRec(SidebarArea, Raylib.WHITE);
-        Raylib.DrawRectangleRec(_buttonsArea, Raylib.GRAY);
+        Raylib.DrawRectangleRec(_sidebarButtonsArea, Raylib.GRAY);
 
         // Draw buttons
-        foreach (var button in _buttonsList) button.Draw();
+        foreach (var button in _sidebarButtonsList) button.Draw();
 
         // Draw minimap
         _miniMapTexture.Draw();
@@ -126,7 +139,10 @@ public class GameUi
                           $"{gameLogic.CurrentDateTime.ToLongTimeString()}";
 
         // Append paused string if game is paused
-        if (gameLogic.GamePaused) _calendarString += $" - {PausedString}";
+        if (gameLogic.GamePaused)
+            _calendarString += $" - {PausedString}";
+        else
+            _calendarString += $" - {gameLogic.GameSpeed}";
 
         // Set selected entity string
         _selectedEntityString = gameLogic.SelectedEntity?.GetInfoString();
@@ -141,14 +157,13 @@ public class GameUi
                 $"FPS: {Raylib.GetFPS()}\n" +
                 $"Window Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
                 $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
-                $"Game Speed: {gameLogic.GameSpeed} ({gameLogic.GameSpeed.GetSpeedMultiplier()}x)\n" +
                 "\n" +
                 $"Mouse Window Position: {InputManager.GetMousePosition()}\n" +
                 $"Mouse Map Position: {gameMap.GetMapMousePosition()}\n" +
                 $"Mouse Highlighted Tile: {gameMap.GetMapMouseTile()}\n" +
                 "\n" +
                 $"Camera Zoom: {gameLogic.GameCamera.Camera.zoom}x\n" +
-                $"Camera Position: {gameLogic.GameCamera.Camera.target}\n" +
+                $"Camera Target: {gameLogic.GameCamera.Camera.target}\n" +
                 $"Camera Pan Limits: {gameMap.GetCameraPanLimits()}\n" +
                 $"Camera Visible Map Tiles: {gameMap.GetVisibleMapTiles().String()}";
         }
@@ -184,39 +199,55 @@ public class GameUi
             (int)(SidebarWidth * scalingManager.ScaleFactor + sidebarWidthPadding),
             (int)(SidebarHeight * scalingManager.ScaleFactor + sidebarHeightPadding));
 
-        // Set buttons area
-        _buttonsArea = new Rectangle(
+        // Set sidebar buttons area
+        _sidebarButtonsArea = new Rectangle(
             SidebarArea.X + scalingManager.Padding,
             SidebarArea.Y + scalingManager.Padding,
-            (int)(ButtonsWidth * scalingManager.ScaleFactor),
-            (int)(ButtonsHeight * scalingManager.ScaleFactor));
+            (int)(SidebarButtonsWidth * scalingManager.ScaleFactor),
+            (int)(SidebarButtonsHeight * scalingManager.ScaleFactor));
 
         // Set minimap area
         _miniMapArea = new Rectangle(
             SidebarArea.X + scalingManager.Padding,
-            SidebarArea.Y + _buttonsArea.height + scalingManager.Padding * 2,
+            SidebarArea.Y + _sidebarButtonsArea.height + scalingManager.Padding * 2,
             (int)(MiniMapWidth * scalingManager.ScaleFactor),
             (int)(MiniMapHeight * scalingManager.ScaleFactor));
 
-        // Set button positions
+        // Set speed controls area
+        SpeedControlsArea = new Rectangle(
+            SidebarArea.X + (SidebarArea.width - SpeedControlsWidth * scalingManager.ScaleFactor) / 2,
+            SidebarArea.y - SpeedControlsHeight * scalingManager.ScaleFactor - scalingManager.Padding,
+            (int)(SpeedControlsWidth * scalingManager.ScaleFactor),
+            (int)(SpeedControlsHeight * scalingManager.ScaleFactor)
+        );
+
+        // Set sidebar button positions
         var rowCounter = 0;
         var columnCounter = 0;
-        foreach (var button in _buttonsList)
+        foreach (var button in _sidebarButtonsList)
         {
             button.Area = new Rectangle(
-                _buttonsArea.X + rowCounter * ButtonWidth * scalingManager.ScaleFactor,
-                _buttonsArea.Y + columnCounter * ButtonHeight * scalingManager.ScaleFactor,
-                ButtonWidth * scalingManager.ScaleFactor,
-                ButtonHeight * scalingManager.ScaleFactor);
+                _sidebarButtonsArea.X + rowCounter * SidebarButtonWidth * scalingManager.ScaleFactor,
+                _sidebarButtonsArea.Y + columnCounter * SidebarButtonHeight * scalingManager.ScaleFactor,
+                SidebarButtonWidth * scalingManager.ScaleFactor,
+                SidebarButtonHeight * scalingManager.ScaleFactor);
 
             rowCounter++;
 
-            if (rowCounter >= ButtonsRows)
+            if (rowCounter >= SidebarButtonsRows)
             {
                 rowCounter = 0;
                 columnCounter++;
             }
         }
+
+        // Set speed controls button positions
+        for (var i = 0; i < _speedControlButtonsList.Count; i++)
+            _speedControlButtonsList[i].Area = new Rectangle(
+                SpeedControlsArea.X + i * SpeedControlsButtonWidth * scalingManager.ScaleFactor,
+                SpeedControlsArea.Y,
+                SpeedControlsButtonWidth * scalingManager.ScaleFactor,
+                SpeedControlsArea.height);
 
         // Apply minimap area to texture
         _miniMapTexture.DestinationRectangle = _miniMapArea;
