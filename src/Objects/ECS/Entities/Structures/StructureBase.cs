@@ -11,16 +11,15 @@ public class StructureBase : EntityBase
     /// <summary>
     ///     Checks if the current position of the structure is valid
     /// </summary>
-    /// <param name="gameMap"> GameMap that we are attempting to place the structure on </param>
     /// <returns> True if structure can be placed here, false if not </returns>
-    public virtual bool ValidPlacement(GameMap gameMap)
+    public virtual bool ValidPlacement()
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var occupiedTiles = GetOccupiedTiles();
 
         // Check if structure is on water
         if (!PlaceableOnWater)
-            if (occupiedTiles.Any(tile => gameMap.GetTileType(tile).IsWater()))
+            if (occupiedTiles.Any(tile => gameLogic.GameMap.GetTileType(tile).IsWater()))
                 return false;
 
         // Check if the structure will overlap with any existing structures

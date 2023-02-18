@@ -55,7 +55,7 @@ internal static class Game
                     ServiceManager.GetService<GameUi>().Update();
 
                     // Draw Game
-                    ServiceManager.GetService<GameMap>().Draw();
+                    ServiceManager.GetService<GameLogic>().Draw();
                     ServiceManager.GetService<GameUi>().Draw();
                     break;
             }

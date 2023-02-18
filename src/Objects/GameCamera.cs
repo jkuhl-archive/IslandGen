@@ -32,8 +32,7 @@ public class GameCamera
     /// </summary>
     public void PanDown(float amount = DefaultPanAmount)
     {
-        var gameMap = ServiceManager.GetService<GameMap>();
-        var panLimit = gameMap.GetCameraPanLimits().Item2;
+        var panLimit = ServiceManager.GetService<GameLogic>().GameMap.GetCameraPanLimits().Item2;
 
         Camera.target.Y += amount;
         if (Camera.target.Y > panLimit) Camera.target.Y = panLimit;
@@ -57,8 +56,7 @@ public class GameCamera
     /// </summary>
     public void PanRight(float amount = DefaultPanAmount)
     {
-        var gameMap = ServiceManager.GetService<GameMap>();
-        var panLimit = gameMap.GetCameraPanLimits().Item1;
+        var panLimit = ServiceManager.GetService<GameLogic>().GameMap.GetCameraPanLimits().Item1;
 
         Camera.target.X += amount;
         if (Camera.target.X > panLimit) Camera.target.X = panLimit;
@@ -86,8 +84,7 @@ public class GameCamera
         // Adjust camera target to fit in pan limits, this prevents zooming out into the space outside the game map
         if (Math.Abs(Camera.zoom - previousZoom) > 0)
         {
-            var gameMap = ServiceManager.GetService<GameMap>();
-            var panLimits = gameMap.GetCameraPanLimits();
+            var panLimits = ServiceManager.GetService<GameLogic>().GameMap.GetCameraPanLimits();
 
             if (Camera.target.X > panLimits.Item1) Camera.target.X = panLimits.Item1;
             if (Camera.target.Y > panLimits.Item2) Camera.target.Y = panLimits.Item2;

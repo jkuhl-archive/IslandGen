@@ -18,7 +18,8 @@ public abstract class EntityBase
     public void Draw()
     {
         if (Texture != null)
-            Raylib.DrawTextureV(Texture.Value, ServiceManager.GetService<GameMap>().GetTileCoordinates(MapPosition),
+            Raylib.DrawTextureV(Texture.Value,
+                ServiceManager.GetService<GameLogic>().GameMap.GetTileCoordinates(MapPosition),
                 Raylib.WHITE);
     }
 
@@ -83,7 +84,7 @@ public abstract class EntityBase
     /// <returns> Rectangle containing the space the entity is occupies on the game map </returns>
     public Rectangle GetMapSpaceRectangle()
     {
-        var gameMap = ServiceManager.GetService<GameMap>();
+        var gameMap = ServiceManager.GetService<GameLogic>().GameMap;
         var position = gameMap.GetTileCoordinates(MapPosition);
 
         return new Rectangle(

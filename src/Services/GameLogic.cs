@@ -1,8 +1,11 @@
+using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Data.Enum;
+using IslandGen.Extensions;
 using IslandGen.Objects;
 using IslandGen.Objects.ECS;
 using IslandGen.Objects.ECS.Entities.Structures;
+using IslandGen.Objects.Textures;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
@@ -15,24 +18,82 @@ public class GameLogic
     private const int StartDay = 1;
     [JsonIgnore] public static readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
     [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities = new();
+
+    [JsonIgnore] private readonly RenderTexturePro _gameWorldTexture =
+        new(new Vector2(GameMap.MapSize * GameMap.TileTextureSize, GameMap.MapSize * GameMap.TileTextureSize));
+
     [JsonProperty] private float _updateTimer;
     [JsonIgnore] public EntityBase? SelectedEntity { get; private set; }
     [JsonProperty] public bool GamePaused { get; private set; }
     [JsonIgnore] public StructureBase? MouseStructure { get; private set; }
     [JsonProperty] public DateTime CurrentDateTime { get; private set; } = StartDateTime;
     [JsonProperty] public GameSpeed GameSpeed { get; private set; } = GameSpeed.Normal;
-    [JsonProperty] public GameCamera GameCamera { get; private set; } = new();
+    [JsonProperty] public GameCamera GameCamera { get; private init; } = new();
+    [JsonProperty] public GameMap GameMap { get; private init; } = new();
 
     public void Draw()
     {
+        var gameSettings = ServiceManager.GetService<GameSettings>();
+
+        // Begin rendering game world to texture
+        Raylib.BeginTextureMode(_gameWorldTexture.RenderTexture);
+        Raylib.ClearBackground(Raylib.BLACK);
+        Raylib.BeginMode2D(GameCamera.Camera);
+
+        // Draw map
+        GameMap.Draw();
+
+        // Draw entities
         // TODO: Add map culling here
-        foreach (var entityList in _entities.Values)
-        foreach (var entity in entityList)
+        foreach (var entity in _entities.Values.SelectMany(entityList => entityList))
             entity.Draw();
 
+        // Draw box around selected entity
         if (SelectedEntity != null)
             Raylib.DrawRectangleLinesEx(SelectedEntity.GetMapSpaceRectangle(), 1, Colors.Selected);
         MouseStructure?.Draw();
+
+        // Draw debug elements
+        if (gameSettings.DebugMode)
+        {
+            // Draw grid
+            for (var mapX = 1; mapX < GameMap.MapSize; mapX++)
+            {
+                var x = mapX * GameMap.TileTextureSize;
+                Raylib.DrawLine(x, 0, x, _gameWorldTexture.RenderTexture.texture.height, Colors.GridLine);
+            }
+
+            for (var mapY = 1; mapY < GameMap.MapSize; mapY++)
+            {
+                var y = mapY * GameMap.TileTextureSize;
+                Raylib.DrawLine(0, y, _gameWorldTexture.RenderTexture.texture.width, y, Colors.GridLine);
+            }
+
+            // Draw mouse debug elements
+            if (_gameWorldTexture.DestinationRectangle.PointInsideRectangle(GameMap.GetMapMousePosition()))
+            {
+                var mapMouseTile = GameMap.GetMapMouseTile();
+
+                // Draw box around tile that the mouse cursor is inside
+                Raylib.DrawRectangleLines(
+                    mapMouseTile.Item1 * GameMap.TileTextureSize,
+                    mapMouseTile.Item2 * GameMap.TileTextureSize,
+                    GameMap.TileTextureSize,
+                    GameMap.TileTextureSize,
+                    Raylib.RED
+                );
+
+                // Draw a dot that marks the mouse cursors position on the map
+                Raylib.DrawCircleV(GameMap.GetMapMousePosition(), 2.0f, Raylib.RED);
+            }
+        }
+
+        // Stop rendering to texture
+        Raylib.EndMode2D();
+        Raylib.EndTextureMode();
+
+        // Draw texture to screen
+        _gameWorldTexture.Draw(true);
     }
 
     public void Update()
@@ -41,11 +102,7 @@ public class GameLogic
         UpdateGameObjects();
 
         // Update mouse structure position to match mouse cursor position 
-        if (MouseStructure != null)
-        {
-            var gameMap = ServiceManager.GetService<GameMap>();
-            MouseStructure.MapPosition = gameMap.GetMapMouseTile();
-        }
+        if (MouseStructure != null) MouseStructure.MapPosition = GameMap.GetMapMouseTile();
     }
 
     /// <summary>
@@ -133,7 +190,7 @@ public class GameLogic
     public void PlaceMouseStructure()
     {
         if (MouseStructure == null) return;
-        if (!MouseStructure.ValidPlacement(ServiceManager.GetService<GameMap>())) return;
+        if (!MouseStructure.ValidPlacement()) return;
 
         // If all checks pass, add the structure to the main list and remove it from the mouse
         AddEntity(MouseStructure);
@@ -194,7 +251,7 @@ public class GameLogic
             CurrentDateTime = CurrentDateTime.AddHours(1);
 
             // Update game map
-            ServiceManager.GetService<GameMap>().Update();
+            GameMap.Update();
 
             // Update entities
             foreach (var entityList in _entities.Values)

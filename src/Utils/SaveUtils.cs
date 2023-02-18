@@ -21,17 +21,12 @@ public static class SaveUtils
     /// </summary>
     public static void LoadGame()
     {
-        if (!File.Exists(Paths.GameLogicFile)) return;
-        if (!File.Exists(Paths.GameMapFile)) return;
+        if (!File.Exists(Paths.GameSaveFile)) return;
 
-        var gameLogic = JsonConvert.DeserializeObject<GameLogic>(File.ReadAllText(Paths.GameLogicFile), JsonSettings);
+        var gameLogic = JsonConvert.DeserializeObject<GameLogic>(File.ReadAllText(Paths.GameSaveFile), JsonSettings);
         if (gameLogic == null) return;
-        var gameMap = JsonConvert.DeserializeObject<GameMap>(File.ReadAllText(Paths.GameMapFile), JsonSettings);
-        if (gameMap == null) return;
 
         ServiceManager.ReplaceService(gameLogic);
-        ServiceManager.ReplaceService(gameMap);
-
         ServiceManager.GetService<StateManager>().SetGameState(GameState.InGame);
     }
 
@@ -56,7 +51,7 @@ public static class SaveUtils
     {
         var gameLogic = new GameLogic();
         ServiceManager.ReplaceService(gameLogic);
-        ServiceManager.ReplaceService(new GameMap());
+        gameLogic.GameMap.GenerateMap();
 
         for (var i = 0; i < 10; i++)
             gameLogic.AddEntity(new Colonist
@@ -76,12 +71,8 @@ public static class SaveUtils
         if (!Directory.Exists(Paths.GameSavesDirectory)) Directory.CreateDirectory(Paths.GameSavesDirectory);
 
         File.WriteAllText(
-            Paths.GameLogicFile,
+            Paths.GameSaveFile,
             JsonConvert.SerializeObject(ServiceManager.GetService<GameLogic>(),
-                JsonSettings));
-        File.WriteAllText(
-            Paths.GameMapFile,
-            JsonConvert.SerializeObject(ServiceManager.GetService<GameMap>(),
                 JsonSettings));
     }
 

@@ -27,19 +27,19 @@ public class Wreckage : StructureBase
     /// <summary>
     ///     Checks if the current position of the wreckage is valid
     /// </summary>
-    /// <param name="gameMap"> GameMap that we are attempting to place the wreckage on </param>
     /// <returns> True if wreckage can be placed here, false if not </returns>
-    public override bool ValidPlacement(GameMap gameMap)
+    public override bool ValidPlacement()
     {
-        if (!base.ValidPlacement(gameMap)) return false;
+        if (!base.ValidPlacement()) return false;
 
+        var gameLogic = ServiceManager.GetService<GameLogic>();
         var landTileCounter = 0;
         var landThreshold = Size.Item1 * Size.Item2 / 3;
         var oceanTileCounter = 0;
         var oceanThreshold = Size.Item1 * Size.Item2 / 2;
 
         foreach (var tile in GetOccupiedTiles())
-            if (gameMap.GetTileType(tile) == TileType.Ocean)
+            if (gameLogic.GameMap.GetTileType(tile) == TileType.Ocean)
                 oceanTileCounter++;
             else
                 landTileCounter++;

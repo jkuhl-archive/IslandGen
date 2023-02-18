@@ -107,7 +107,6 @@ public class InputManager
     private void MouseClickInputs()
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
-        var gameMap = ServiceManager.GetService<GameMap>();
         var gameUi = ServiceManager.GetService<GameUi>();
         var mousePosition = GetMousePosition();
 
@@ -134,7 +133,8 @@ public class InputManager
 
             // Attempt to select entity under mouse cursor
             foreach (var entity in gameLogic.GetAllEntities(true).Where(entity =>
-                         entity.GetOccupiedTiles().Any(occupiedTile => occupiedTile == gameMap.GetMapMouseTile())))
+                         entity.GetOccupiedTiles()
+                             .Any(occupiedTile => occupiedTile == gameLogic.GameMap.GetMapMouseTile())))
             {
                 gameLogic.SetSelectedEntity(entity);
                 break;

@@ -1,6 +1,7 @@
 using System.Numerics;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
+using IslandGen.Objects;
 using IslandGen.Objects.ECS.Entities.Creatures;
 using IslandGen.Objects.ECS.Entities.Structures;
 using IslandGen.Objects.Textures;
@@ -78,7 +79,6 @@ public class GameUi
     public void Draw()
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
-        var gameMap = ServiceManager.GetService<GameMap>();
         var gameSettings = ServiceManager.GetService<GameSettings>();
 
         // Draw calendar
@@ -95,9 +95,9 @@ public class GameUi
         Raylib.ClearBackground(Raylib.BLACK);
 
         // Render map to minimap texture
-        for (var mapX = 0; mapX < gameMap.GetMapSize(); mapX++)
-        for (var mapY = 0; mapY < gameMap.GetMapSize(); mapY++)
-            Raylib.DrawPixelV(new Vector2(mapX, mapY), gameMap.GetTileType((mapX, mapY)).GetTileColor());
+        for (var mapX = 0; mapX < GameMap.MapSize; mapX++)
+        for (var mapY = 0; mapY < GameMap.MapSize; mapY++)
+            Raylib.DrawPixelV(new Vector2(mapX, mapY), gameLogic.GameMap.GetTileType((mapX, mapY)).GetTileColor());
 
         // Render structures to minimap texture
         foreach (var structure in gameLogic.GetEntityBaseTypeList<StructureBase>())
@@ -110,7 +110,7 @@ public class GameUi
                 colonist.MiniMapColor);
 
         // Draw box on minimap texture that represents the area of the map currently visible
-        Raylib.DrawRectangleLinesEx(gameMap.GetVisibleMapTiles(), 1, Raylib.RED);
+        Raylib.DrawRectangleLinesEx(gameLogic.GameMap.GetVisibleMapTiles(), 1, Raylib.RED);
 
         // End minimap texture rendering
         Raylib.EndTextureMode();
@@ -150,7 +150,6 @@ public class GameUi
         // Set debug info string
         if (gameSettings.DebugMode)
         {
-            var gameMap = ServiceManager.GetService<GameMap>();
             var scalingManager = ServiceManager.GetService<ScalingManager>();
 
             _debugInfoString =
@@ -159,13 +158,13 @@ public class GameUi
                 $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
                 "\n" +
                 $"Mouse Window Position: {InputManager.GetMousePosition()}\n" +
-                $"Mouse Map Position: {gameMap.GetMapMousePosition()}\n" +
-                $"Mouse Highlighted Tile: {gameMap.GetMapMouseTile()}\n" +
+                $"Mouse Map Position: {gameLogic.GameMap.GetMapMousePosition()}\n" +
+                $"Mouse Highlighted Tile: {gameLogic.GameMap.GetMapMouseTile()}\n" +
                 "\n" +
                 $"Camera Zoom: {gameLogic.GameCamera.Camera.zoom}x\n" +
                 $"Camera Target: {gameLogic.GameCamera.Camera.target}\n" +
-                $"Camera Pan Limits: {gameMap.GetCameraPanLimits()}\n" +
-                $"Camera Visible Map Tiles: {gameMap.GetVisibleMapTiles().String()}";
+                $"Camera Pan Limits: {gameLogic.GameMap.GetCameraPanLimits()}\n" +
+                $"Camera Visible Map Tiles: {gameLogic.GameMap.GetVisibleMapTiles().String()}";
         }
     }
 

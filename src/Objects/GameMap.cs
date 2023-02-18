@@ -4,17 +4,17 @@ using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.Objects.ECS.Entities;
 using IslandGen.Objects.ECS.Entities.Structures;
-using IslandGen.Objects.Textures;
+using IslandGen.Services;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
-namespace IslandGen.Services;
+namespace IslandGen.Objects;
 
 public class GameMap
 {
-    private const int MapSize = 100;
+    public const int MapSize = 100;
     private const int MapBuffer = MapSize / 10;
-    private const int TileTextureSize = 16;
+    public const int TileTextureSize = 16;
 
     private const int DirtDeform1Iterations = 10;
     private const int DirtDeform2Iterations = 20;
@@ -43,41 +43,10 @@ public class GameMap
     [JsonIgnore] private readonly Rectangle _baseIslandArea =
         new(MapBuffer, MapBuffer, MapSize - MapBuffer * 2, MapSize - MapBuffer * 2);
 
-    [JsonIgnore] private readonly RenderTexturePro _mapTexture =
-        new(new Vector2(MapSize * TileTextureSize, MapSize * TileTextureSize));
-
-    [JsonProperty] private readonly TileType[,] _tileMap;
-
-    /// <summary>
-    ///     Service that manages the game's map and entities
-    /// </summary>
-    public GameMap()
-    {
-        _tileMap = new TileType[MapSize, MapSize];
-        GenerateMap();
-    }
-
-    /// <summary>
-    ///     Constructor for loading a saved GameMap
-    /// </summary>
-    /// <param name="tileMap"> Array that stores the map's tiles </param>
-    [JsonConstructor]
-    private GameMap(TileType[,] tileMap)
-    {
-        _tileMap = tileMap;
-    }
+    [JsonProperty] private readonly TileType[,] _tileMap = new TileType[MapSize, MapSize];
 
     public void Draw()
     {
-        var gameLogic = ServiceManager.GetService<GameLogic>();
-        var gameSettings = ServiceManager.GetService<GameSettings>();
-
-        // Begin rendering game map to texture
-        Raylib.BeginTextureMode(_mapTexture.RenderTexture);
-        Raylib.ClearBackground(Raylib.BLACK);
-        Raylib.BeginMode2D(gameLogic.GameCamera.Camera);
-
-        // Draw tiles
         // TODO: Implement culling to prevent wasted time drawing stuff off screen
         for (var mapX = 0; mapX < MapSize; mapX++)
         for (var mapY = 0; mapY < MapSize; mapY++)
@@ -94,50 +63,6 @@ public class GameMap
                 Raylib.DrawTexture(texture, mapX * TileTextureSize, mapY * TileTextureSize, Raylib.WHITE);
             }
         }
-
-        // Draw game logic objects
-        ServiceManager.GetService<GameLogic>().Draw();
-
-        // Draw debug elements
-        if (gameSettings.DebugMode)
-        {
-            var mapMouseTile = GetMapMouseTile();
-
-            // Draw grid
-            for (var mapX = 1; mapX < MapSize; mapX++)
-            {
-                var x = mapX * TileTextureSize;
-                Raylib.DrawLine(x, 0, x, _mapTexture.RenderTexture.texture.height, Colors.GridLine);
-            }
-
-            for (var mapY = 1; mapY < MapSize; mapY++)
-            {
-                var y = mapY * TileTextureSize;
-                Raylib.DrawLine(0, y, _mapTexture.RenderTexture.texture.width, y, Colors.GridLine);
-            }
-
-            if (_mapTexture.DestinationRectangle.PointInsideRectangle(GetMapMousePosition()))
-            {
-                // Draw box around highlighted tile
-                Raylib.DrawRectangleLines(
-                    mapMouseTile.Item1 * TileTextureSize,
-                    mapMouseTile.Item2 * TileTextureSize,
-                    TileTextureSize,
-                    TileTextureSize,
-                    Raylib.RED
-                );
-
-                // Draw a dot that marks the mouse cursors position on the map
-                Raylib.DrawCircleV(GetMapMousePosition(), 2.0f, Raylib.RED);
-            }
-        }
-
-        // Stop rendering to texture
-        Raylib.EndMode2D();
-        Raylib.EndTextureMode();
-
-        // Draw texture to screen
-        _mapTexture.Draw(true);
     }
 
     public void Update()
@@ -153,23 +78,14 @@ public class GameMap
     {
         var camera = ServiceManager.GetService<GameLogic>().GameCamera.Camera;
         var scalingManager = ServiceManager.GetService<ScalingManager>();
-        var cameraViewWidth = _mapTexture.RenderTexture.texture.width * camera.zoom * scalingManager.ScaleFactor;
-        var cameraViewHeight = _mapTexture.RenderTexture.texture.height * camera.zoom * scalingManager.ScaleFactor;
+        var cameraViewWidth = MapSize * TileTextureSize * camera.zoom * scalingManager.ScaleFactor;
+        var cameraViewHeight = MapSize * TileTextureSize * camera.zoom * scalingManager.ScaleFactor;
         var mapViewWidth = MapSize * scalingManager.WindowWidth / cameraViewWidth;
         var mapViewHeight = MapSize * scalingManager.WindowHeight / cameraViewHeight;
 
         return (
             (int)((MapSize - mapViewWidth) * TileTextureSize),
             (int)((MapSize - mapViewHeight) * TileTextureSize));
-    }
-
-    /// <summary>
-    ///     Returns the size of the map
-    /// </summary>
-    /// <returns> Int that represents the width and height of the game map </returns>
-    public int GetMapSize()
-    {
-        return MapSize;
     }
 
     /// <summary>
@@ -265,8 +181,8 @@ public class GameMap
     {
         var camera = ServiceManager.GetService<GameLogic>().GameCamera.Camera;
         var scalingManager = ServiceManager.GetService<ScalingManager>();
-        var cameraViewWidth = _mapTexture.RenderTexture.texture.width * camera.zoom * scalingManager.ScaleFactor;
-        var cameraViewHeight = _mapTexture.RenderTexture.texture.height * camera.zoom * scalingManager.ScaleFactor;
+        var cameraViewWidth = MapSize * TileTextureSize * camera.zoom * scalingManager.ScaleFactor;
+        var cameraViewHeight = MapSize * TileTextureSize * camera.zoom * scalingManager.ScaleFactor;
 
         var mapViewX = (int)Math.Round(camera.target.X / TileTextureSize);
         var mapViewY = (int)Math.Round(camera.target.Y / TileTextureSize);
@@ -339,7 +255,7 @@ public class GameMap
     /// <summary>
     ///     Randomly generates an island on the game map
     /// </summary>
-    private void GenerateMap()
+    public void GenerateMap()
     {
         var rnd = ServiceManager.GetService<Random>();
 
@@ -524,7 +440,7 @@ public class GameMap
         for (var attempt = 0; attempt < MapSize * 10; attempt++)
         {
             wreckage.MapPosition = (rnd.Next(MapBuffer), rnd.Next(MapBuffer, MapSize - MapBuffer));
-            if (!wreckage.ValidPlacement(this)) continue;
+            if (!wreckage.ValidPlacement()) continue;
 
             gameLogic.AddEntity(wreckage);
             break;

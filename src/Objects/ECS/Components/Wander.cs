@@ -55,7 +55,7 @@ public class Wander : IComponent
     /// <param name="currentMapPosition"> Current position on the game map </param>
     private void SetDestination((int, int) currentMapPosition)
     {
-        var gameMap = ServiceManager.GetService<GameMap>();
+        var gameLogic = ServiceManager.GetService<GameLogic>();
         var rnd = ServiceManager.GetService<Random>();
 
         (int, int) destination;
@@ -63,8 +63,8 @@ public class Wander : IComponent
         {
             destination = (currentMapPosition.Item1 + rnd.Next(-Distance, Distance),
                 currentMapPosition.Item2 + rnd.Next(-Distance, Distance));
-            if (!gameMap.PositionInRange(destination)) continue;
-            if (!gameMap.GetTileType(destination).IsWater()) break;
+            if (!gameLogic.GameMap.PositionInRange(destination)) continue;
+            if (!gameLogic.GameMap.GetTileType(destination).IsWater()) break;
         }
 
         _destination = destination;

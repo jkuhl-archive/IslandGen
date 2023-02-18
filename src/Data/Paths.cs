@@ -7,8 +7,7 @@ public static class Paths
 
     // Game save file paths
     public static readonly string GameSavesDirectory = Path.Join(GameDirectory, "saves");
-    public static readonly string GameLogicFile = Path.Join(GameSavesDirectory, "game_logic.json");
-    public static readonly string GameMapFile = Path.Join(GameSavesDirectory, "game_map.json");
+    public static readonly string GameSaveFile = Path.Join(GameSavesDirectory, "game_save.json");
     public static readonly string GameSettingsFile = Path.Join(GameSavesDirectory, "game_settings.json");
 
     // Texture paths
