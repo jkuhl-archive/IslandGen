@@ -25,23 +25,11 @@ public class GameCamera
         var targetX = (targetTile.Item1 - visibleMapTiles.width / 2) * GameMap.TileTextureSize;
         var targetY = (targetTile.Item2 - visibleMapTiles.height / 2) * GameMap.TileTextureSize;
 
-        if (targetY < Camera.target.Y)
-        {
-            PanUp(Camera.target.Y - targetY);
-        } 
-        else if (targetY > Camera.target.Y)
-        {
-            PanDown(targetY - Camera.target.Y);
-        }
-        
-        if (targetX < Camera.target.X)
-        {
-            PanLeft(Camera.target.X - targetX);
-        } 
-        else if (targetX > Camera.target.X)
-        {
-            PanRight(targetX - Camera.target.X);
-        }
+        if (targetY < Camera.target.Y) PanUp(Camera.target.Y - targetY);
+        else if (targetY > Camera.target.Y) PanDown(targetY - Camera.target.Y);
+
+        if (targetX < Camera.target.X) PanLeft(Camera.target.X - targetX);
+        else if (targetX > Camera.target.X) PanRight(targetX - Camera.target.X);
     }
 
     /// <summary>

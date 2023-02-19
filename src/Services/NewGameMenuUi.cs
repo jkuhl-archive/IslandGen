@@ -234,7 +234,7 @@ public class NewGameMenuUi
             _gameLogic.AddEntity(wreckage);
             break;
         }
-        
+
         // Point GameCamera at wreckage
         var cameraPosition = (wreckage.MapPosition.Item1 + wreckage.Size.Item1 / 2,
             wreckage.MapPosition.Item2 + wreckage.Size.Item2 / 2);
