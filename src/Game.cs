@@ -19,15 +19,17 @@ internal static class Game
         Raylib.InitAudioDevice();
 
         // Load game settings
-        ServiceManager.AddService(SaveUtils.LoadSettings());
-        ServiceManager.GetService<GameSettings>().ApplySettings();
+        SaveUtils.LoadSettings();
+
+        // Initialize System.Random service
+        ServiceManager.AddService(new Random());
 
         // Initialize core game services
         ServiceManager.AddService(new GameSettingsUi());
         ServiceManager.AddService(new GameUi());
         ServiceManager.AddService(new InputManager());
         ServiceManager.AddService(new MainMenuUi());
-        ServiceManager.AddService(new Random());
+        ServiceManager.AddService(new NewGameMenuUi());
         ServiceManager.AddService(new ScalingManager());
         ServiceManager.AddService(new StateManager());
 
@@ -45,6 +47,11 @@ internal static class Game
                 case GameState.MainMenu:
                     // Draw Main Menu
                     ServiceManager.GetService<MainMenuUi>().Draw();
+                    break;
+
+                case GameState.NewGameMenu:
+                    // Draw New Game Menu
+                    ServiceManager.GetService<NewGameMenuUi>().Draw();
                     break;
 
                 case GameState.InGame:

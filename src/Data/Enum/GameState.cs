@@ -6,5 +6,6 @@ namespace IslandGen.Data.Enum;
 public enum GameState
 {
     MainMenu,
+    NewGameMenu,
     InGame
 }

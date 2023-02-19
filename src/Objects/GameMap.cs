@@ -2,8 +2,6 @@ using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
-using IslandGen.Objects.ECS.Entities;
-using IslandGen.Objects.ECS.Entities.Structures;
 using IslandGen.Services;
 using Newtonsoft.Json;
 using Raylib_CsLo;
@@ -13,7 +11,7 @@ namespace IslandGen.Objects;
 public class GameMap
 {
     public const int MapSize = 100;
-    private const int MapBuffer = MapSize / 10;
+    public const int MapBuffer = MapSize / 10;
     public const int TileTextureSize = 16;
 
     private const int DirtDeform1Iterations = 10;
@@ -68,6 +66,99 @@ public class GameMap
     public void Update()
     {
         VegetationGrowth();
+    }
+
+    /// <summary>
+    ///     Randomly generates an island on the game map
+    /// </summary>
+    public void GenerateMap()
+    {
+        var rnd = ServiceManager.GetService<Random>();
+
+        // Fill map with ocean, then fill island base area with dirt
+        FillMapSection(Vector2.Zero, new Vector2(MapSize), TileType.Ocean);
+        FillMapSection(_baseIslandArea.Start(), _baseIslandArea.End(), TileType.Dirt);
+
+        // Dirt perimeter deform pass 1 and 2
+        DeformPerimeter(DirtDeform1Iterations, DirtDeform1Multiplier, TileType.Dirt, TileType.Ocean);
+        DeformPerimeter(DirtDeform2Iterations, DirtDeform2Multiplier, TileType.Dirt, TileType.Ocean);
+
+        // Dirt padding pass 1
+        PadTileTransition(TileType.Ocean, TileType.Dirt, TileType.Dirt);
+
+        // Lake seeding pass 1
+        SeedTileType(LakeSeeding1Iterations, LakeSeeding1Multiplier, null, TileType.Lake);
+
+        // Lake padding pass 1
+        PadTileTransition(TileType.Ocean, TileType.Lake, TileType.Lake);
+        PadTileTransition(TileType.Dirt, TileType.Lake, TileType.Lake);
+
+        // Sand padding pass 1
+        PadTileTransition(TileType.Ocean, TileType.Lake, TileType.Sand);
+        PadTileTransition(TileType.Ocean, TileType.Dirt, TileType.Sand);
+        for (var i = 0; i < rnd.Next((int)(MapSize * SandPad1Multiplier)); i++)
+            PadTileTransition(TileType.Ocean, TileType.Sand, TileType.Sand);
+
+        // Rock seeding pass 1
+        SeedTileType(RockSeeding1Iterations, RockSeeding1Multiplier, TileType.Dirt, TileType.Rock);
+
+        // Rock padding pass 1
+        PadTileTransition(TileType.Dirt, TileType.Rock, TileType.Rock);
+
+        // Sand perimeter deform pass 1 and 2
+        DeformPerimeter(SandDeform1Iterations, SandDeform1Multiplier, TileType.Sand, TileType.Ocean);
+        DeformPerimeter(SandDeform2Iterations, SandDeform2Multiplier, TileType.Sand, TileType.Ocean);
+
+        // Sand padding pass 2
+        PadTileTransition(TileType.Ocean, TileType.Rock, TileType.Sand);
+        PadTileTransition(TileType.Ocean, TileType.Dirt, TileType.Sand);
+        for (var i = 0; i < rnd.Next((int)(MapSize * SandPad2Multiplier)); i++)
+            PadTileTransition(TileType.Ocean, TileType.Sand, TileType.Sand);
+
+        // Sand deform pass 3
+        DeformPerimeter(SandDeform3Iterations, SandDeform3Multiplier, TileType.Sand, TileType.Ocean);
+
+        // Sand padding pass 3
+        PadTileTransition(TileType.Ocean, TileType.Sand, TileType.Sand);
+
+        // River generation pass 1 and pass 2
+        RiverGenerator();
+        RiverGenerator();
+
+        // River padding pass 1
+        PadTileTransition(TileType.Dirt, TileType.River, TileType.River);
+        PadTileTransition(TileType.Rock, TileType.River, TileType.River);
+        PadTileTransition(TileType.Sand, TileType.River, TileType.River);
+
+        // Ocean padding pass 1, this erodes river tiles that extend out into the ocean
+        PadTileTransition(TileType.River, TileType.Ocean, TileType.Ocean);
+        PadTileTransition(TileType.River, TileType.Ocean, TileType.Ocean);
+
+        // Vegetation sparse and vegetation moderate seeding pass 1
+        SeedTileType(VegetationSparseSeeding1Iterations, VegetationSparseSeeding1Multiplier,
+            TileType.Dirt, TileType.VegetationSparse);
+        SeedTileType(VegetationModerateSeeding1Iterations, VegetationModerateSeeding1Multiplier,
+            TileType.VegetationSparse, TileType.VegetationModerate);
+
+        // Vegetation sparse and vegetation moderate padding pass 1
+        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
+        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
+        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
+        PadTileTransition(TileType.Dirt, TileType.VegetationModerate, TileType.VegetationModerate);
+        PadTileTransition(TileType.VegetationSparse, TileType.VegetationModerate, TileType.VegetationModerate);
+        PadTileTransition(TileType.VegetationSparse, TileType.VegetationModerate, TileType.VegetationModerate);
+
+        // Vegetation dense seeding pass 1
+        SeedTileType(VegetationDenseSeeding1Iterations, VegetationDenseSeeding1Multiplier,
+            TileType.VegetationSparse, TileType.VegetationDense);
+        SeedTileType(VegetationDenseSeeding1Iterations, VegetationDenseSeeding1Multiplier,
+            TileType.VegetationModerate, TileType.VegetationDense);
+
+        // Vegetation dense padding pass 1
+        PadTileTransition(TileType.Dirt, TileType.VegetationDense, TileType.VegetationDense);
+        PadTileTransition(TileType.VegetationSparse, TileType.VegetationDense, TileType.VegetationDense);
+        PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
+        PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
     }
 
     /// <summary>
@@ -253,105 +344,6 @@ public class GameMap
     }
 
     /// <summary>
-    ///     Randomly generates an island on the game map
-    /// </summary>
-    public void GenerateMap()
-    {
-        var rnd = ServiceManager.GetService<Random>();
-
-        // Fill map with ocean, then fill island base area with dirt
-        FillMapSection(Vector2.Zero, new Vector2(MapSize), TileType.Ocean);
-        FillMapSection(_baseIslandArea.Start(), _baseIslandArea.End(), TileType.Dirt);
-
-        // Dirt perimeter deform pass 1 and 2
-        DeformPerimeter(DirtDeform1Iterations, DirtDeform1Multiplier, TileType.Dirt, TileType.Ocean);
-        DeformPerimeter(DirtDeform2Iterations, DirtDeform2Multiplier, TileType.Dirt, TileType.Ocean);
-
-        // Dirt padding pass 1
-        PadTileTransition(TileType.Ocean, TileType.Dirt, TileType.Dirt);
-
-        // Lake seeding pass 1
-        SeedTileType(LakeSeeding1Iterations, LakeSeeding1Multiplier, null, TileType.Lake);
-
-        // Lake padding pass 1
-        PadTileTransition(TileType.Ocean, TileType.Lake, TileType.Lake);
-        PadTileTransition(TileType.Dirt, TileType.Lake, TileType.Lake);
-
-        // Sand padding pass 1
-        PadTileTransition(TileType.Ocean, TileType.Lake, TileType.Sand);
-        PadTileTransition(TileType.Ocean, TileType.Dirt, TileType.Sand);
-        for (var i = 0; i < rnd.Next((int)(MapSize * SandPad1Multiplier)); i++)
-            PadTileTransition(TileType.Ocean, TileType.Sand, TileType.Sand);
-
-        // Rock seeding pass 1
-        SeedTileType(RockSeeding1Iterations, RockSeeding1Multiplier, TileType.Dirt, TileType.Rock);
-
-        // Rock padding pass 1
-        PadTileTransition(TileType.Dirt, TileType.Rock, TileType.Rock);
-
-        // Sand perimeter deform pass 1 and 2
-        DeformPerimeter(SandDeform1Iterations, SandDeform1Multiplier, TileType.Sand, TileType.Ocean);
-        DeformPerimeter(SandDeform2Iterations, SandDeform2Multiplier, TileType.Sand, TileType.Ocean);
-
-        // Sand padding pass 2
-        PadTileTransition(TileType.Ocean, TileType.Rock, TileType.Sand);
-        PadTileTransition(TileType.Ocean, TileType.Dirt, TileType.Sand);
-        for (var i = 0; i < rnd.Next((int)(MapSize * SandPad2Multiplier)); i++)
-            PadTileTransition(TileType.Ocean, TileType.Sand, TileType.Sand);
-
-        // Sand deform pass 3
-        DeformPerimeter(SandDeform3Iterations, SandDeform3Multiplier, TileType.Sand, TileType.Ocean);
-
-        // Sand padding pass 3
-        PadTileTransition(TileType.Ocean, TileType.Sand, TileType.Sand);
-
-        // River generation pass 1 and pass 2
-        RiverGenerator();
-        RiverGenerator();
-
-        // River padding pass 1
-        PadTileTransition(TileType.Dirt, TileType.River, TileType.River);
-        PadTileTransition(TileType.Rock, TileType.River, TileType.River);
-        PadTileTransition(TileType.Sand, TileType.River, TileType.River);
-
-        // Ocean padding pass 1, this erodes river tiles that extend out into the ocean
-        PadTileTransition(TileType.River, TileType.Ocean, TileType.Ocean);
-        PadTileTransition(TileType.River, TileType.Ocean, TileType.Ocean);
-
-        // Vegetation sparse and vegetation moderate seeding pass 1
-        SeedTileType(VegetationSparseSeeding1Iterations, VegetationSparseSeeding1Multiplier,
-            TileType.Dirt, TileType.VegetationSparse);
-        SeedTileType(VegetationModerateSeeding1Iterations, VegetationModerateSeeding1Multiplier,
-            TileType.VegetationSparse, TileType.VegetationModerate);
-
-        // Vegetation sparse and vegetation moderate padding pass 1
-        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
-        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
-        PadTileTransition(TileType.Dirt, TileType.VegetationSparse, TileType.VegetationSparse);
-        PadTileTransition(TileType.Dirt, TileType.VegetationModerate, TileType.VegetationModerate);
-        PadTileTransition(TileType.VegetationSparse, TileType.VegetationModerate, TileType.VegetationModerate);
-        PadTileTransition(TileType.VegetationSparse, TileType.VegetationModerate, TileType.VegetationModerate);
-
-        // Vegetation dense seeding pass 1
-        SeedTileType(VegetationDenseSeeding1Iterations, VegetationDenseSeeding1Multiplier,
-            TileType.VegetationSparse, TileType.VegetationDense);
-        SeedTileType(VegetationDenseSeeding1Iterations, VegetationDenseSeeding1Multiplier,
-            TileType.VegetationModerate, TileType.VegetationDense);
-
-        // Vegetation dense padding pass 1
-        PadTileTransition(TileType.Dirt, TileType.VegetationDense, TileType.VegetationDense);
-        PadTileTransition(TileType.VegetationSparse, TileType.VegetationDense, TileType.VegetationDense);
-        PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
-        PadTileTransition(TileType.VegetationModerate, TileType.VegetationDense, TileType.VegetationDense);
-
-        // Place wreckage
-        PlaceWreckage();
-
-        // Place trees
-        PlaceTrees();
-    }
-
-    /// <summary>
     ///     Pads transitions between TileTypes
     /// </summary>
     /// <param name="tileType1"> TileType that we are checking for as the transition, replaced if valid </param>
@@ -387,64 +379,6 @@ public class GameMap
         // Update all marked tiles
         foreach (var tileCoordinates in tilesPendingUpdate)
             _tileMap[tileCoordinates.Item1, tileCoordinates.Item2] = fill;
-    }
-
-    /// <summary>
-    ///     Randomly seeds trees around the map based on the types of tiles the tree's roots will be in
-    /// </summary>
-    private void PlaceTrees()
-    {
-        var gameLogic = ServiceManager.GetService<GameLogic>();
-        var rnd = ServiceManager.GetService<Random>();
-        var wreckageTiles = gameLogic.GetEntityList<Wreckage>()[0].GetOccupiedTiles();
-
-        for (var mapX = 0; mapX < MapSize; mapX++)
-        for (var mapY = 0; mapY < MapSize; mapY++)
-        {
-            var treeBaseY = mapY + 1;
-            if (treeBaseY >= MapSize) continue;
-            if (wreckageTiles.Contains((mapX, mapY)) || wreckageTiles.Contains((mapX, treeBaseY))) continue;
-
-            switch (_tileMap[mapX, treeBaseY])
-            {
-                case TileType.Dirt:
-                case TileType.Sand:
-                    if (rnd.Next(100) < 95) continue;
-                    break;
-                case TileType.VegetationSparse:
-                    if (rnd.Next(100) < 70) continue;
-                    break;
-                case TileType.VegetationModerate:
-                    if (rnd.Next(100) < 50) continue;
-                    break;
-                case TileType.VegetationDense:
-                    if (rnd.Next(100) < 20) continue;
-                    break;
-                default:
-                    continue;
-            }
-
-            gameLogic.AddEntity(new Tree { MapPosition = (mapX, mapY) });
-        }
-    }
-
-    /// <summary>
-    ///     Places ship wreckage on the game map
-    /// </summary>
-    private void PlaceWreckage()
-    {
-        var gameLogic = ServiceManager.GetService<GameLogic>();
-        var rnd = ServiceManager.GetService<Random>();
-        var wreckage = new Wreckage();
-
-        for (var attempt = 0; attempt < MapSize * 10; attempt++)
-        {
-            wreckage.MapPosition = (rnd.Next(MapBuffer), rnd.Next(MapBuffer, MapSize - MapBuffer));
-            if (!wreckage.ValidPlacement()) continue;
-
-            gameLogic.AddEntity(wreckage);
-            break;
-        }
     }
 
     /// <summary>

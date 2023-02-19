@@ -17,8 +17,8 @@ public class MainMenuUi
     private const string GameMajorVersion = "0.1-alpha";
 
     private readonly List<Button> _buttonsList;
+    private readonly Texture _dirtTexture = Assets.Textures[TileType.Dirt.GetTileTextureName()];
     private readonly string _versionString;
-
     private Rectangle _backgroundArea;
     private Rectangle _buttonsArea;
     private Rectangle _titleArea;
@@ -35,7 +35,7 @@ public class MainMenuUi
     {
         _buttonsList = new List<Button>
         {
-            new("New Island", SaveUtils.NewGame),
+            new("New Island", () => ServiceManager.GetService<StateManager>().NewGameMenu()),
             new("Load Island", SaveUtils.LoadGame),
             new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
             new("Exit Game", Raylib.CloseWindow)
@@ -47,9 +47,13 @@ public class MainMenuUi
 
     public void Draw()
     {
-        var texture = Assets.Textures[TileType.Dirt.GetTileTextureName()];
-        Raylib.DrawTextureTiled(texture, new Rectangle(0, 0, texture.width, texture.height), _backgroundArea,
-            Vector2.Zero, 0, BackgroundTileScale, Raylib.WHITE);
+        Raylib.DrawTextureTiled(_dirtTexture,
+            new Rectangle(0, 0, _dirtTexture.width, _dirtTexture.height),
+            _backgroundArea,
+            Vector2.Zero,
+            0,
+            BackgroundTileScale,
+            Raylib.WHITE);
 
         Raylib.DrawTextEx(Raylib.GetFontDefault(), GameTitle, _titleArea.Start() + Vector2.One * 4, _titleFontSize,
             _titleFontSpacing, Raylib.BLACK);

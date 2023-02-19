@@ -1,8 +1,4 @@
 using IslandGen.Data;
-using IslandGen.Data.Enum;
-using IslandGen.Extensions;
-using IslandGen.Objects.ECS.Entities.Creatures;
-using IslandGen.Objects.ECS.Entities.Structures;
 using IslandGen.Services;
 using Newtonsoft.Json;
 
@@ -27,40 +23,21 @@ public static class SaveUtils
         if (gameLogic == null) return;
 
         ServiceManager.ReplaceService(gameLogic);
-        ServiceManager.GetService<StateManager>().SetGameState(GameState.InGame);
+        ServiceManager.GetService<StateManager>().InGame();
     }
 
     /// <summary>
     ///     Loads saved game settings
     /// </summary>
     /// <returns> Loaded GameSettings object or new GameSettings object if unable to load </returns>
-    public static GameSettings LoadSettings()
+    public static void LoadSettings()
     {
-        if (!File.Exists(Paths.GameSettingsFile)) return new GameSettings();
+        var gameSettings = File.Exists(Paths.GameSettingsFile)
+            ? JsonConvert.DeserializeObject<GameSettings>(File.ReadAllText(Paths.GameSettingsFile), JsonSettings)
+            : new GameSettings();
 
-        var gameSettings =
-            JsonConvert.DeserializeObject<GameSettings>(File.ReadAllText(Paths.GameSettingsFile), JsonSettings);
-        return gameSettings ?? new GameSettings();
-    }
-
-    /// <summary>
-    ///     Initializes a new game
-    ///     TODO: Move this to MainMenuUi once we no longer want to generate new island in game
-    /// </summary>
-    public static void NewGame()
-    {
-        var gameLogic = new GameLogic();
-        ServiceManager.ReplaceService(gameLogic);
-        gameLogic.GameMap.GenerateMap();
-
-        for (var i = 0; i < 10; i++)
-            gameLogic.AddEntity(new Colonist
-            {
-                MapPosition = ((Wreckage)gameLogic.GetEntityList<Wreckage>()[0]).GetShipExitTile(),
-                ReadableName = Datasets.MaleNames.RandomItem()
-            });
-
-        ServiceManager.GetService<StateManager>().SetGameState(GameState.InGame);
+        gameSettings!.ApplySettings();
+        ServiceManager.AddService(gameSettings);
     }
 
     /// <summary>
@@ -79,7 +56,7 @@ public static class SaveUtils
     /// <summary>
     ///     Saves the game's settings
     /// </summary>
-    public static void SaveGameSettings()
+    public static void SaveSettings()
     {
         if (!Directory.Exists(Paths.GameSavesDirectory)) Directory.CreateDirectory(Paths.GameSavesDirectory);
 

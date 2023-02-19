@@ -13,10 +13,9 @@ namespace IslandGen.Services;
 
 public class GameUi
 {
-    private const int CalendarWidth = 115;
+    private const int CalendarWidth = 120;
     private const int CalendarHeight = 20;
-    private const int MiniMapWidth = 100;
-    private const int MiniMapHeight = 100;
+    private const int MiniMapSize = 100;
     private const int SelectedEntityMenuWidth = 250;
     private const int SelectedEntityMenuHeight = 80;
     private const int SidebarButtonsWidth = 100;
@@ -32,17 +31,15 @@ public class GameUi
     private const int SpeedControlsButtonWidth = 25;
     private const int SpeedControlsWidth = SpeedControlsButtonWidth * 3;
     private const int SpeedControlsHeight = 15;
-
     private const string PausedString = "Paused";
-    private readonly RenderTexturePro _miniMapTexture;
 
+    private readonly RenderTexturePro _miniMapTexture;
     private readonly List<Button> _sidebarButtonsList;
     private readonly List<Button> _speedControlButtonsList;
     private string _calendarString;
     private string _debugInfoString;
     private Rectangle _miniMapArea;
     private string? _selectedEntityString;
-
     private Rectangle _sidebarButtonsArea;
 
     /// <summary>
@@ -54,10 +51,9 @@ public class GameUi
         {
             new("Save Island", SaveUtils.SaveGame),
             new("Load Island", SaveUtils.LoadGame),
-            new("New Island", SaveUtils.NewGame),
             new("New Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
             new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
-            new("Main Menu", () => ServiceManager.GetService<StateManager>().SetGameState(GameState.MainMenu))
+            new("Main Menu", () => ServiceManager.GetService<StateManager>().MainMenu())
         };
         _speedControlButtonsList = new List<Button>
         {
@@ -68,7 +64,7 @@ public class GameUi
 
         _calendarString = string.Empty;
         _debugInfoString = string.Empty;
-        _miniMapTexture = new RenderTexturePro(new Vector2(MiniMapWidth, MiniMapHeight));
+        _miniMapTexture = new RenderTexturePro((MiniMapSize, MiniMapSize));
     }
 
     public Rectangle CalendarArea { get; private set; }
@@ -209,8 +205,8 @@ public class GameUi
         _miniMapArea = new Rectangle(
             SidebarArea.X + scalingManager.Padding,
             SidebarArea.Y + _sidebarButtonsArea.height + scalingManager.Padding * 2,
-            (int)(MiniMapWidth * scalingManager.ScaleFactor),
-            (int)(MiniMapHeight * scalingManager.ScaleFactor));
+            (int)(MiniMapSize * scalingManager.ScaleFactor),
+            (int)(MiniMapSize * scalingManager.ScaleFactor));
 
         // Set speed controls area
         SpeedControlsArea = new Rectangle(

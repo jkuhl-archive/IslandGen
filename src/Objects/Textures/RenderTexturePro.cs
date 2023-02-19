@@ -1,5 +1,4 @@
 using System.Numerics;
-using IslandGen.Extensions;
 using IslandGen.Services;
 using Raylib_CsLo;
 
@@ -15,9 +14,9 @@ public class RenderTexturePro
     ///     Constructor for RenderTexturePro
     /// </summary>
     /// <param name="textureSize"> Vector2 that contains the width and height of the texture </param>
-    public RenderTexturePro(Vector2 textureSize)
+    public RenderTexturePro((int, int) textureSize)
     {
-        RenderTexture = Raylib.LoadRenderTexture(textureSize.X_int(), textureSize.Y_int());
+        RenderTexture = Raylib.LoadRenderTexture(textureSize.Item1, textureSize.Item2);
 
         // The source rectangle's height is flipped for OpenGL reasons
         SourceRectangle = new Rectangle(0, 0, RenderTexture.texture.width, -RenderTexture.texture.height);

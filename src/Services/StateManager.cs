@@ -7,11 +7,28 @@ public class StateManager
     public GameState GameState { get; private set; } = GameState.MainMenu;
 
     /// <summary>
-    ///     Sets the game state
+    ///     Switches the GameState to InGame
     /// </summary>
-    /// <param name="gameState"> GameState that we want to set the game to </param>
-    public void SetGameState(GameState gameState)
+    public void InGame()
     {
-        GameState = gameState;
+        GameState = GameState.InGame;
+    }
+
+    /// <summary>
+    ///     Switches the GameState to NewGameMenu
+    /// </summary>
+    public void NewGameMenu()
+    {
+        ServiceManager.GetService<NewGameMenuUi>().InitializeGameLogic();
+        GameState = GameState.NewGameMenu;
+    }
+
+    /// <summary>
+    ///     Switches the GameState to MainMenu
+    /// </summary>
+    public void MainMenu()
+    {
+        ServiceManager.RemoveService(typeof(GameLogic));
+        GameState = GameState.MainMenu;
     }
 }

@@ -1,4 +1,3 @@
-using System.Numerics;
 using IslandGen.Data;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
@@ -13,20 +12,17 @@ namespace IslandGen.Services;
 
 public class GameLogic
 {
-    private const int StartYear = 1600;
-    private const int StartMonth = 1;
-    private const int StartDay = 1;
-    [JsonIgnore] public static readonly DateTime StartDateTime = new(StartYear, StartMonth, StartDay);
     [JsonProperty] private readonly Dictionary<Type, List<EntityBase>> _entities = new();
 
     [JsonIgnore] private readonly RenderTexturePro _gameWorldTexture =
-        new(new Vector2(GameMap.MapSize * GameMap.TileTextureSize, GameMap.MapSize * GameMap.TileTextureSize));
+        new((GameMap.MapSize * GameMap.TileTextureSize, GameMap.MapSize * GameMap.TileTextureSize));
 
     [JsonProperty] private float _updateTimer;
+    [JsonProperty] public DateTime StartDateTime { get; init; }
     [JsonIgnore] public EntityBase? SelectedEntity { get; private set; }
     [JsonProperty] public bool GamePaused { get; private set; }
     [JsonIgnore] public StructureBase? MouseStructure { get; private set; }
-    [JsonProperty] public DateTime CurrentDateTime { get; private set; } = StartDateTime;
+    [JsonProperty] public DateTime CurrentDateTime { get; private set; }
     [JsonProperty] public GameSpeed GameSpeed { get; private set; } = GameSpeed.Normal;
     [JsonProperty] public GameCamera GameCamera { get; private init; } = new();
     [JsonProperty] public GameMap GameMap { get; private init; } = new();
@@ -196,6 +192,14 @@ public class GameLogic
         AddEntity(MouseStructure);
         Raylib.PlaySound(Assets.Sounds["click"]); // TODO: Replace this with a 'construction' sound
         MouseStructure = null;
+    }
+
+    /// <summary>
+    ///     Resets the in game date to the start date
+    /// </summary>
+    public void ResetDateTime()
+    {
+        CurrentDateTime = StartDateTime;
     }
 
     /// <summary>

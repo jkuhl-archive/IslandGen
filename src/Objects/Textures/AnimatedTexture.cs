@@ -7,9 +7,9 @@ namespace IslandGen.Objects.Textures;
 public class AnimatedTexture
 {
     private readonly int _frameDelay;
-    private readonly int _frameWidth;
     private readonly Texture _texture;
     private readonly int _totalFrames;
+    public readonly int FrameWidth;
     private int _currentFrame;
 
     private int _frameCounter;
@@ -25,12 +25,12 @@ public class AnimatedTexture
         var gameSettings = ServiceManager.GetService<GameSettings>();
 
         _texture = texture;
-        _frameWidth = frameWidth;
-        _totalFrames = texture.width / _frameWidth;
+        FrameWidth = frameWidth;
+        _totalFrames = texture.width / FrameWidth;
         _frameDelay = (int)Math.Round(gameSettings.TargetFrameRate / (float)_totalFrames);
 
         _currentFrame = 0;
-        _textureRectangle = new Rectangle(0, 0, _frameWidth, _texture.height);
+        _textureRectangle = new Rectangle(0, 0, FrameWidth, _texture.height);
     }
 
     public void Draw(Vector2 position)
@@ -49,7 +49,7 @@ public class AnimatedTexture
 
             if (_currentFrame > _totalFrames - 1) _currentFrame = 0;
 
-            _textureRectangle.X = _currentFrame * _frameWidth;
+            _textureRectangle.X = _currentFrame * FrameWidth;
         }
     }
 

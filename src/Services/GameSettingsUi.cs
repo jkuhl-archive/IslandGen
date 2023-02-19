@@ -17,11 +17,11 @@ public class GameSettingsUi
     private const string FullscreenDisabledLabel = "Fullscreen";
     private const string FullscreenEnabledLabel = "Windowed";
     private const string SettingsMenuTitle = "Settings";
+
     private readonly Button _debugModeButton;
     private readonly Button _exitButton;
     private readonly Button _fullscreenButton;
     private readonly List<Button> _settingsButtonsList;
-
     private Rectangle _buttonsArea;
     private Rectangle _menuBackdrop;
     private Rectangle _menuInnerBackdrop;
@@ -133,7 +133,7 @@ public class GameSettingsUi
     /// </summary>
     public void ToggleSettingsMenu()
     {
-        SaveUtils.SaveGameSettings();
+        SaveUtils.SaveSettings();
 
         var gameLogic = ServiceManager.GetService<GameLogic>();
         if (gameLogic != null) gameLogic.ToggleGamePaused();

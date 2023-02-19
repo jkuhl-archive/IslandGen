@@ -9,12 +9,10 @@ public class ScalingManager
     private const double BaseHeight16By9 = 360;
     private const double BaseHeight16By10 = 400;
     private const double BaseHeight32By9 = 180;
-
     private const double AspectRatio4By3 = BaseWidth / BaseHeight4By3;
     private const double AspectRatio16By9 = BaseWidth / BaseHeight16By9;
     private const double AspectRatio16By10 = BaseWidth / BaseHeight16By10;
     private const double AspectRatio32By9 = BaseWidth / BaseHeight32By9;
-
     private const double ScaleFactor4By3 = 1 / BaseHeight4By3;
     private const double ScaleFactor16By9 = 1 / BaseHeight16By9;
     private const double ScaleFactor16By10 = 1 / BaseHeight16By10;
@@ -48,9 +46,10 @@ public class ScalingManager
         FontSize = (int)ScaleFactor * 5;
         FontSpacing = (int)(2 * ScaleFactor);
 
-        ServiceManager.GetService<MainMenuUi>().UpdateScaling();
         ServiceManager.GetService<GameUi>().UpdateScaling();
         ServiceManager.GetService<GameSettingsUi>().UpdateScaling();
+        ServiceManager.GetService<MainMenuUi>().UpdateScaling();
+        ServiceManager.GetService<NewGameMenuUi>().UpdateScaling();
     }
 
     /// <summary>
