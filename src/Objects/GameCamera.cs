@@ -15,6 +15,36 @@ public class GameCamera
     [JsonProperty] public Camera2D Camera = new() { zoom = DefaultZoom };
 
     /// <summary>
+    ///     Moves the camera to look at a specific tile on the game map
+    /// </summary>
+    /// <param name="targetTile"> Tile that the camera should center on </param>
+    public void LookAtTile((int, int) targetTile)
+    {
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+        var visibleMapTiles = gameLogic.GameMap.GetVisibleMapTiles();
+        var targetX = (targetTile.Item1 - visibleMapTiles.width / 2) * GameMap.TileTextureSize;
+        var targetY = (targetTile.Item2 - visibleMapTiles.height / 2) * GameMap.TileTextureSize;
+
+        if (targetY < Camera.target.Y)
+        {
+            PanUp(Camera.target.Y - targetY);
+        } 
+        else if (targetY > Camera.target.Y)
+        {
+            PanDown(targetY - Camera.target.Y);
+        }
+        
+        if (targetX < Camera.target.X)
+        {
+            PanLeft(Camera.target.X - targetX);
+        } 
+        else if (targetX > Camera.target.X)
+        {
+            PanRight(targetX - Camera.target.X);
+        }
+    }
+
+    /// <summary>
     ///     Pans the camera up
     ///     <param name="amount"> Distance the camera should be panned </param>
     /// </summary>

@@ -6,7 +6,7 @@ namespace IslandGen.Services;
 
 public class InputManager
 {
-    private const float MouseCameraPanSpeed = 20;
+    private const float MouseCameraPanSpeed = 10;
     private const int MouseCameraPanThreshold = 5;
 
     public void Update()

@@ -234,6 +234,11 @@ public class NewGameMenuUi
             _gameLogic.AddEntity(wreckage);
             break;
         }
+        
+        // Point GameCamera at wreckage
+        var cameraPosition = (wreckage.MapPosition.Item1 + wreckage.Size.Item1 / 2,
+            wreckage.MapPosition.Item2 + wreckage.Size.Item2 / 2);
+        _gameLogic.GameCamera.LookAtTile(cameraPosition);
 
         // Place trees
         for (var mapX = 0; mapX < GameMap.MapSize; mapX++)
