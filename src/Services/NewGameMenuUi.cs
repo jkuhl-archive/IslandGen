@@ -273,6 +273,13 @@ public class NewGameMenuUi
             _gameLogic.AddEntity(new Tree { MapPosition = (mapX, mapY) });
         }
 
+        // Place captain
+        _gameLogic.AddEntity(new Colonist
+        {
+            MapPosition = wreckage.GetShipExitTile(),
+            ReadableName = $"Captain {_captainName}"
+        });
+
         // Place colonists
         for (var i = 0; i < CrewSize - 1; i++)
             _gameLogic.AddEntity(new Colonist
@@ -280,12 +287,5 @@ public class NewGameMenuUi
                 MapPosition = wreckage.GetShipExitTile(),
                 ReadableName = Datasets.MaleNames.RandomItem()
             });
-
-        // Place captain
-        _gameLogic.AddEntity(new Colonist
-        {
-            MapPosition = wreckage.GetShipExitTile(),
-            ReadableName = $"Captain {_captainName}"
-        });
     }
 }

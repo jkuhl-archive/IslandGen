@@ -2,6 +2,7 @@ using System.Numerics;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.Objects;
+using IslandGen.Objects.ECS.Components;
 using IslandGen.Objects.ECS.Entities.Creatures;
 using IslandGen.Objects.ECS.Entities.Structures;
 using IslandGen.Objects.Textures;
@@ -27,11 +28,13 @@ public class GameUi
     private const int SpeedControlsButtonWidth = 25;
     private const int SpeedControlsWidth = SpeedControlsButtonWidth * 3;
     private const int SpeedControlsHeight = 15;
+    private const int StatusButtonHeight = 8;
     private const string PausedString = "Paused";
-    
+
     private readonly List<Button> _buildTabButtons;
     private readonly RenderTexturePro _miniMapTexture;
     private readonly List<Button> _speedControlButtons;
+    private readonly List<Button> _statusButtons;
     private readonly List<Button> _systemTabButtons;
     private readonly List<Button> _tabButtons;
     private string _calendarString;
@@ -39,9 +42,10 @@ public class GameUi
     private string _debugInfoString;
     private Rectangle _miniMapArea;
     private string? _selectedEntityString;
-    private Rectangle _sidebarButtonsArea;
+    private Rectangle _sidebarContentsArea;
     private Rectangle _sidebarInnerArea;
     private Rectangle _sidebarTabsArea;
+    private int _statusButtonHeight;
 
     /// <summary>
     ///     Service that manages the game's UI
@@ -58,6 +62,7 @@ public class GameUi
             new("| |", () => ServiceManager.GetService<GameLogic>().ToggleGamePaused()),
             new("|>|>", () => ServiceManager.GetService<GameLogic>().IncreaseGameSpeed())
         };
+        _statusButtons = new List<Button>();
         _systemTabButtons = new List<Button>
         {
             new("Save Island", SaveUtils.SaveGame),
@@ -125,7 +130,7 @@ public class GameUi
 
         // Draw sidebar backdrop
         Raylib.DrawRectangleRec(SidebarArea, Raylib.WHITE);
-        Raylib.DrawRectangleRec(_sidebarButtonsArea, Raylib.GRAY);
+        Raylib.DrawRectangleRec(_sidebarContentsArea, Raylib.GRAY);
         Raylib.DrawRectangleRec(_sidebarTabsArea, Raylib.DARKGRAY);
 
         // Draw tab buttons
@@ -136,6 +141,11 @@ public class GameUi
         {
             case GameUiTab.Build:
                 foreach (var button in _buildTabButtons) button.Draw();
+                break;
+            case GameUiTab.Items:
+                break;
+            case GameUiTab.Status:
+                foreach (var button in _statusButtons) button.Draw();
                 break;
             case GameUiTab.System:
                 foreach (var button in _systemTabButtons) button.Draw();
@@ -167,6 +177,27 @@ public class GameUi
         // Set selected entity string
         _selectedEntityString = gameLogic.SelectedEntity?.GetInfoString();
 
+        // Set status tab contents
+        switch (_currentUiTab)
+        {
+            case GameUiTab.Status:
+                _statusButtons.Clear();
+                var colonistList = gameLogic.GetEntityList<Colonist>();
+                for (var i = 0; i < colonistList.Count; i++)
+                {
+                    var colonist = colonistList[i];
+                    _statusButtons.Add(new Button(
+                        $"{colonist.ReadableName} - Health: {colonist.GetComponent<Health>().HealthPoints}",
+                        () => gameLogic.SetSelectedEntity(colonist),
+                        _sidebarContentsArea with
+                        {
+                            Y = _sidebarContentsArea.Y + i * _statusButtonHeight,
+                            height = _statusButtonHeight
+                        }));
+                }
+                break;
+        }
+
         // Set debug info string
         if (gameSettings.DebugMode)
         {
@@ -194,6 +225,7 @@ public class GameUi
     public void UpdateScaling()
     {
         var scalingManager = ServiceManager.GetService<ScalingManager>();
+        _statusButtonHeight = (int)(StatusButtonHeight * scalingManager.ScaleFactor);
 
         // Set calendar area
         CalendarArea = new Rectangle(
@@ -238,7 +270,7 @@ public class GameUi
             SidebarTabHeight * scalingManager.ScaleFactor);
 
         // Set sidebar buttons area
-        _sidebarButtonsArea = new Rectangle(
+        _sidebarContentsArea = new Rectangle(
             _sidebarInnerArea.X,
             _sidebarTabsArea.Y + _sidebarTabsArea.height + scalingManager.Padding,
             _sidebarInnerArea.width,
@@ -266,8 +298,8 @@ public class GameUi
         for (var i = 0; i < 20; i++)
         {
             var buttonArea = new Rectangle(
-                _sidebarButtonsArea.X + columnCounter * SidebarButtonWidth * scalingManager.ScaleFactor,
-                _sidebarButtonsArea.Y + rowCounter * SidebarButtonHeight * scalingManager.ScaleFactor,
+                _sidebarContentsArea.X + columnCounter * SidebarButtonWidth * scalingManager.ScaleFactor,
+                _sidebarContentsArea.Y + rowCounter * SidebarButtonHeight * scalingManager.ScaleFactor,
                 SidebarButtonWidth * scalingManager.ScaleFactor,
                 SidebarButtonHeight * scalingManager.ScaleFactor);
 
