@@ -26,6 +26,7 @@ public class GameLogic
     [JsonProperty] public GameSpeed GameSpeed { get; private set; } = GameSpeed.Normal;
     [JsonProperty] public GameCamera GameCamera { get; private init; } = new();
     [JsonProperty] public GameMap GameMap { get; private init; } = new();
+    [JsonProperty] public Dictionary<Resource, int> Resources { get; private init; } = new();
 
     public void Draw()
     {

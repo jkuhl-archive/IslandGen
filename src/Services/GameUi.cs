@@ -32,6 +32,7 @@ public class GameUi
     private const string PausedString = "Paused";
 
     private readonly List<Button> _buildTabButtons;
+    private readonly List<string> _itemsList;
     private readonly RenderTexturePro _miniMapTexture;
     private readonly List<Button> _speedControlButtons;
     private readonly List<Button> _statusButtons;
@@ -40,6 +41,9 @@ public class GameUi
     private string _calendarString;
     private GameUiTab _currentUiTab;
     private string _debugInfoString;
+    private int _itemsFontSize;
+    private int _itemsFontSpacing;
+    private Rectangle _itemsStringsArea;
     private Rectangle _miniMapArea;
     private string? _selectedEntityString;
     private Rectangle _sidebarContentsArea;
@@ -56,6 +60,7 @@ public class GameUi
         {
             new("Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter()))
         };
+        _itemsList = new List<string>();
         _speedControlButtons = new List<Button>
         {
             new("<|<|", () => ServiceManager.GetService<GameLogic>().DecreaseGameSpeed()),
@@ -143,6 +148,13 @@ public class GameUi
                 foreach (var button in _buildTabButtons) button.Draw();
                 break;
             case GameUiTab.Items:
+                for (var i = 0; i < _itemsList.Count; i++)
+                    Raylib.DrawTextEx(Raylib.GetFontDefault(),
+                        _itemsList[i],
+                        new Vector2(_itemsStringsArea.X, _itemsStringsArea.Y + i * _itemsFontSize),
+                        _itemsFontSize,
+                        _itemsFontSpacing,
+                        Raylib.WHITE);
                 break;
             case GameUiTab.Status:
                 foreach (var button in _statusButtons) button.Draw();
@@ -177,7 +189,7 @@ public class GameUi
         // Set selected entity string
         _selectedEntityString = gameLogic.SelectedEntity?.GetInfoString();
 
-        // Set status tab contents
+        // Set tab contents
         switch (_currentUiTab)
         {
             case GameUiTab.Status:
@@ -200,6 +212,12 @@ public class GameUi
                         }));
                 }
 
+                break;
+
+            case GameUiTab.Items:
+                _itemsList.Clear();
+                foreach (var key in gameLogic.Resources.Keys)
+                    _itemsList.Add($"{key.GetResourceName()}: {gameLogic.Resources[key]}");
                 break;
         }
 
@@ -230,6 +248,8 @@ public class GameUi
     public void UpdateScaling()
     {
         var scalingManager = ServiceManager.GetService<ScalingManager>();
+        _itemsFontSize = scalingManager.FontSize;
+        _itemsFontSpacing = scalingManager.FontSpacing;
         _statusButtonHeight = (int)(StatusButtonHeight * scalingManager.ScaleFactor);
 
         // Set calendar area
@@ -274,12 +294,19 @@ public class GameUi
             _sidebarInnerArea.width,
             SidebarTabHeight * scalingManager.ScaleFactor);
 
-        // Set sidebar buttons area
+        // Set sidebar contents area
         _sidebarContentsArea = new Rectangle(
             _sidebarInnerArea.X,
             _sidebarTabsArea.Y + _sidebarTabsArea.height + scalingManager.Padding,
             _sidebarInnerArea.width,
             _sidebarInnerArea.height - _sidebarTabsArea.height - _miniMapArea.height - scalingManager.Padding * 2);
+
+        // Set items strings area
+        _itemsStringsArea = new Rectangle(
+            _sidebarContentsArea.X + scalingManager.Padding,
+            _sidebarContentsArea.Y + scalingManager.Padding,
+            _sidebarContentsArea.width - scalingManager.Padding * 2,
+            _sidebarContentsArea.height - scalingManager.Padding * 2);
 
         // Set speed controls area
         SpeedControlsArea = new Rectangle(

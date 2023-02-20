@@ -190,6 +190,11 @@ public class NewGameMenuUi
         // Set captain and ship names
         _captainName = Datasets.MaleNames.RandomItem();
         _shipName = Datasets.FemaleNames.RandomItem();
+
+        // Give starting resources
+        _gameLogic.Resources.Add(Resource.CookedFish, 20);
+        _gameLogic.Resources.Add(Resource.DrinkingWater, 50);
+        _gameLogic.Resources.Add(Resource.Lumber, 100);
     }
 
     /// <summary>
