@@ -14,7 +14,7 @@ namespace IslandGen.Services;
 
 public class GameUi
 {
-    private const int CalendarWidth = 120;
+    private const int CalendarWidth = 125;
     private const int CalendarHeight = 20;
     private const int MiniMapSize = 100;
     private const int SelectedEntityMenuWidth = 250;
@@ -188,13 +188,18 @@ public class GameUi
                     var colonist = colonistList[i];
                     _statusButtons.Add(new Button(
                         $"{colonist.ReadableName} - Health: {colonist.GetComponent<Health>().HealthPoints}",
-                        () => gameLogic.SetSelectedEntity(colonist),
+                        () =>
+                        {
+                            gameLogic.SetSelectedEntity(colonist);
+                            gameLogic.GameCamera.LookAtTile(colonist.MapPosition);
+                        },
                         _sidebarContentsArea with
                         {
                             Y = _sidebarContentsArea.Y + i * _statusButtonHeight,
                             height = _statusButtonHeight
                         }));
                 }
+
                 break;
         }
 
