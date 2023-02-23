@@ -60,7 +60,8 @@ public class GameUi
             new("Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
             new("Lumber Yard", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new LumberYard())),
             new("Well", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Well())),
-            new("Farm", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Farm()))
+            new("Farm", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Farm())),
+            new("Fishing Spot", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new FishingSpot()))
         };
         _itemsList = new List<string>();
         _speedControlButtons = new List<Button>

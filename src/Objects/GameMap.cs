@@ -226,7 +226,9 @@ public class GameMap
     /// <returns> TileType of the given tile </returns>
     public TileType GetTileType((int, int) tilePosition)
     {
-        return _tileMap[tilePosition.Item1, tilePosition.Item2];
+        return !_tileMap.InRange(tilePosition)
+            ? TileType.OutOfBounds
+            : _tileMap[tilePosition.Item1, tilePosition.Item2];
     }
 
     /// <summary>

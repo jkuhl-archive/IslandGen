@@ -7,10 +7,10 @@ namespace IslandGen.Data.Enum;
 /// </summary>
 public enum TileType
 {
-    Debug,
     Dirt,
     Lake,
     Ocean,
+    OutOfBounds,
     River,
     Rock,
     Sand,
@@ -30,10 +30,10 @@ public static class TileTypeExtensions
     {
         return tileType switch
         {
-            TileType.Debug => Colors.TileDebug,
             TileType.Dirt => Colors.TileDirt,
             TileType.Lake => Colors.TileLake,
             TileType.Ocean => Colors.TileOcean,
+            TileType.OutOfBounds => Colors.TileDebug,
             TileType.River => Colors.TileRiver,
             TileType.Rock => Colors.TileRock,
             TileType.Sand => Colors.TileSand,
@@ -53,10 +53,10 @@ public static class TileTypeExtensions
     {
         return tileType switch
         {
-            TileType.Debug => "tiles/debug",
             TileType.Dirt => "tiles/dirt",
             TileType.Lake => "tiles/lake",
             TileType.Ocean => "tiles/ocean",
+            TileType.OutOfBounds => "tiles/debug",
             TileType.River => "tiles/river",
             TileType.Rock => "tiles/rock",
             TileType.Sand => "tiles/sand",
