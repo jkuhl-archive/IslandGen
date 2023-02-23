@@ -53,17 +53,17 @@ public static class TileTypeExtensions
     {
         return tileType switch
         {
-            TileType.Debug => "debug",
-            TileType.Dirt => "dirt",
-            TileType.Lake => "lake",
-            TileType.Ocean => "ocean",
-            TileType.River => "river",
-            TileType.Rock => "rock",
-            TileType.Sand => "sand",
-            TileType.VegetationDense => "vegetation_3",
-            TileType.VegetationModerate => "vegetation_2",
-            TileType.VegetationSparse => "vegetation_1",
-            _ => "debug"
+            TileType.Debug => "tiles/debug",
+            TileType.Dirt => "tiles/dirt",
+            TileType.Lake => "tiles/lake",
+            TileType.Ocean => "tiles/ocean",
+            TileType.River => "tiles/river",
+            TileType.Rock => "tiles/rock",
+            TileType.Sand => "tiles/sand",
+            TileType.VegetationDense => "tiles/vegetation_3",
+            TileType.VegetationModerate => "tiles/vegetation_2",
+            TileType.VegetationSparse => "tiles/vegetation_1",
+            _ => "tiles/debug"
         };
     }
 

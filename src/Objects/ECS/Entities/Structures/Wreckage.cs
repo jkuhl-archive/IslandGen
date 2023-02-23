@@ -16,7 +16,7 @@ public class Wreckage : StructureBase
         PlaceableOnWater = true;
         ReadableName = "Ship Wreckage";
         Size = (5, 4);
-        Texture = Assets.Textures["wreckage"];
+        Texture = Assets.Textures["structures/wreckage"];
     }
 
     public (int, int) GetShipExitTile()

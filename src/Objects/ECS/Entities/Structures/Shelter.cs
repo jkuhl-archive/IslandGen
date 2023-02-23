@@ -14,6 +14,6 @@ public class Shelter : StructureBase
         PlaceableOnWater = false;
         ReadableName = "Shelter";
         Size = (2, 2);
-        Texture = Assets.Textures["shelter"];
+        Texture = Assets.Textures["structures/shelter"];
     }
 }

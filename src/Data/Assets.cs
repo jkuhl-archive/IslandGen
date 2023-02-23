@@ -15,12 +15,27 @@ public static class Assets
     /// <returns> Dictionary containing animated texture assets with file names as keys </returns>
     private static Dictionary<string, AnimatedTexture> LoadAnimatedTextures()
     {
+        var animatedTextures = new Dictionary<string, AnimatedTexture>();
         var animatedTexturesDirectory = new DirectoryInfo(Paths.AnimatedTexturesDirectory);
-        var animatedTextureFileList = animatedTexturesDirectory.GetFiles();
+        var directoryList = new List<DirectoryInfo> { animatedTexturesDirectory };
 
-        return animatedTextureFileList.ToDictionary(
-            textureFile => Path.ChangeExtension(textureFile.Name, null),
-            textureFile => new AnimatedTexture(Raylib.LoadTexture(textureFile.FullName)));
+        while (directoryList.Count > 0)
+        {
+            var currentDirectory = directoryList[0];
+            directoryList.AddRange(currentDirectory.GetDirectories());
+
+            foreach (var file in currentDirectory.GetFiles())
+            {
+                var textureName = Path.ChangeExtension(file.Name, null);
+                if (currentDirectory != animatedTexturesDirectory)
+                    textureName = Path.Join(currentDirectory.Name, textureName);
+                animatedTextures.Add(textureName, new AnimatedTexture(Raylib.LoadTexture(file.FullName)));
+            }
+
+            directoryList.Remove(currentDirectory);
+        }
+
+        return animatedTextures;
     }
 
     /// <summary>
@@ -42,11 +57,26 @@ public static class Assets
     /// <returns> Dictionary containing texture assets with file names as keys </returns>
     private static Dictionary<string, Texture> LoadTextures()
     {
+        var textures = new Dictionary<string, Texture>();
         var textureDirectory = new DirectoryInfo(Paths.StaticTexturesDirectory);
-        var textureFileList = textureDirectory.GetFiles();
+        var directoryList = new List<DirectoryInfo> { textureDirectory };
 
-        return textureFileList.ToDictionary(textureFile => Path.ChangeExtension(textureFile.Name, null),
-            textureFile => Raylib.LoadTexture(textureFile.FullName));
+        while (directoryList.Count > 0)
+        {
+            var currentDirectory = directoryList[0];
+            directoryList.AddRange(currentDirectory.GetDirectories());
+
+            foreach (var file in currentDirectory.GetFiles())
+            {
+                var textureName = Path.ChangeExtension(file.Name, null);
+                if (currentDirectory != textureDirectory) textureName = Path.Join(currentDirectory.Name, textureName);
+                textures.Add(textureName, Raylib.LoadTexture(file.FullName));
+            }
+
+            directoryList.Remove(currentDirectory);
+        }
+
+        return textures;
     }
 
     public static void Update()

@@ -58,7 +58,9 @@ public class GameUi
     {
         _buildTabButtons = new List<Button>
         {
-            new("Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter()))
+            new("Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
+            new("Lumber Yard", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new LumberYard())),
+            new("Well", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Well()))
         };
         _itemsList = new List<string>();
         _speedControlButtons = new List<Button>
