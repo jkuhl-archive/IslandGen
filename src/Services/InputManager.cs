@@ -15,7 +15,8 @@ public class InputManager
 
         KeyboardInputs();
         MouseCameraInputs();
-        MouseClickInputs();
+        MouseEntityInputs();
+        MouseMiniMapInputs();
     }
 
     /// <summary>
@@ -102,9 +103,9 @@ public class InputManager
     }
 
     /// <summary>
-    ///     Processes mouse click input events
+    ///     Processes mouse inputs that interact with entities
     /// </summary>
-    private void MouseClickInputs()
+    private void MouseEntityInputs()
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
         var gameUi = ServiceManager.GetService<GameUi>();
@@ -139,6 +140,25 @@ public class InputManager
                 gameLogic.SetSelectedEntity(entity);
                 break;
             }
+        }
+    }
+
+    /// <summary>
+    ///     Processes mouse inputs that interact with the mini map
+    /// </summary>
+    private void MouseMiniMapInputs()
+    {
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+        var gameUi = ServiceManager.GetService<GameUi>();
+        var scalingManager = ServiceManager.GetService<ScalingManager>();
+        var mousePosition = GetMousePosition();
+
+        if (!gameUi.MiniMapArea.PointInsideRectangle(mousePosition)) return;
+
+        if (Raylib.IsMouseButtonDown(MouseButton.MOUSE_BUTTON_LEFT))
+        {
+            var miniMapPosition = (mousePosition - gameUi.MiniMapArea.Start()) / scalingManager.ScaleFactor;
+            gameLogic.GameCamera.LookAtTile((miniMapPosition.X_int(), miniMapPosition.Y_int()));
         }
     }
 }

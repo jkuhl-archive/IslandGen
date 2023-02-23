@@ -44,7 +44,6 @@ public class GameUi
     private int _itemsFontSize;
     private int _itemsFontSpacing;
     private Rectangle _itemsStringsArea;
-    private Rectangle _miniMapArea;
     private string? _selectedEntityString;
     private Rectangle _sidebarContentsArea;
     private Rectangle _sidebarInnerArea;
@@ -60,7 +59,8 @@ public class GameUi
         {
             new("Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
             new("Lumber Yard", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new LumberYard())),
-            new("Well", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Well()))
+            new("Well", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Well())),
+            new("Farm", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Farm()))
         };
         _itemsList = new List<string>();
         _speedControlButtons = new List<Button>
@@ -92,6 +92,7 @@ public class GameUi
     }
 
     public Rectangle CalendarArea { get; private set; }
+    public Rectangle MiniMapArea { get; private set; }
     public Rectangle SelectedEntityMenuArea { get; private set; }
     public Rectangle SidebarArea { get; private set; }
     public Rectangle SpeedControlsArea { get; private set; }
@@ -227,7 +228,6 @@ public class GameUi
         if (gameSettings.DebugMode)
         {
             var scalingManager = ServiceManager.GetService<ScalingManager>();
-
             _debugInfoString =
                 $"FPS: {Raylib.GetFPS()}\n" +
                 $"Window Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
@@ -283,7 +283,7 @@ public class GameUi
             SidebarHeight * scalingManager.ScaleFactor + scalingManager.Padding * 2);
 
         // Set minimap area
-        _miniMapArea = new Rectangle(
+        MiniMapArea = new Rectangle(
             _sidebarInnerArea.X,
             _sidebarInnerArea.Y + _sidebarInnerArea.height - MiniMapSize * scalingManager.ScaleFactor,
             (int)(MiniMapSize * scalingManager.ScaleFactor),
@@ -301,7 +301,7 @@ public class GameUi
             _sidebarInnerArea.X,
             _sidebarTabsArea.Y + _sidebarTabsArea.height + scalingManager.Padding,
             _sidebarInnerArea.width,
-            _sidebarInnerArea.height - _sidebarTabsArea.height - _miniMapArea.height - scalingManager.Padding * 2);
+            _sidebarInnerArea.height - _sidebarTabsArea.height - MiniMapArea.height - scalingManager.Padding * 2);
 
         // Set items strings area
         _itemsStringsArea = new Rectangle(
@@ -358,7 +358,7 @@ public class GameUi
                 SpeedControlsArea.height);
 
         // Apply minimap area to texture
-        _miniMapTexture.DestinationRectangle = _miniMapArea;
+        _miniMapTexture.DestinationRectangle = MiniMapArea;
     }
 
     /// <summary>

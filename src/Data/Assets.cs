@@ -28,7 +28,7 @@ public static class Assets
             {
                 var textureName = Path.ChangeExtension(file.Name, null);
                 if (currentDirectory != animatedTexturesDirectory)
-                    textureName = Path.Join(currentDirectory.Name, textureName);
+                    textureName = $"{currentDirectory.Name}/{textureName}";
                 animatedTextures.Add(textureName, new AnimatedTexture(Raylib.LoadTexture(file.FullName)));
             }
 
@@ -69,7 +69,7 @@ public static class Assets
             foreach (var file in currentDirectory.GetFiles())
             {
                 var textureName = Path.ChangeExtension(file.Name, null);
-                if (currentDirectory != textureDirectory) textureName = Path.Join(currentDirectory.Name, textureName);
+                if (currentDirectory != textureDirectory) textureName = $"{currentDirectory.Name}/{textureName}";
                 textures.Add(textureName, Raylib.LoadTexture(file.FullName));
             }
 
