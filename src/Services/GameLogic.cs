@@ -3,6 +3,7 @@ using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.Objects;
 using IslandGen.Objects.ECS;
+using IslandGen.Objects.ECS.Entities.Creatures;
 using IslandGen.Objects.ECS.Entities.Structures;
 using IslandGen.Objects.Textures;
 using Newtonsoft.Json;
@@ -40,10 +41,19 @@ public class GameLogic
         // Draw map
         GameMap.Draw();
 
-        // Draw entities
+        // Draw all entities other than colonists
         // TODO: Add map culling here
-        foreach (var entity in _entities.Values.SelectMany(entityList => entityList))
-            entity.Draw();
+        foreach (var entityType in _entities.Keys)
+        {
+            if (entityType == typeof(Colonist)) continue;
+
+            foreach (var entity in _entities[entityType]) entity.Draw();
+        }
+
+        // Draw colonists, by drawing these last they appear 'on top of' everything else
+        // TODO: Add map culling here
+        // TODO: We may not need to split this out once colonists can enter structures
+        foreach (var colonist in _entities[typeof(Colonist)]) colonist.Draw();
 
         // Draw box around selected entity
         if (SelectedEntity != null)
