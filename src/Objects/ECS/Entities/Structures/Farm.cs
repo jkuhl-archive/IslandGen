@@ -1,5 +1,6 @@
 using IslandGen.Data;
 using IslandGen.Data.Enum;
+using IslandGen.Objects.ECS.Components;
 using IslandGen.Services;
 using Raylib_CsLo;
 
@@ -17,6 +18,8 @@ public class Farm : StructureBase
         ReadableName = "Farm";
         Size = (4, 4);
         Texture = Assets.Textures["structures/farm"];
+
+        AddComponent(new Construction { RequiredWork = 2 });
     }
 
     /// <summary>

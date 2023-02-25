@@ -1,5 +1,6 @@
 using IslandGen.Data;
 using IslandGen.Objects.ECS.Components;
+using IslandGen.Objects.ECS.Routines;
 using Raylib_CsLo;
 
 namespace IslandGen.Objects.ECS.Entities.Creatures;
@@ -18,6 +19,7 @@ public class Colonist : EntityBase
         AddComponent(new Health { MaxHealthPoints = 100, HealthPoints = 100 });
         AddComponent(new Inventory { InventorySize = 10 });
         AddComponent(new MovementSpeed { Speed = 1 });
-        AddComponent(new Wander());
+        AddRoutine(new Build());
+        AddRoutine(new Wander());
     }
 }

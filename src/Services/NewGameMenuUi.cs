@@ -192,9 +192,9 @@ public class NewGameMenuUi
         _shipName = Datasets.FemaleNames.RandomItem();
 
         // Give starting resources
-        _gameLogic.Resources.Add(Resource.CookedFish, 20);
-        _gameLogic.Resources.Add(Resource.DrinkingWater, 50);
-        _gameLogic.Resources.Add(Resource.Lumber, 100);
+        _gameLogic.AddResource(Resource.CookedFish, 20);
+        _gameLogic.AddResource(Resource.DrinkingWater, 50);
+        _gameLogic.AddResource(Resource.Lumber, 100);
     }
 
     /// <summary>

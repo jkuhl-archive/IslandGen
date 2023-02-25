@@ -2,7 +2,7 @@ using System.Numerics;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.Objects;
-using IslandGen.Objects.ECS.Components;
+using IslandGen.Objects.ECS.Entities;
 using IslandGen.Objects.ECS.Entities.Creatures;
 using IslandGen.Objects.ECS.Entities.Structures;
 using IslandGen.Objects.Textures;
@@ -203,7 +203,7 @@ public class GameUi
                 {
                     var colonist = colonistList[i];
                     _statusButtons.Add(new Button(
-                        $"{colonist.ReadableName} - Health: {colonist.GetComponent<Health>().HealthPoints}",
+                        $"{colonist.ReadableName} - Status: {colonist.GetRoutineStatus()}",
                         () =>
                         {
                             gameLogic.SetSelectedEntity(colonist);
@@ -220,8 +220,8 @@ public class GameUi
 
             case GameUiTab.Items:
                 _itemsList.Clear();
-                foreach (var key in gameLogic.Resources.Keys)
-                    _itemsList.Add($"{key.GetResourceName()}: {gameLogic.Resources[key]}");
+                foreach (var resource in gameLogic.GetResourceCounts())
+                    _itemsList.Add($"{resource.Key.GetResourceName()}: {resource.Value}");
                 break;
         }
 

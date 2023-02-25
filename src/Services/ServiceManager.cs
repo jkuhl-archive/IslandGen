@@ -32,6 +32,7 @@ public static class ServiceManager
     /// </summary>
     /// <typeparam name="T"> Type of the service </typeparam>
     /// <returns> Service of the specified type or null </returns>
+    /// <exception cref="ArgumentNullException"> If component is null </exception>
     public static T GetService<T>() where T : class
     {
         var requestedType = typeof(T);

@@ -10,6 +10,7 @@ public enum Resource
     Lumber,
     RawFish,
     Stone,
+    TreeTrunk,
     WildGrains
 }
 
@@ -30,6 +31,7 @@ public static class ResourceExtensions
             Resource.Lumber => "Lumber",
             Resource.RawFish => "Raw Fish",
             Resource.Stone => "Stone",
+            Resource.TreeTrunk => "Tree Trunk",
             Resource.WildGrains => "Wild Grains",
             _ => throw new ArgumentOutOfRangeException(nameof(resource), resource, null)
         };

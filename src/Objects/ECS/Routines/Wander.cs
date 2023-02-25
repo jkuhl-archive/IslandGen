@@ -2,9 +2,9 @@ using IslandGen.Data.Enum;
 using IslandGen.Services;
 using Newtonsoft.Json;
 
-namespace IslandGen.Objects.ECS.Components;
+namespace IslandGen.Objects.ECS.Routines;
 
-public class Wander : IComponent
+public class Wander : IRoutine
 {
     private const int Delay = 3;
     private const int Distance = 5;
@@ -12,6 +12,7 @@ public class Wander : IComponent
     [JsonProperty] private bool _delayActive = true;
     [JsonProperty] private int _delayCounter;
     [JsonProperty] private (int, int) _destination;
+    [JsonIgnore] public string Name => "Wandering";
 
     public void Update(EntityBase entity)
     {
@@ -34,19 +35,29 @@ public class Wander : IComponent
         if (entity.MapPosition == _destination)
         {
             _delayActive = true;
+            entity.UnsetCurrentRoutine();
             return;
         }
 
-        entity.MoveTo(_destination);
+        entity.MoveTowards(_destination);
     }
 
     /// <summary>
-    ///     Returns info about entity wandering
+    ///     Returns true if the entity can wander, which is always true
+    /// </summary>
+    /// <returns> Always returns true </returns>
+    public bool CanExecute(EntityBase entity)
+    {
+        return true;
+    }
+
+    /// <summary>
+    ///     Returns wander status
     /// </summary>
     /// <returns> Wander status as a string </returns>
-    public string GetInfoString()
+    public string GetStatus()
     {
-        return $"Wandering: {!_delayActive}, Destination: {_destination}";
+        return $"Wandering to {_destination}";
     }
 
     /// <summary>

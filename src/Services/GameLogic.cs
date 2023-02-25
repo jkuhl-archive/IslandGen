@@ -3,8 +3,8 @@ using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.Objects;
 using IslandGen.Objects.ECS;
+using IslandGen.Objects.ECS.Entities;
 using IslandGen.Objects.ECS.Entities.Creatures;
-using IslandGen.Objects.ECS.Entities.Structures;
 using IslandGen.Objects.Textures;
 using Newtonsoft.Json;
 using Raylib_CsLo;
@@ -18,6 +18,7 @@ public class GameLogic
     [JsonIgnore] private readonly RenderTexturePro _gameWorldTexture =
         new((GameMap.MapSize * GameMap.TileTextureSize, GameMap.MapSize * GameMap.TileTextureSize));
 
+    [JsonProperty] private readonly Dictionary<Resource, int> _resources = new();
     [JsonProperty] private float _updateTimer;
     [JsonProperty] public DateTime StartDateTime { get; init; }
     [JsonIgnore] public EntityBase? SelectedEntity { get; private set; }
@@ -27,7 +28,6 @@ public class GameLogic
     [JsonProperty] public GameSpeed GameSpeed { get; private set; } = GameSpeed.Normal;
     [JsonProperty] public GameCamera GameCamera { get; private init; } = new();
     [JsonProperty] public GameMap GameMap { get; private init; } = new();
-    [JsonProperty] public Dictionary<Resource, int> Resources { get; private init; } = new();
 
     public void Draw()
     {
@@ -132,6 +132,18 @@ public class GameLogic
     }
 
     /// <summary>
+    ///     Adds a resource to the colony's stores
+    /// </summary>
+    /// <param name="resource"> Resource that we are adding </param>
+    /// <param name="amount"> Amount that should be added </param>
+    public void AddResource(Resource resource, int amount)
+    {
+        var newAmount = _resources.GetValueOrDefault(resource) + amount;
+
+        _resources[resource] = newAmount;
+    }
+
+    /// <summary>
     ///     Slows down passage of in game time
     /// </summary>
     public void DecreaseGameSpeed()
@@ -172,13 +184,22 @@ public class GameLogic
     /// </summary>
     /// <typeparam name="T"> Entity base type that we are getting a list of </typeparam>
     /// <returns> List of entity objects of the given base type </returns>
-    public List<EntityBase> GetEntityBaseTypeList<T>() where T : class
+    public List<T> GetEntityBaseTypeList<T>() where T : class
     {
-        var entityList = new List<EntityBase>();
+        var entityList = new List<T>();
         foreach (var entityType in _entities.Keys.Where(entityType => entityType.BaseType == typeof(T)))
-            entityList.AddRange(_entities[entityType]);
+            entityList.AddRange(_entities[entityType].Cast<T>());
 
         return entityList;
+    }
+
+    /// <summary>
+    ///     Gets a dictionary containing resource counts
+    /// </summary>
+    /// <returns> Dictionary with resource types as keys and amounts as values </returns>
+    public Dictionary<Resource, int> GetResourceCounts()
+    {
+        return _resources;
     }
 
     /// <summary>
