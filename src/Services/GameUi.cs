@@ -1,4 +1,5 @@
 using System.Numerics;
+using IslandGen.Data;
 using IslandGen.Data.Enum;
 using IslandGen.Extensions;
 using IslandGen.Objects;
@@ -132,7 +133,7 @@ public class GameUi
                 colonist.MiniMapColor);
 
         // Draw box on minimap texture that represents the area of the map currently visible
-        Raylib.DrawRectangleLinesEx(gameLogic.GameMap.GetVisibleMapTiles(), 1, Raylib.RED);
+        Raylib.DrawRectangleLinesEx(gameLogic.GameMap.GetVisibleMapTiles(), 1, Colors.MiniMapViewBox);
 
         // End minimap texture rendering
         Raylib.EndTextureMode();
