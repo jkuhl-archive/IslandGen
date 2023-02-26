@@ -6,13 +6,13 @@ namespace IslandGen.Extensions;
 public static class RectangleExtensions
 {
     /// <summary>
-    ///     Gets the top left coordinate in the rectangle and returns it
+    ///     Gets the center coordinate of the rectangle and returns it
     /// </summary>
     /// <param name="rectangle"> Rectangle we are getting coordinates for </param>
-    /// <returns> Vector2 that represents the top left corner </returns>
-    public static Vector2 Start(this Rectangle rectangle)
+    /// <returns> Vector2 that represents the center </returns>
+    public static Vector2 Center(this Rectangle rectangle)
     {
-        return new Vector2(rectangle.x, rectangle.y);
+        return new Vector2(rectangle.x + rectangle.width / 2, rectangle.y + rectangle.height / 2);
     }
 
     /// <summary>
@@ -23,6 +23,26 @@ public static class RectangleExtensions
     public static Vector2 End(this Rectangle rectangle)
     {
         return rectangle.Start() + new Vector2(rectangle.width, rectangle.height);
+    }
+
+    /// <summary>
+    ///     Gets the top left coordinate in the rectangle and returns it
+    /// </summary>
+    /// <param name="rectangle"> Rectangle we are getting coordinates for </param>
+    /// <returns> Vector2 that represents the top left corner </returns>
+    public static Vector2 Start(this Rectangle rectangle)
+    {
+        return new Vector2(rectangle.x, rectangle.y);
+    }
+
+    /// <summary>
+    ///     Gets the width and height of the rectangle
+    /// </summary>
+    /// <param name="rectangle"> Rectangle we are getting size for </param>
+    /// <returns> Vector2 that represents the size </returns>
+    public static Vector2 Size(this Rectangle rectangle)
+    {
+        return new Vector2(rectangle.width, rectangle.height);
     }
 
     /// <summary>

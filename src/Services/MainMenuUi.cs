@@ -16,8 +16,8 @@ public class MainMenuUi
     private const string GameTitle = "IslandGen";
     private const string GameMajorVersion = "0.1-alpha";
 
-    private readonly List<Button> _buttonsList;
-    private readonly Texture _dirtTexture = Assets.Textures[TileType.Dirt.GetTileTextureName()];
+    private readonly List<TextureButton> _buttonsList;
+    private readonly Texture _sandTexture = Assets.Textures[TileType.Sand.GetTileTextureName()];
     private readonly string _versionString;
     private Rectangle _backgroundArea;
     private Rectangle _buttonsArea;
@@ -33,12 +33,13 @@ public class MainMenuUi
     /// </summary>
     public MainMenuUi()
     {
-        _buttonsList = new List<Button>
+        _buttonsList = new List<TextureButton>
         {
-            new("New Island", () => ServiceManager.GetService<StateManager>().NewGameMenu()),
-            new("Load Island", SaveUtils.LoadGame),
-            new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
-            new("Exit Game", Raylib.CloseWindow)
+            new(Assets.Textures["buttons/new_island"], () => ServiceManager.GetService<StateManager>().NewGameMenu()),
+            new(Assets.Textures["buttons/load_island"], SaveUtils.LoadGame),
+            new(Assets.Textures["buttons/settings"],
+                () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
+            new(Assets.Textures["buttons/exit"], Raylib.CloseWindow)
         };
 
         var buildId = File.ReadAllText("assets/build_id.txt").Replace("\n", "");
@@ -47,8 +48,8 @@ public class MainMenuUi
 
     public void Draw()
     {
-        Raylib.DrawTextureTiled(_dirtTexture,
-            new Rectangle(0, 0, _dirtTexture.width, _dirtTexture.height),
+        Raylib.DrawTextureTiled(_sandTexture,
+            new Rectangle(0, 0, _sandTexture.width, _sandTexture.height),
             _backgroundArea,
             Vector2.Zero,
             0,
@@ -65,6 +66,11 @@ public class MainMenuUi
             _versionFontSpacing, Raylib.WHITE);
 
         foreach (var button in _buttonsList) button.Draw();
+    }
+
+    public void Update()
+    {
+        foreach (var button in _buttonsList) button.Update();
     }
 
     /// <summary>
@@ -104,10 +110,10 @@ public class MainMenuUi
             buttonsAreaHeight);
 
         for (var i = 0; i < _buttonsList.Count; i++)
-            _buttonsList[i].Area = _buttonsArea with
+            _buttonsList[i].SetArea(_buttonsArea with
             {
                 Y = _buttonsArea.Y + i * (ButtonHeight * scalingManager.ScaleFactor + scalingManager.Padding),
                 height = ButtonHeight * scalingManager.ScaleFactor
-            };
+            });
     }
 }

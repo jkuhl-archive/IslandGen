@@ -28,7 +28,6 @@ public class StateManager
     /// </summary>
     public void MainMenu()
     {
-        ServiceManager.RemoveService(typeof(GameLogic));
         GameState = GameState.MainMenu;
     }
 }

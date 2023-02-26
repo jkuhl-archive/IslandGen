@@ -46,11 +46,13 @@ internal static class Game
             {
                 case GameState.MainMenu:
                     // Draw Main Menu
+                    ServiceManager.GetService<MainMenuUi>().Update();
                     ServiceManager.GetService<MainMenuUi>().Draw();
                     break;
 
                 case GameState.NewGameMenu:
                     // Draw New Game Menu
+                    ServiceManager.GetService<NewGameMenuUi>().Update();
                     ServiceManager.GetService<NewGameMenuUi>().Draw();
                     break;
 
@@ -68,6 +70,7 @@ internal static class Game
             }
 
             // Draw settings menu overlay if enabled
+            ServiceManager.GetService<GameSettingsUi>().Update();
             ServiceManager.GetService<GameSettingsUi>().Draw();
 
             // End drawing

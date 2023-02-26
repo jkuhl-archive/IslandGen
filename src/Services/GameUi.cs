@@ -32,13 +32,13 @@ public class GameUi
     private const int StatusButtonHeight = 8;
     private const string PausedString = "Paused";
 
-    private readonly List<Button> _buildTabButtons;
+    private readonly List<LabelButton> _buildTabButtons;
     private readonly List<string> _itemsList;
     private readonly RenderTexturePro _miniMapTexture;
-    private readonly List<Button> _speedControlButtons;
-    private readonly List<Button> _statusButtons;
-    private readonly List<Button> _systemTabButtons;
-    private readonly List<Button> _tabButtons;
+    private readonly List<TextureButton> _speedControlButtons;
+    private readonly List<LabelButton> _statusButtons;
+    private readonly List<LabelButton> _systemTabButtons;
+    private readonly List<LabelButton> _tabButtons;
     private string _calendarString;
     private GameUiTab _currentUiTab;
     private string _debugInfoString;
@@ -56,7 +56,7 @@ public class GameUi
     /// </summary>
     public GameUi()
     {
-        _buildTabButtons = new List<Button>
+        _buildTabButtons = new List<LabelButton>
         {
             new("Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
             new("Lumber Yard", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new LumberYard())),
@@ -65,21 +65,22 @@ public class GameUi
             new("Fishing Spot", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new FishingSpot()))
         };
         _itemsList = new List<string>();
-        _speedControlButtons = new List<Button>
+        _speedControlButtons = new List<TextureButton>
         {
-            new("<|<|", () => ServiceManager.GetService<GameLogic>().DecreaseGameSpeed()),
-            new("| |", () => ServiceManager.GetService<GameLogic>().ToggleGamePaused()),
-            new("|>|>", () => ServiceManager.GetService<GameLogic>().IncreaseGameSpeed())
+            new(Assets.Textures["buttons/speed_rw"], () => ServiceManager.GetService<GameLogic>().DecreaseGameSpeed()),
+            new(Assets.Textures["buttons/speed_pause"],
+                () => ServiceManager.GetService<GameLogic>().ToggleGamePaused()),
+            new(Assets.Textures["buttons/speed_ff"], () => ServiceManager.GetService<GameLogic>().IncreaseGameSpeed())
         };
-        _statusButtons = new List<Button>();
-        _systemTabButtons = new List<Button>
+        _statusButtons = new List<LabelButton>();
+        _systemTabButtons = new List<LabelButton>
         {
             new("Save Island", SaveUtils.SaveGame),
             new("Load Island", SaveUtils.LoadGame),
             new("Settings", () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
             new("Main Menu", () => ServiceManager.GetService<StateManager>().MainMenu())
         };
-        _tabButtons = new List<Button>
+        _tabButtons = new List<LabelButton>
         {
             new("Build", () => _currentUiTab = GameUiTab.Build),
             new("Status", () => _currentUiTab = GameUiTab.Status),
@@ -203,8 +204,8 @@ public class GameUi
                 for (var i = 0; i < colonistList.Count; i++)
                 {
                     var colonist = colonistList[i];
-                    _statusButtons.Add(new Button(
-                        $"{colonist.ReadableName} - Status: {colonist.GetRoutineStatus()}",
+                    _statusButtons.Add(new LabelButton(
+                        $"{colonist.ReadableName} - {colonist.GetRoutineStatus()}",
                         () =>
                         {
                             gameLogic.SetSelectedEntity(colonist);
@@ -223,6 +224,26 @@ public class GameUi
                 _itemsList.Clear();
                 foreach (var resource in gameLogic.GetResourceCounts())
                     _itemsList.Add($"{resource.Key.GetResourceName()}: {resource.Value}");
+                break;
+        }
+
+        // Update speed controls
+        foreach (var button in _speedControlButtons) button.Update();
+
+        // Update tab buttons
+        foreach (var button in _tabButtons) button.Update();
+
+        // Update tab buttons
+        switch (_currentUiTab)
+        {
+            case GameUiTab.Build:
+                foreach (var button in _buildTabButtons) button.Update();
+                break;
+            case GameUiTab.Status:
+                foreach (var button in _statusButtons) button.Update();
+                break;
+            case GameUiTab.System:
+                foreach (var button in _systemTabButtons) button.Update();
                 break;
         }
 
@@ -322,11 +343,11 @@ public class GameUi
 
         // Set tab button positions
         for (var i = 0; i < _tabButtons.Count; i++)
-            _tabButtons[i].Area = new Rectangle(
+            _tabButtons[i].SetArea(new Rectangle(
                 _sidebarTabsArea.X + i * SidebarTabWidth * scalingManager.ScaleFactor,
                 _sidebarTabsArea.Y,
                 SidebarTabWidth * scalingManager.ScaleFactor,
-                SidebarTabHeight * scalingManager.ScaleFactor);
+                SidebarTabHeight * scalingManager.ScaleFactor));
 
         // Set sidebar button positions
         var columnCounter = 0;
@@ -339,8 +360,8 @@ public class GameUi
                 SidebarButtonWidth * scalingManager.ScaleFactor,
                 SidebarButtonHeight * scalingManager.ScaleFactor);
 
-            if (i <= _buildTabButtons.Count - 1) _buildTabButtons[i].Area = buttonArea;
-            if (i <= _systemTabButtons.Count - 1) _systemTabButtons[i].Area = buttonArea;
+            if (i <= _buildTabButtons.Count - 1) _buildTabButtons[i].SetArea(buttonArea);
+            if (i <= _systemTabButtons.Count - 1) _systemTabButtons[i].SetArea(buttonArea);
 
             columnCounter++;
 
@@ -353,11 +374,11 @@ public class GameUi
 
         // Set speed controls button positions
         for (var i = 0; i < _speedControlButtons.Count; i++)
-            _speedControlButtons[i].Area = new Rectangle(
+            _speedControlButtons[i].SetArea(new Rectangle(
                 SpeedControlsArea.X + i * SpeedControlsButtonWidth * scalingManager.ScaleFactor,
                 SpeedControlsArea.Y,
                 SpeedControlsButtonWidth * scalingManager.ScaleFactor,
-                SpeedControlsArea.height);
+                SpeedControlsArea.height));
 
         // Apply minimap area to texture
         _miniMapTexture.DestinationRectangle = MiniMapArea;

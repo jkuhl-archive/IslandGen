@@ -1,3 +1,4 @@
+using IslandGen.Objects.UI;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -43,13 +44,14 @@ public class ScalingManager
         WindowHeight = Raylib.GetRenderHeight();
         ScaleFactor = GetScaleFactor();
         Padding = (int)(1 * ScaleFactor);
-        FontSize = (int)ScaleFactor * 5;
+        FontSize = (int)(5 * ScaleFactor);
         FontSpacing = (int)(2 * ScaleFactor);
 
         ServiceManager.GetService<GameUi>().UpdateScaling();
         ServiceManager.GetService<GameSettingsUi>().UpdateScaling();
         ServiceManager.GetService<MainMenuUi>().UpdateScaling();
         ServiceManager.GetService<NewGameMenuUi>().UpdateScaling();
+        LabelButton.UpdateScaling();
     }
 
     /// <summary>

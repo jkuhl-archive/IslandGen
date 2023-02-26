@@ -4,6 +4,11 @@ namespace IslandGen.Data;
 
 public static class Colors
 {
+    public static readonly Color ButtonDefaultColor = new(128, 128, 128, 255);
+    public static readonly Color ButtonHighlightMouseDown = new(0, 0, 0, 100);
+    public static readonly Color ButtonHighlightMouseOver = new(50, 50, 50, 100);
+    public static readonly Color ButtonTintMouseDown = new(150, 150, 150, 255);
+    public static readonly Color ButtonTintMouseOver = new(210, 210, 210, 255);
     public static readonly Color ConstructionBase = new(255, 255, 255, 150);
     public static readonly Color GridLine = new(0, 0, 0, 40);
     public static readonly Color MiniMapColonist = new(166, 44, 31, 255);

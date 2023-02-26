@@ -14,18 +14,18 @@ namespace IslandGen.Services;
 
 public class NewGameMenuUi
 {
-    private const int ButtonWidth = 50;
-    private const int ButtonHeight = 20;
+    private const int ButtonWidth = 80;
+    private const int ButtonHeight = 40;
     private const int CrewSize = 10;
     private const int DepartureYearStart = 1603;
     private const int DepartureYearEnd = 1627;
     private const int MapPreviewSize = 100;
 
     private readonly List<Vector2> _backgroundStarPositions;
-    private readonly Button _mainMenuButton;
+    private readonly TextureButton _mainMenuButton;
     private readonly RenderTexturePro _mapPreviewTexture;
-    private readonly Button _randomizeButton;
-    private readonly Button _startGameButton;
+    private readonly TextureButton _randomizeButton;
+    private readonly TextureButton _startGameButton;
     private Rectangle _background;
     private string _captainName;
     private DateTime _departureDate;
@@ -41,10 +41,11 @@ public class NewGameMenuUi
 
     public NewGameMenuUi()
     {
-        _mainMenuButton = new Button("Main Menu",
+        _mainMenuButton = new TextureButton(Assets.Textures["buttons/main_menu"],
             () => ServiceManager.GetService<StateManager>().MainMenu());
-        _randomizeButton = new Button("Randomize Island", () => _gameLogic!.GameMap.GenerateMap());
-        _startGameButton = new Button("Start Game", StartGame);
+        _randomizeButton =
+            new TextureButton(Assets.Textures["buttons/randomize"], () => _gameLogic!.GameMap.GenerateMap());
+        _startGameButton = new TextureButton(Assets.Textures["buttons/start"], StartGame);
         _mapPreviewTexture = new RenderTexturePro((MapPreviewSize, MapPreviewSize));
 
         _backgroundStarPositions = new List<Vector2>();
@@ -94,6 +95,13 @@ public class NewGameMenuUi
         _mainMenuButton.Draw();
         _randomizeButton.Draw();
         _startGameButton.Draw();
+    }
+
+    public void Update()
+    {
+        _mainMenuButton.Update();
+        _randomizeButton.Update();
+        _startGameButton.Update();
     }
 
     /// <summary>
@@ -148,25 +156,25 @@ public class NewGameMenuUi
         _mapPreviewTexture.DestinationRectangle = _mapPreviewArea;
 
         // Set main menu button area
-        _mainMenuButton.Area = new Rectangle(
+        _mainMenuButton.SetArea(new Rectangle(
             scalingManager.WindowWidth - ButtonWidth * scalingManager.ScaleFactor - scalingManager.Padding * 2,
             scalingManager.Padding * 2,
             ButtonWidth * scalingManager.ScaleFactor,
-            ButtonHeight * scalingManager.ScaleFactor);
+            ButtonHeight * scalingManager.ScaleFactor));
 
         // Set randomize button area
-        _randomizeButton.Area = new Rectangle(
+        _randomizeButton.SetArea(new Rectangle(
             _mapPreviewArea.X + _mapPreviewArea.width / 2 - ButtonWidth * scalingManager.ScaleFactor / 2,
             _mapPreviewArea.Y - ButtonHeight * scalingManager.ScaleFactor - scalingManager.Padding * 2,
             ButtonWidth * scalingManager.ScaleFactor,
-            ButtonHeight * scalingManager.ScaleFactor);
+            ButtonHeight * scalingManager.ScaleFactor));
 
         // Set start game button area
-        _startGameButton.Area = new Rectangle(
+        _startGameButton.SetArea(new Rectangle(
             _menuInnerBackdrop.X + _menuPadding,
             _menuInnerBackdrop.Y + _menuInnerBackdrop.height - ButtonHeight * scalingManager.ScaleFactor - _menuPadding,
             ButtonWidth * scalingManager.ScaleFactor,
-            ButtonHeight * scalingManager.ScaleFactor);
+            ButtonHeight * scalingManager.ScaleFactor));
     }
 
     /// <summary>
@@ -216,7 +224,7 @@ public class NewGameMenuUi
     /// </summary>
     private void StartGame()
     {
-        ServiceManager.AddService(_gameLogic);
+        ServiceManager.ReplaceService(_gameLogic);
         PlaceStartingEntities();
         ServiceManager.GetService<StateManager>().InGame();
     }
