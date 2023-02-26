@@ -8,6 +8,10 @@ namespace IslandGen.Objects.ECS.Entities.Structures;
 
 public class Farm : StructureBase
 {
+    public const string Description = "Plot for colonists to grow crops";
+    public const string Requirements = "Must be placed on soil";
+    public static readonly Dictionary<Resource, int> Cost = new() { { Resource.Lumber, 30 } };
+
     /// <summary>
     ///     Structure generates crops
     /// </summary>
@@ -20,6 +24,15 @@ public class Farm : StructureBase
         Texture = Assets.Textures["structures/farm"];
 
         AddComponent(new Construction { RequiredWork = 2 });
+    }
+
+    /// <summary>
+    ///     Gets the cost of this structure
+    /// </summary>
+    /// <returns> Cost of this structure as a dictionary of resources and amounts </returns>
+    public override Dictionary<Resource, int> GetCost()
+    {
+        return Cost;
     }
 
     /// <summary>

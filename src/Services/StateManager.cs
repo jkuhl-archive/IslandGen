@@ -28,6 +28,7 @@ public class StateManager
     /// </summary>
     public void MainMenu()
     {
+        ServiceManager.GetService<MainMenuUi>().UpdateLoadGameButton();
         GameState = GameState.MainMenu;
     }
 }

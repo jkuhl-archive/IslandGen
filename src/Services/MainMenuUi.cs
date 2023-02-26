@@ -35,11 +35,23 @@ public class MainMenuUi
     {
         _buttonsList = new List<TextureButton>
         {
-            new(Assets.Textures["buttons/new_island"], () => ServiceManager.GetService<StateManager>().NewGameMenu()),
-            new(Assets.Textures["buttons/load_island"], SaveUtils.LoadGame),
-            new(Assets.Textures["buttons/settings"],
-                () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu()),
-            new(Assets.Textures["buttons/exit"], Raylib.CloseWindow)
+            new(
+                Assets.Textures["buttons/new_island"],
+                () => ServiceManager.GetService<StateManager>().NewGameMenu(),
+                toolTip: new List<string> { "Generate a new island" }),
+            new(
+                Assets.Textures["buttons/load_island"],
+                SaveUtils.LoadGame,
+                toolTip: new List<string> { "Load a saved island" },
+                disabled: !SaveUtils.SaveFileExists()),
+            new(
+                Assets.Textures["buttons/settings"],
+                () => ServiceManager.GetService<GameSettingsUi>().ToggleSettingsMenu(),
+                toolTip: new List<string> { "Modify game settings" }),
+            new(
+                Assets.Textures["buttons/exit"],
+                Raylib.CloseWindow,
+                toolTip: new List<string> { "Exit to desktop" })
         };
 
         var buildId = File.ReadAllText("assets/build_id.txt").Replace("\n", "");
@@ -65,12 +77,21 @@ public class MainMenuUi
         Raylib.DrawTextEx(Raylib.GetFontDefault(), _versionString, _versionArea.Start(), _versionFontSize,
             _versionFontSpacing, Raylib.WHITE);
 
-        foreach (var button in _buttonsList) button.Draw();
+        // Draw buttons in reverse order to tooltips don't draw behind other buttons
+        foreach (var button in _buttonsList.GetReverse()) button.Draw();
     }
 
     public void Update()
     {
         foreach (var button in _buttonsList) button.Update();
+    }
+
+    /// <summary>
+    ///     Updates the load game button based on if there is a save file to be loaded
+    /// </summary>
+    public void UpdateLoadGameButton()
+    {
+        _buttonsList[1].Disabled = !SaveUtils.SaveFileExists();
     }
 
     /// <summary>

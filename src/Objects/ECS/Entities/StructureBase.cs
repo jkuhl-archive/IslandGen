@@ -21,6 +21,10 @@ public class StructureBase : EntityBase
             if (HasComponent<Construction>() && !GetComponent<Construction>().Complete)
                 textureColor = Colors.ConstructionBase;
 
+            // If structure is mouse structure and placement isn't valid color it red
+            if (ServiceManager.GetService<GameLogic>().MouseStructure == this && !ValidPlacement())
+                textureColor = Colors.ConstructionInvalidPlacement;
+
             // Draw structure texture
             Raylib.DrawTextureV(Texture.Value,
                 ServiceManager.GetService<GameLogic>().GameMap.GetTileCoordinates(MapPosition),
@@ -44,6 +48,15 @@ public class StructureBase : EntityBase
     // This will be replaced with structure specific logic at some point.
     public override void Update()
     {
+    }
+
+    /// <summary>
+    ///     Virtual GetCost method for structures to override
+    /// </summary>
+    /// <returns> Nothing, throws an exception if called </returns>
+    public virtual Dictionary<Resource, int> GetCost()
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>

@@ -12,16 +12,12 @@ public class GameSettingsUi
     private const int ExitButtonSize = 12;
     private const int SettingsMenuWidth = 150;
     private const int SettingsMenuHeight = 200;
-    private const string DebugModeDisabledLabel = "Debug Mode: Disabled";
-    private const string DebugModeEnabledLabel = "Debug Mode: Enabled";
-    private const string FullscreenDisabledLabel = "Switch to: Fullscreen";
-    private const string FullscreenEnabledLabel = "Switch to: Window";
     private const string SettingsMenuTitle = "Settings";
 
-    private readonly LabelButton _debugModeButton;
+    private readonly TextureButton _debugModeButton;
     private readonly TextureButton _exitButton;
-    private readonly LabelButton _fullscreenButton;
-    private readonly List<LabelButton> _settingsButtonsList;
+    private readonly TextureButton _fullscreenButton;
+    private readonly List<TextureButton> _settingsButtonsList;
     private Rectangle _buttonsArea;
     private Rectangle _menuBackdrop;
     private Rectangle _menuInnerBackdrop;
@@ -34,23 +30,32 @@ public class GameSettingsUi
     {
         var gameSettings = ServiceManager.GetService<GameSettings>();
 
-        // Initialize settings buttons
-        _debugModeButton = new LabelButton(DebugModeDisabledLabel, ToggleDebugMode, settingsButton: true);
-        _fullscreenButton = new LabelButton(FullscreenDisabledLabel, ToggleFullscreen, settingsButton: true);
+        // Initialize buttons
+        _debugModeButton = new TextureButton(
+            Assets.Textures["buttons/settings_debug_disabled"],
+            ToggleDebugMode,
+            toolTip: new List<string> { "Toggle debug mode" },
+            settingsButton: true);
+        _exitButton = new TextureButton(
+            Assets.Textures["buttons/settings_exit"],
+            ToggleSettingsMenu,
+            settingsButton: true);
+        _fullscreenButton = new TextureButton(
+            Assets.Textures["buttons/settings_fullscreen"],
+            ToggleFullscreen,
+            toolTip: new List<string> { "Toggle fullscreen" },
+            settingsButton: true);
 
         // Update button labels to match settings state
-        if (gameSettings.DebugMode) _debugModeButton.SetLabel(DebugModeEnabledLabel);
-        if (gameSettings.Fullscreen) _fullscreenButton.SetLabel(FullscreenEnabledLabel);
+        if (gameSettings.DebugMode) _debugModeButton.SetTexture(Assets.Textures["buttons/settings_debug_enabled"]);
+        if (gameSettings.Fullscreen) _fullscreenButton.SetTexture(Assets.Textures["buttons/settings_windowed"]);
 
         // Add buttons to a list so they can be iterated over
-        _settingsButtonsList = new List<LabelButton>
+        _settingsButtonsList = new List<TextureButton>
         {
             _fullscreenButton,
             _debugModeButton
         };
-
-        _exitButton = new TextureButton(Assets.Textures["buttons/close_settings"], ToggleSettingsMenu,
-            settingsButton: true);
     }
 
     public bool SettingsMenuActive { get; private set; }
@@ -65,7 +70,9 @@ public class GameSettingsUi
         Raylib.DrawTextEx(Raylib.GetFontDefault(), SettingsMenuTitle, _titleArea.Start(), _titleFontSize,
             _titleFontSpacing, Raylib.WHITE);
         _exitButton.Draw();
-        foreach (var button in _settingsButtonsList) button.Draw();
+
+        // Draw buttons in reverse order to tooltips don't draw behind other buttons
+        foreach (var button in _settingsButtonsList.GetReverse()) button.Draw();
     }
 
     public void Update()
@@ -141,10 +148,6 @@ public class GameSettingsUi
     public void ToggleSettingsMenu()
     {
         SaveUtils.SaveSettings();
-
-        var gameLogic = ServiceManager.GetService<GameLogic>();
-        if (gameLogic != null) gameLogic.ToggleGamePaused();
-
         SettingsMenuActive = !SettingsMenuActive;
     }
 
@@ -156,7 +159,9 @@ public class GameSettingsUi
         var gameSettings = ServiceManager.GetService<GameSettings>();
 
         gameSettings.DebugMode = !gameSettings.DebugMode;
-        _debugModeButton.SetLabel(gameSettings.DebugMode ? DebugModeEnabledLabel : DebugModeDisabledLabel);
+        _debugModeButton.SetTexture(gameSettings.DebugMode
+            ? Assets.Textures["buttons/settings_debug_enabled"]
+            : Assets.Textures["buttons/settings_debug_disabled"]);
     }
 
     /// <summary>
@@ -168,7 +173,8 @@ public class GameSettingsUi
 
         gameSettings.Fullscreen = !gameSettings.Fullscreen;
         if (gameSettings.Fullscreen != Raylib.IsWindowFullscreen()) Raylib.ToggleFullscreen();
-
-        _fullscreenButton.SetLabel(gameSettings.Fullscreen ? FullscreenEnabledLabel : FullscreenDisabledLabel);
+        _fullscreenButton.SetTexture(gameSettings.Fullscreen
+            ? Assets.Textures["buttons/settings_windowed"]
+            : Assets.Textures["buttons/settings_fullscreen"]);
     }
 }

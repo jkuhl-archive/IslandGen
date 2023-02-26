@@ -41,13 +41,20 @@ public class NewGameMenuUi
 
     public NewGameMenuUi()
     {
-        _mainMenuButton = new TextureButton(Assets.Textures["buttons/main_menu"],
-            () => ServiceManager.GetService<StateManager>().MainMenu());
-        _randomizeButton =
-            new TextureButton(Assets.Textures["buttons/randomize"], () => _gameLogic!.GameMap.GenerateMap());
-        _startGameButton = new TextureButton(Assets.Textures["buttons/start"], StartGame);
-        _mapPreviewTexture = new RenderTexturePro((MapPreviewSize, MapPreviewSize));
+        _mainMenuButton = new TextureButton(
+            Assets.Textures["buttons/main_menu"],
+            () => ServiceManager.GetService<StateManager>().MainMenu(),
+            toolTip: new List<string> { "Return to the main menu" });
+        _randomizeButton = new TextureButton(
+            Assets.Textures["buttons/randomize"],
+            () => _gameLogic!.GameMap.GenerateMap(),
+            toolTip: new List<string> { "Randomize the island's layout and contents" });
+        _startGameButton = new TextureButton(
+            Assets.Textures["buttons/start"],
+            StartGame,
+            toolTip: new List<string> { "Accept island and start the game" });
 
+        _mapPreviewTexture = new RenderTexturePro((MapPreviewSize, MapPreviewSize));
         _backgroundStarPositions = new List<Vector2>();
         _gameLogic = new GameLogic();
         _captainName = string.Empty;

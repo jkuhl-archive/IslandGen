@@ -10,6 +10,7 @@ public static class Colors
     public static readonly Color ButtonTintMouseDown = new(150, 150, 150, 255);
     public static readonly Color ButtonTintMouseOver = new(210, 210, 210, 255);
     public static readonly Color ConstructionBase = new(255, 255, 255, 150);
+    public static readonly Color ConstructionInvalidPlacement = new(255, 0, 0, 150);
     public static readonly Color GridLine = new(0, 0, 0, 40);
     public static readonly Color MiniMapColonist = new(166, 44, 31, 255);
     public static readonly Color MiniMapViewBox = new(255, 0, 0, 200);

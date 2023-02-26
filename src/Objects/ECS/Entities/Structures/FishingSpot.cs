@@ -8,6 +8,10 @@ namespace IslandGen.Objects.ECS.Entities.Structures;
 
 public class FishingSpot : StructureBase
 {
+    public const string Description = "Allows colonists to fish in nearby water";
+    public const string Requirements = "Must be placed near water";
+    public static readonly Dictionary<Resource, int> Cost = new() { { Resource.Lumber, 10 }, { Resource.Stone, 10 } };
+
     /// <summary>
     ///     Structure generates raw fish
     /// </summary>
@@ -20,6 +24,15 @@ public class FishingSpot : StructureBase
         Texture = Assets.Textures["structures/fishing_spot"];
 
         AddComponent(new Construction { RequiredWork = 1 });
+    }
+
+    /// <summary>
+    ///     Gets the cost of this structure
+    /// </summary>
+    /// <returns> Cost of this structure as a dictionary of resources and amounts </returns>
+    public override Dictionary<Resource, int> GetCost()
+    {
+        return Cost;
     }
 
     /// <summary>

@@ -32,7 +32,12 @@ public class GameUi
     private const int StatusButtonHeight = 8;
     private const string PausedString = "Paused";
 
-    private readonly List<LabelButton> _buildTabButtons;
+    private readonly TextureButton _buildFarmButton;
+    private readonly TextureButton _buildFishingSpotButton;
+    private readonly TextureButton _buildLumberYardButton;
+    private readonly TextureButton _buildShelterButton;
+    private readonly List<TextureButton> _buildTabButtons;
+    private readonly TextureButton _buildWellButton;
     private readonly List<string> _itemsList;
     private readonly RenderTexturePro _miniMapTexture;
     private readonly List<TextureButton> _speedControlButtons;
@@ -56,21 +61,68 @@ public class GameUi
     /// </summary>
     public GameUi()
     {
-        _buildTabButtons = new List<LabelButton>
+        _buildFarmButton = new TextureButton(
+            Assets.Textures["buttons/build_farm"],
+            () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Farm()),
+            toolTip: new List<string>
+            {
+                Farm.Description, $"Requirements: {Farm.Requirements}", $"Cost: {CostUtils.GetCostString(Farm.Cost)}"
+            });
+        _buildFishingSpotButton = new TextureButton(
+            Assets.Textures["buttons/build_fishing_spot"],
+            () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new FishingSpot()),
+            toolTip: new List<string>
+            {
+                FishingSpot.Description, $"Requirements: {FishingSpot.Requirements}",
+                $"Cost: {CostUtils.GetCostString(FishingSpot.Cost)}"
+            });
+        _buildLumberYardButton = new TextureButton(
+            Assets.Textures["buttons/build_lumber_yard"],
+            () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new LumberYard()),
+            toolTip: new List<string>
+            {
+                LumberYard.Description, $"Requirements: {LumberYard.Requirements}",
+                $"Cost: {CostUtils.GetCostString(LumberYard.Cost)}"
+            });
+        _buildShelterButton = new TextureButton(
+            Assets.Textures["buttons/build_shelter"],
+            () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter()),
+            toolTip: new List<string>
+            {
+                Shelter.Description, $"Requirements: {Shelter.Requirements}",
+                $"Cost: {CostUtils.GetCostString(Shelter.Cost)}"
+            });
+
+        _buildWellButton = new TextureButton(
+            Assets.Textures["buttons/build_well"],
+            () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Well()),
+            toolTip: new List<string>
+            {
+                Well.Description, $"Requirements: {Well.Requirements}", $"Cost: {CostUtils.GetCostString(Well.Cost)}"
+            });
+        _buildTabButtons = new List<TextureButton>
         {
-            new("Shelter", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Shelter())),
-            new("Lumber Yard", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new LumberYard())),
-            new("Well", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Well())),
-            new("Farm", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new Farm())),
-            new("Fishing Spot", () => ServiceManager.GetService<GameLogic>().SetMouseStructure(new FishingSpot()))
+            _buildShelterButton,
+            _buildLumberYardButton,
+            _buildFarmButton,
+            _buildWellButton,
+            _buildFishingSpotButton
         };
         _itemsList = new List<string>();
         _speedControlButtons = new List<TextureButton>
         {
-            new(Assets.Textures["buttons/speed_rw"], () => ServiceManager.GetService<GameLogic>().DecreaseGameSpeed()),
-            new(Assets.Textures["buttons/speed_pause"],
-                () => ServiceManager.GetService<GameLogic>().ToggleGamePaused()),
-            new(Assets.Textures["buttons/speed_ff"], () => ServiceManager.GetService<GameLogic>().IncreaseGameSpeed())
+            new(
+                Assets.Textures["buttons/speed_rw"],
+                () => ServiceManager.GetService<GameLogic>().DecreaseGameSpeed(),
+                toolTip: new List<string> { "Decrease game speed" }),
+            new(
+                Assets.Textures["buttons/speed_pause"],
+                PauseGame,
+                toolTip: new List<string> { "Toggle pausing the game" }),
+            new(
+                Assets.Textures["buttons/speed_ff"],
+                () => ServiceManager.GetService<GameLogic>().IncreaseGameSpeed(),
+                toolTip: new List<string> { "Increase game speed" })
         };
         _statusButtons = new List<LabelButton>();
         _systemTabButtons = new List<LabelButton>
@@ -108,9 +160,6 @@ public class GameUi
         // Draw calendar
         DrawPopUp(_calendarString, CalendarArea);
 
-        // Draw speed controls
-        foreach (var button in _speedControlButtons) button.Draw();
-
         // Draw selected entity menu
         if (_selectedEntityString != null) DrawPopUp(_selectedEntityString, SelectedEntityMenuArea);
 
@@ -144,14 +193,23 @@ public class GameUi
         Raylib.DrawRectangleRec(_sidebarContentsArea, Raylib.GRAY);
         Raylib.DrawRectangleRec(_sidebarTabsArea, Raylib.DARKGRAY);
 
-        // Draw tab buttons
-        foreach (var button in _tabButtons) button.Draw();
+        // Draw minimap
+        _miniMapTexture.Draw();
 
         // Draw tab contents
         switch (_currentUiTab)
         {
             case GameUiTab.Build:
-                foreach (var button in _buildTabButtons) button.Draw();
+                // Row 3
+                _buildFishingSpotButton.Draw();
+
+                // Row 2
+                _buildFarmButton.Draw();
+                _buildWellButton.Draw();
+
+                // Row 1
+                _buildShelterButton.Draw();
+                _buildLumberYardButton.Draw();
                 break;
             case GameUiTab.Items:
                 for (var i = 0; i < _itemsList.Count; i++)
@@ -170,8 +228,11 @@ public class GameUi
                 break;
         }
 
-        // Draw minimap
-        _miniMapTexture.Draw();
+        // Draw tab buttons
+        foreach (var button in _tabButtons) button.Draw();
+
+        // Draw speed controls
+        foreach (var button in _speedControlButtons) button.Draw();
 
         // Draw debug info
         if (gameSettings.DebugMode) DrawPopUp(_debugInfoString, new Rectangle(), true);
@@ -237,6 +298,11 @@ public class GameUi
         switch (_currentUiTab)
         {
             case GameUiTab.Build:
+                _buildShelterButton.Disabled = !CostUtils.CanAfford(Shelter.Cost);
+                _buildLumberYardButton.Disabled = !CostUtils.CanAfford(LumberYard.Cost);
+                _buildWellButton.Disabled = !CostUtils.CanAfford(Well.Cost);
+                _buildFarmButton.Disabled = !CostUtils.CanAfford(Farm.Cost);
+                _buildFishingSpotButton.Disabled = !CostUtils.CanAfford(FishingSpot.Cost);
                 foreach (var button in _buildTabButtons) button.Update();
                 break;
             case GameUiTab.Status:
@@ -420,5 +486,18 @@ public class GameUi
         Raylib.DrawTextEx(Raylib.GetFontDefault(), message,
             new Vector2(popupArea.X + padding * 4, popupArea.Y + padding * 4),
             fontSize, fontSpacing, Raylib.WHITE);
+    }
+
+    /// <summary>
+    ///     Handles pausing the game and updating the texture for the pause/play button
+    /// </summary>
+    private void PauseGame()
+    {
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+
+        gameLogic.ToggleGamePaused();
+        _speedControlButtons[1].SetTexture(gameLogic.GamePaused
+            ? Assets.Textures["buttons/speed_play"]
+            : Assets.Textures["buttons/speed_pause"]);
     }
 }

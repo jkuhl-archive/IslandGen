@@ -52,6 +52,7 @@ public class ScalingManager
         ServiceManager.GetService<MainMenuUi>().UpdateScaling();
         ServiceManager.GetService<NewGameMenuUi>().UpdateScaling();
         LabelButton.UpdateScaling();
+        TextureButton.UpdateScaling();
     }
 
     /// <summary>

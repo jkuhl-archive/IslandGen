@@ -54,6 +54,15 @@ public static class SaveUtils
     }
 
     /// <summary>
+    ///     Checks if a game save file exists
+    /// </summary>
+    /// <returns> True if save file exists, false if not </returns>
+    public static bool SaveFileExists()
+    {
+        return File.Exists(Paths.GameSaveFile);
+    }
+
+    /// <summary>
     ///     Saves the game's settings
     /// </summary>
     public static void SaveSettings()

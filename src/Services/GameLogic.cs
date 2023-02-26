@@ -6,6 +6,7 @@ using IslandGen.Objects.ECS;
 using IslandGen.Objects.ECS.Entities;
 using IslandGen.Objects.ECS.Entities.Creatures;
 using IslandGen.Objects.Textures;
+using IslandGen.Utils;
 using Newtonsoft.Json;
 using Raylib_CsLo;
 
@@ -139,7 +140,6 @@ public class GameLogic
     public void AddResource(Resource resource, int amount)
     {
         var newAmount = _resources.GetValueOrDefault(resource) + amount;
-
         _resources[resource] = newAmount;
     }
 
@@ -219,11 +219,27 @@ public class GameLogic
     {
         if (MouseStructure == null) return;
         if (!MouseStructure.ValidPlacement()) return;
+        if (!CostUtils.CanAfford(MouseStructure.GetCost())) return;
 
         // If all checks pass, add the structure to the main list and remove it from the mouse
+        foreach (var cost in MouseStructure.GetCost()) RemoveResource(cost.Key, cost.Value);
         AddEntity(MouseStructure);
         Raylib.PlaySound(Assets.Sounds["click"]); // TODO: Replace this with a 'construction' sound
         MouseStructure = null;
+    }
+
+    /// <summary>
+    ///     Removes a resource to the colony's stores
+    /// </summary>
+    /// <param name="resource"> Resource that we are removing </param>
+    /// <param name="amount"> Amount that should be removed </param>
+    public void RemoveResource(Resource resource, int amount)
+    {
+        var newAmount = _resources.GetValueOrDefault(resource) - amount;
+        if (newAmount <= 0)
+            _resources.Remove(resource);
+        else
+            _resources[resource] = newAmount;
     }
 
     /// <summary>
