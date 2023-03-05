@@ -21,6 +21,13 @@ public class NewGameMenuUi
     private const int DepartureYearEnd = 1627;
     private const int MapPreviewSize = 100;
 
+    private static readonly Dictionary<Resource, int> StartingResources = new()
+    {
+        { Resource.CookedFish, 20 },
+        { Resource.DrinkingWater, 50 },
+        { Resource.Lumber, 100 }
+    };
+
     private readonly List<Vector2> _backgroundStarPositions;
     private readonly TextureButton _mainMenuButton;
     private readonly RenderTexturePro _mapPreviewTexture;
@@ -207,9 +214,7 @@ public class NewGameMenuUi
         _shipName = Datasets.FemaleNames.RandomItem();
 
         // Give starting resources
-        _gameLogic.AddResource(Resource.CookedFish, 20);
-        _gameLogic.AddResource(Resource.DrinkingWater, 50);
-        _gameLogic.AddResource(Resource.Lumber, 100);
+        foreach (var resource in StartingResources) _gameLogic.AddResource(resource.Key, resource.Value);
     }
 
     /// <summary>
