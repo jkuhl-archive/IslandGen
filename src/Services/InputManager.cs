@@ -1,5 +1,6 @@
 using System.Numerics;
 using IslandGen.Extensions;
+using IslandGen.Objects.ECS;
 using Raylib_CsLo;
 
 namespace IslandGen.Services;
@@ -116,7 +117,7 @@ public class InputManager
             gameUi.CalendarArea.PointInsideRectangle(mousePosition) ||
             gameUi.SidebarArea.PointInsideRectangle(mousePosition) ||
             gameUi.SpeedControlsArea.PointInsideRectangle(mousePosition) ||
-            (gameLogic.SelectedEntity != null && gameUi.SelectedEntityMenuArea.PointInsideRectangle(mousePosition))
+            (gameLogic.SelectedEntity != null && EntityBase.SelectedEntityMenuArea.PointInsideRectangle(mousePosition))
         ) return;
 
         // Left mouse click

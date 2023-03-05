@@ -229,6 +229,22 @@ public class GameLogic
     }
 
     /// <summary>
+    ///     Removes an entity from the entity dictionary
+    /// </summary>
+    /// <param name="entity"> Entity that we want to remove from the dictionary </param>
+    /// <exception cref="ArgumentNullException"> If entity is null </exception>
+    public void RemoveEntity(EntityBase entity)
+    {
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
+
+        var entityList = _entities[entity.GetType()];
+        for (var i = 0; i < entityList.Count; i++)
+            if (entityList[i] == entity)
+                entityList.Remove(entity);
+    }
+
+    /// <summary>
     ///     Removes a resource to the colony's stores
     /// </summary>
     /// <param name="resource"> Resource that we are removing </param>

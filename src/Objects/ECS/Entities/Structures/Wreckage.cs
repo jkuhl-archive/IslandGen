@@ -7,11 +7,15 @@ namespace IslandGen.Objects.ECS.Entities.Structures;
 
 public class Wreckage : StructureBase
 {
+    private static readonly Dictionary<Resource, int> Cost = new() { { Resource.Lumber, 200 }, { Resource.Stone, 25 } };
+
     /// <summary>
     ///     Ship wreckage structure, colonists can "work" the wreckage to savage materials
     /// </summary>
     public Wreckage()
     {
+        ConstructionProgress = 200;
+        ConstructionTotalWork = ConstructionProgress;
         MiniMapColor = Raylib.DARKBROWN;
         PlaceableOnWater = true;
         ReadableName = "Ship Wreckage";
@@ -19,6 +23,19 @@ public class Wreckage : StructureBase
         Texture = Assets.Textures["structures/wreckage"];
     }
 
+    /// <summary>
+    ///     Gets the cost of this structure
+    /// </summary>
+    /// <returns> Cost of this structure as a dictionary of resources and amounts </returns>
+    public override Dictionary<Resource, int> GetCost()
+    {
+        return Cost;
+    }
+
+    /// <summary>
+    ///     Gets the tile on the wreckage that colonists exit from
+    /// </summary>
+    /// <returns> Position on the tile map colonists exit from </returns>
     public (int, int) GetShipExitTile()
     {
         return (MapPosition.Item1 + 3, MapPosition.Item2 + 2);

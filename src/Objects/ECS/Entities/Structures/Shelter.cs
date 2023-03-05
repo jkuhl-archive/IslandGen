@@ -1,6 +1,5 @@
 using IslandGen.Data;
 using IslandGen.Data.Enum;
-using IslandGen.Objects.ECS.Components;
 using Raylib_CsLo;
 
 namespace IslandGen.Objects.ECS.Entities.Structures;
@@ -16,13 +15,12 @@ public class Shelter : StructureBase
     /// </summary>
     public Shelter()
     {
+        ConstructionTotalWork = 10;
         MiniMapColor = Raylib.BROWN;
         PlaceableOnWater = false;
         ReadableName = "Shelter";
         Size = (2, 2);
         Texture = Assets.Textures["structures/shelter"];
-
-        AddComponent(new Construction { RequiredWork = 5 });
     }
 
     /// <summary>

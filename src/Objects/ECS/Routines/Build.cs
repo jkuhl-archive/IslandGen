@@ -1,5 +1,4 @@
 using IslandGen.Data.Enum;
-using IslandGen.Objects.ECS.Components;
 using IslandGen.Objects.ECS.Entities;
 using IslandGen.Services;
 using Newtonsoft.Json;
@@ -10,12 +9,13 @@ public class Build : IRoutine
 {
     [JsonIgnore] private StructureBase? _target;
     [JsonProperty] private Guid? _targetId;
+    [JsonProperty] private bool _treesCleared;
     [JsonIgnore] public string Name => "Building";
 
     public void Update(EntityBase entity)
     {
         // If we have a target ID but the target is null attempt to get the target
-        if (_target == null && _targetId != null) _target = GetTarget(_targetId);
+        if (_target == null && _targetId != null) _target = GetTarget(entity, _targetId);
 
         // If target is null stop routine
         if (_target == null)
@@ -32,22 +32,28 @@ public class Build : IRoutine
         }
 
         // Clear any trees in the build area
-        var treeList = ServiceManager.GetService<GameLogic>().GetEntityList<Tree>();
-        if (treeList.Any(tree => tree.GetOccupiedTiles().Intersect(_target.GetOccupiedTiles()).Any()))
-            for (var i = 0; i < treeList.Count; i++)
-                if (treeList[i].GetOccupiedTiles().Intersect(_target.GetOccupiedTiles()).Any())
-                {
-                    treeList.Remove(treeList[i]);
-                    ServiceManager.GetService<GameLogic>().AddResource(Resource.TreeTrunk, 1);
-                    return;
-                }
+        if (!_treesCleared)
+        {
+            var treeList = ServiceManager.GetService<GameLogic>().GetEntityList<Tree>();
+            if (treeList.Any(tree => tree.GetOccupiedTiles().Intersect(_target.GetOccupiedTiles()).Any()))
+                for (var i = 0; i < treeList.Count; i++)
+                    if (treeList[i].GetOccupiedTiles().Intersect(_target.GetOccupiedTiles()).Any())
+                    {
+                        treeList.Remove(treeList[i]);
+                        ServiceManager.GetService<GameLogic>().AddResource(Resource.TreeTrunk, 1);
+                        return;
+                    }
 
-        // Build the target
-        _target.GetComponent<Construction>().Update(entity);
+            _treesCleared = true;
+        }
+
+        // Work the target
+        _target.Work(entity);
 
         // If construction is complete, stop building
-        if (_target.GetComponent<Construction>().Complete)
+        if (_target.ConstructionComplete() || _target.DeconstructionComplete())
         {
+            _target.WorkerId = null;
             _target = null;
             _targetId = null;
             entity.UnsetCurrentRoutine();
@@ -63,7 +69,7 @@ public class Build : IRoutine
     {
         if (_target != null) return true;
 
-        _target = GetTarget();
+        _target = GetTarget(entity);
         if (_target != null)
         {
             _targetId = _target.Id;
@@ -79,26 +85,32 @@ public class Build : IRoutine
     /// <returns> Build status as a string </returns>
     public string GetStatus()
     {
-        return _target == null ? string.Empty : $"Building {_target.ReadableName} at {_target.MapPosition}";
+        if (_target != null)
+            return _target.Deconstruct switch
+            {
+                false => $"Building {_target.ReadableName} at {_target.MapPosition}",
+                true => $"Deconstructing {_target.ReadableName} at {_target.MapPosition}"
+            };
+
+        return string.Empty;
     }
 
     /// <summary>
     ///     Attempts to find a structure that needs to be built and has not already been started
     /// </summary>
+    /// <param name="worker"> Entity that will be working on the structure </param>
     /// <param name="guid"> If specified attempts to find a structure with the given ID </param>
     /// <returns> StructureBase if a build target could be found, null if not </returns>
-    private StructureBase? GetTarget(Guid? guid = null)
+    private StructureBase? GetTarget(EntityBase worker, Guid? guid = null)
     {
         foreach (var structure in ServiceManager.GetService<GameLogic>().GetEntityBaseTypeList<StructureBase>())
         {
-            if (!structure.HasComponent<Construction>()) continue;
-
             if (guid != null && structure.Id == guid) return structure;
 
-            if (structure.GetComponent<Construction>().Complete) continue;
-            if (structure.GetComponent<Construction>().Started) continue;
+            if (!structure.Deconstruct && structure.ConstructionComplete()) continue;
+            if (structure.WorkerId != null) continue;
 
-            structure.GetComponent<Construction>().Started = true;
+            structure.WorkerId = worker.Id;
             return structure;
         }
 

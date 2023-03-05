@@ -13,6 +13,7 @@ public class TextureButton
     private static int _toolTipFontSize;
     private static int _toolTipFontSpacing;
     private static int _toolTipPadding;
+    private static int _windowHeight;
     private static int _windowWidth;
 
     private readonly Action _function;
@@ -52,25 +53,32 @@ public class TextureButton
 
     public void Draw()
     {
+        // Set button tint based on current state
         var tint = Raylib.WHITE;
         if (MouseDown) tint = Colors.ButtonTintMouseDown;
         else if (MouseOver) tint = Colors.ButtonTintMouseOver;
         if (Disabled) tint = Colors.ButtonTintMouseDown;
 
+        // Draw button texture
         Raylib.DrawTexturePro(Texture, _textureSource, Area, Vector2.Zero, 0.0f, tint);
+
+        // Draw tool tip
         if (ToolTip != null && _displayToolTip)
         {
             var contents = string.Join("\n", ToolTip);
             var size = Raylib.MeasureTextEx(Raylib.GetFontDefault(), contents, _toolTipFontSize, _toolTipFontSpacing);
             var mousePosition = InputManager.GetMousePosition();
 
-            // Set tooltip area, flip to drawing on left of mouse if tooltip will be drawn outside the game window
+            // Set tooltip area
             var toolTipArea = new Rectangle(
                 mousePosition.X,
                 mousePosition.Y,
                 size.X + _toolTipPadding * 8,
                 size.Y + _toolTipPadding * 8);
+
+            // Adjust drawing position to prevent drawing off screen
             if (toolTipArea.X + toolTipArea.width > _windowWidth) toolTipArea.X -= toolTipArea.width;
+            if (toolTipArea.Y + toolTipArea.height > _windowHeight) toolTipArea.Y -= toolTipArea.height;
 
             // Set tooltip inner area
             var innerToolTipArea = new Rectangle
@@ -137,6 +145,7 @@ public class TextureButton
         _toolTipFontSize = scalingManager.FontSize;
         _toolTipFontSpacing = scalingManager.FontSpacing;
         _toolTipPadding = scalingManager.Padding;
+        _windowHeight = scalingManager.WindowHeight;
         _windowWidth = scalingManager.WindowWidth;
     }
 

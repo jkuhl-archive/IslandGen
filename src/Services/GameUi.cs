@@ -18,8 +18,6 @@ public class GameUi
     private const int CalendarWidth = 125;
     private const int CalendarHeight = 20;
     private const int MiniMapSize = 100;
-    private const int SelectedEntityMenuWidth = 250;
-    private const int SelectedEntityMenuHeight = 80;
     private const int SidebarButtonWidth = 50;
     private const int SidebarButtonHeight = 20;
     private const int SidebarTabWidth = 25;
@@ -50,7 +48,6 @@ public class GameUi
     private int _itemsFontSize;
     private int _itemsFontSpacing;
     private Rectangle _itemsStringsArea;
-    private string? _selectedEntityString;
     private Rectangle _sidebarContentsArea;
     private Rectangle _sidebarInnerArea;
     private Rectangle _sidebarTabsArea;
@@ -148,7 +145,6 @@ public class GameUi
 
     public Rectangle CalendarArea { get; private set; }
     public Rectangle MiniMapArea { get; private set; }
-    public Rectangle SelectedEntityMenuArea { get; private set; }
     public Rectangle SidebarArea { get; private set; }
     public Rectangle SpeedControlsArea { get; private set; }
 
@@ -161,7 +157,7 @@ public class GameUi
         DrawPopUp(_calendarString, CalendarArea);
 
         // Draw selected entity menu
-        if (_selectedEntityString != null) DrawPopUp(_selectedEntityString, SelectedEntityMenuArea);
+        gameLogic.SelectedEntity?.DrawSelectedMenu();
 
         // Start minimap texture rendering
         Raylib.BeginTextureMode(_miniMapTexture.RenderTexture);
@@ -253,8 +249,8 @@ public class GameUi
         else
             _calendarString += $" - {gameLogic.GameSpeed}";
 
-        // Set selected entity string
-        _selectedEntityString = gameLogic.SelectedEntity?.GetInfoString();
+        // Update selected entity menu
+        gameLogic.SelectedEntity?.UpdateSelectedMenu();
 
         // Set tab contents
         switch (_currentUiTab)
@@ -349,13 +345,6 @@ public class GameUi
             0,
             (int)(CalendarWidth * scalingManager.ScaleFactor),
             (int)(CalendarHeight * scalingManager.ScaleFactor));
-
-        // Set selected entity menu area
-        SelectedEntityMenuArea = new Rectangle(
-            (scalingManager.WindowWidth - SelectedEntityMenuWidth * scalingManager.ScaleFactor) / 2,
-            scalingManager.WindowHeight - SelectedEntityMenuHeight * scalingManager.ScaleFactor,
-            (int)(SelectedEntityMenuWidth * scalingManager.ScaleFactor),
-            (int)(SelectedEntityMenuHeight * scalingManager.ScaleFactor));
 
         // Set sidebar area
         SidebarArea = new Rectangle(
