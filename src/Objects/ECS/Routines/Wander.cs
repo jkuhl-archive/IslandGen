@@ -34,8 +34,7 @@ public class Wander : IRoutine
 
         if (entity.MapPosition == _destination)
         {
-            _delayActive = true;
-            entity.UnsetCurrentRoutine();
+            EndRoutine(entity);
             return;
         }
 
@@ -49,6 +48,16 @@ public class Wander : IRoutine
     public bool CanExecute(EntityBase entity)
     {
         return true;
+    }
+
+    /// <summary>
+    ///     Exits out of this routine
+    /// </summary>
+    /// <param name="entity"> Entity that this routine is attached to </param>
+    public void EndRoutine(EntityBase entity)
+    {
+        _delayActive = true;
+        entity.UnsetCurrentRoutine();
     }
 
     /// <summary>

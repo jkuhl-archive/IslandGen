@@ -1,6 +1,7 @@
 using IslandGen.Data;
 using IslandGen.Data.Enum;
 using IslandGen.Objects.ECS.Entities.Creatures;
+using IslandGen.Objects.ECS.Routines;
 using IslandGen.Objects.UI;
 using IslandGen.Services;
 using Newtonsoft.Json;
@@ -55,7 +56,7 @@ public class StructureBase : EntityBase
                 textureColor);
 
             // If structure under construction draw a progress bar over it
-            if (!ConstructionComplete())
+            if (!ConstructionComplete() || Deconstruct)
             {
                 var structureMapSpace = GetMapSpaceRectangle();
                 var progressBar = new Rectangle(
@@ -100,8 +101,7 @@ public class StructureBase : EntityBase
         // Set worker info
         if (WorkerId != null)
         {
-            var worker = ServiceManager.GetService<GameLogic>().GetEntityList<Colonist>()
-                .Find(i => i.Id == WorkerId);
+            var worker = GetWorker();
             SelectedEntityInfo += $"\nWorker: {worker!.ReadableName}";
         }
 
@@ -139,13 +139,7 @@ public class StructureBase : EntityBase
             else
             {
                 ConstructionProgress--;
-                if (ConstructionProgress <= 0)
-                {
-                    var gameLogic = ServiceManager.GetService<GameLogic>();
-                    gameLogic.RemoveEntity(this);
-                    foreach (var cost in GetCost()) gameLogic.AddResource(cost.Key, cost.Value);
-                    if (gameLogic.SelectedEntity == this) gameLogic.UnsetSelectedEntity();
-                }
+                if (ConstructionProgress <= 0) CompleteDeconstruction();
             }
         }
     }
@@ -211,11 +205,36 @@ public class StructureBase : EntityBase
     }
 
     /// <summary>
+    ///     Attempts to get the current worker by ID
+    /// </summary>
+    /// <returns> Entity working this structure, or null if unable to find </returns>
+    protected EntityBase? GetWorker()
+    {
+        return ServiceManager.GetService<GameLogic>().GetEntityList<Colonist>().Find(i => i.Id == WorkerId);
+    }
+
+    /// <summary>
     ///     Marks this structure for deconstruction
     /// </summary>
     private void StartDeconstruction()
     {
         Deconstruct = true;
         _deconstructButton.Disabled = true;
+
+        if (ConstructionProgress == 0) CompleteDeconstruction();
+    }
+
+    /// <summary>
+    ///     Completes deconstruction process
+    /// </summary>
+    private void CompleteDeconstruction()
+    {
+        var gameLogic = ServiceManager.GetService<GameLogic>();
+        var worker = GetWorker();
+
+        worker?.GetRoutine<Build>().EndRoutine(worker);
+        gameLogic.RemoveEntity(this);
+        foreach (var cost in GetCost()) gameLogic.AddResource(cost.Key, cost.Value);
+        if (gameLogic.SelectedEntity == this) gameLogic.UnsetSelectedEntity();
     }
 }

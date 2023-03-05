@@ -23,6 +23,6 @@ public static class CostUtils
     /// <returns> String containing cost info </returns>
     public static string GetCostString(Dictionary<Resource, int> cost)
     {
-        return string.Join(", ", cost.Select(item => $"{item.Key}: {item.Value}").ToList());
+        return string.Join(", ", cost.Select(item => $"{item.Key.GetResourceName()}: {item.Value}").ToList());
     }
 }

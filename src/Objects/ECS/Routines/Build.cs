@@ -32,7 +32,7 @@ public class Build : IRoutine
         }
 
         // Clear any trees in the build area
-        if (!_treesCleared)
+        if (!_treesCleared || !_target.Deconstruct)
         {
             var treeList = ServiceManager.GetService<GameLogic>().GetEntityList<Tree>();
             if (treeList.Any(tree => tree.GetOccupiedTiles().Intersect(_target.GetOccupiedTiles()).Any()))
@@ -51,13 +51,7 @@ public class Build : IRoutine
         _target.Work(entity);
 
         // If construction is complete, stop building
-        if (_target.ConstructionComplete() || _target.DeconstructionComplete())
-        {
-            _target.WorkerId = null;
-            _target = null;
-            _targetId = null;
-            entity.UnsetCurrentRoutine();
-        }
+        if (_target.ConstructionComplete() || _target.DeconstructionComplete()) EndRoutine(entity);
     }
 
     /// <summary>
@@ -77,6 +71,18 @@ public class Build : IRoutine
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///     Exits out of this routine
+    /// </summary>
+    /// <param name="entity"> Entity that this routine is attached to </param>
+    public void EndRoutine(EntityBase entity)
+    {
+        if (_target != null) _target.WorkerId = null;
+        _target = null;
+        _targetId = null;
+        entity.UnsetCurrentRoutine();
     }
 
     /// <summary>
