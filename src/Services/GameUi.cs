@@ -196,16 +196,11 @@ public class GameUi
         switch (_currentUiTab)
         {
             case GameUiTab.Build:
-                // Row 3
-                _buildFishingSpotButton.Draw();
-
-                // Row 2
-                _buildFarmButton.Draw();
-                _buildWellButton.Draw();
-
-                // Row 1
                 _buildShelterButton.Draw();
                 _buildLumberYardButton.Draw();
+                _buildWellButton.Draw();
+                _buildFarmButton.Draw();
+                _buildFishingSpotButton.Draw();
                 break;
             case GameUiTab.Items:
                 for (var i = 0; i < _itemsList.Count; i++)
@@ -317,6 +312,8 @@ public class GameUi
                 $"FPS: {Raylib.GetFPS()}\n" +
                 $"Window Resolution: {scalingManager.WindowWidth}x{scalingManager.WindowHeight}\n" +
                 $"Scaling Factor: {scalingManager.ScaleFactor}\n" +
+                "\n" +
+                $"Pressed Keyboard Keys: {string.Join(" ", InputManager.PressedChars)}" +
                 "\n" +
                 $"Mouse Window Position: {InputManager.GetMousePosition()}\n" +
                 $"Mouse Map Position: {gameLogic.GameMap.GetMapMousePosition()}\n" +

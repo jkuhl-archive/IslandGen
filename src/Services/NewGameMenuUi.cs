@@ -20,6 +20,9 @@ public class NewGameMenuUi
     private const int DepartureYearStart = 1603;
     private const int DepartureYearEnd = 1627;
     private const int MapPreviewSize = 100;
+    private const int TextFieldOffset = 100;
+    private const int TextFieldWidth = 100;
+    private const int TextFieldHeight = 15;
 
     private static readonly Dictionary<Resource, int> StartingResources = new()
     {
@@ -29,21 +32,23 @@ public class NewGameMenuUi
     };
 
     private readonly List<Vector2> _backgroundStarPositions;
+    private readonly TextField _captainNameField;
     private readonly TextureButton _mainMenuButton;
     private readonly RenderTexturePro _mapPreviewTexture;
     private readonly TextureButton _randomizeButton;
+    private readonly TextField _shipNameField;
     private readonly TextureButton _startGameButton;
     private Rectangle _background;
-    private string _captainName;
+    private Vector2 _captainNameLabelPosition;
     private DateTime _departureDate;
+    private int _fontSize;
+    private int _fontSpacing;
     private GameLogic _gameLogic;
     private Rectangle _mapPreviewArea;
     private Rectangle _menuBackdrop;
     private Rectangle _menuInnerBackdrop;
     private int _menuPadding;
-    private int _promptFontSize;
-    private int _promptFontSpacing;
-    private string _shipName;
+    private Vector2 _shipNameLabelPosition;
     private DateTime _stormDate;
 
     public NewGameMenuUi()
@@ -59,13 +64,15 @@ public class NewGameMenuUi
         _startGameButton = new TextureButton(
             Assets.Textures["buttons/start"],
             StartGame,
-            toolTip: new List<string> { "Accept island and start the game" });
+            toolTip: new List<string> { "Accept island layout and start the game" });
+        _captainNameField = new TextField(toolTip: new List<string> { "Captain's name" });
+        _shipNameField = new TextField(toolTip: new List<string> { "Ship's name" });
+        _captainNameLabelPosition = Vector2.Zero;
+        _shipNameLabelPosition = Vector2.Zero;
 
         _mapPreviewTexture = new RenderTexturePro((MapPreviewSize, MapPreviewSize));
         _backgroundStarPositions = new List<Vector2>();
         _gameLogic = new GameLogic();
-        _captainName = string.Empty;
-        _shipName = string.Empty;
     }
 
     public void Draw()
@@ -83,16 +90,16 @@ public class NewGameMenuUi
         for (var i = 0; i < promptStrings.Count; i++)
         {
             var line = promptStrings[i];
-            var promptSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), line, _promptFontSize, _promptFontSpacing);
+            var promptSize = Raylib.MeasureTextEx(Raylib.GetFontDefault(), line, _fontSize, _fontSpacing);
             var promptX = _menuInnerBackdrop.X + _menuInnerBackdrop.width / 2 - promptSize.X / 2;
-            var promptY = _menuInnerBackdrop.Y + _menuPadding + (promptSize.Y + _promptFontSpacing) * i;
+            var promptY = _menuInnerBackdrop.Y + _menuPadding + (promptSize.Y + _fontSpacing) * i;
 
             Raylib.DrawTextEx(
                 Raylib.GetFontDefault(),
                 line,
                 new Vector2(promptX, promptY),
-                _promptFontSize,
-                _promptFontSpacing,
+                _fontSize,
+                _fontSpacing,
                 Raylib.WHITE);
         }
 
@@ -109,10 +116,36 @@ public class NewGameMenuUi
         _mainMenuButton.Draw();
         _randomizeButton.Draw();
         _startGameButton.Draw();
+
+        // Draw labels
+        Raylib.DrawTextEx(
+            Raylib.GetFontDefault(),
+            "Captain's Name:",
+            _captainNameLabelPosition,
+            _fontSize,
+            _fontSpacing,
+            Raylib.WHITE);
+        Raylib.DrawTextEx(
+            Raylib.GetFontDefault(),
+            "Ship's Name:",
+            _shipNameLabelPosition,
+            _fontSize,
+            _fontSpacing,
+            Raylib.WHITE);
+
+        // Draw text fields
+        _captainNameField.Draw();
+        _shipNameField.Draw();
     }
 
     public void Update()
     {
+        // Update text fields
+        _captainNameField.Update();
+        _shipNameField.Update();
+        _startGameButton.Disabled = _captainNameField.Contents.Length == 0 || _shipNameField.Contents.Length == 0;
+
+        // Update buttons
         _mainMenuButton.Update();
         _randomizeButton.Update();
         _startGameButton.Update();
@@ -126,8 +159,8 @@ public class NewGameMenuUi
         var rnd = ServiceManager.GetService<Random>();
         var scalingManager = ServiceManager.GetService<ScalingManager>();
         _menuPadding = scalingManager.Padding * 10;
-        _promptFontSize = scalingManager.FontSize * 2;
-        _promptFontSpacing = scalingManager.FontSpacing;
+        _fontSize = scalingManager.FontSize * 2;
+        _fontSpacing = scalingManager.FontSpacing;
         var backdropWidth = scalingManager.WindowWidth - scalingManager.WindowWidth / 4;
         var backdropHeight = scalingManager.WindowHeight - scalingManager.WindowHeight / 3;
         var windowWidthCenter = scalingManager.WindowWidth / 2;
@@ -179,7 +212,7 @@ public class NewGameMenuUi
         // Set randomize button area
         _randomizeButton.SetArea(new Rectangle(
             _mapPreviewArea.X + _mapPreviewArea.width / 2 - ButtonWidth * scalingManager.ScaleFactor / 2,
-            _mapPreviewArea.Y - ButtonHeight * scalingManager.ScaleFactor - scalingManager.Padding * 2,
+            _mapPreviewArea.Y - ButtonHeight * scalingManager.ScaleFactor - scalingManager.Padding * 4,
             ButtonWidth * scalingManager.ScaleFactor,
             ButtonHeight * scalingManager.ScaleFactor));
 
@@ -189,6 +222,26 @@ public class NewGameMenuUi
             _menuInnerBackdrop.Y + _menuInnerBackdrop.height - ButtonHeight * scalingManager.ScaleFactor - _menuPadding,
             ButtonWidth * scalingManager.ScaleFactor,
             ButtonHeight * scalingManager.ScaleFactor));
+
+        // Set captain's name text field area
+        _captainNameField.SetArea(new Rectangle(
+            _startGameButton.Area.X + TextFieldOffset * scalingManager.ScaleFactor,
+            _randomizeButton.Area.Y + scalingManager.Padding * 2,
+            TextFieldWidth * scalingManager.ScaleFactor,
+            TextFieldHeight * scalingManager.ScaleFactor));
+
+        // Set captain's name text field area
+        _shipNameField.SetArea(new Rectangle(
+            _startGameButton.Area.X + TextFieldOffset * scalingManager.ScaleFactor,
+            _captainNameField.Area.Y + TextFieldHeight * scalingManager.ScaleFactor + scalingManager.Padding * 4,
+            TextFieldWidth * scalingManager.ScaleFactor,
+            TextFieldHeight * scalingManager.ScaleFactor));
+
+        // Set label areas
+        _captainNameLabelPosition = new Vector2(_startGameButton.Area.X,
+            _captainNameField.Area.Y + _captainNameField.Area.height / 2 - _fontSize / 2);
+        _shipNameLabelPosition = new Vector2(_startGameButton.Area.X,
+            _shipNameField.Area.Y + _shipNameField.Area.height / 2 - _fontSize / 2);
     }
 
     /// <summary>
@@ -210,8 +263,8 @@ public class NewGameMenuUi
         _gameLogic.GameMap.GenerateMap();
 
         // Set captain and ship names
-        _captainName = Datasets.MaleNames.RandomItem();
-        _shipName = Datasets.FemaleNames.RandomItem();
+        _captainNameField.Contents = Datasets.MaleNames.RandomItem();
+        _shipNameField.Contents = Datasets.FemaleNames.RandomItem();
 
         // Give starting resources
         foreach (var resource in StartingResources) _gameLogic.AddResource(resource.Key, resource.Value);
@@ -225,9 +278,9 @@ public class NewGameMenuUi
     {
         return new List<string>
         {
-            $"The Spanish naval ship 'The {_shipName}' leaves port on {_departureDate:MMMM d, yyyy}.",
+            $"The Spanish naval ship 'The {_shipNameField.Contents}' leaves port on {_departureDate:MMMM d, yyyy}.",
             $"On {_stormDate:MMMM d, yyyy} a sudden storm damages the ship beyond repair.",
-            $"Captain {_captainName} makes the decision to beach the ship on a small island."
+            $"Captain {_captainNameField.Contents} makes the decision to beach the ship on a small island."
         };
     }
 
@@ -247,7 +300,7 @@ public class NewGameMenuUi
     private void PlaceStartingEntities()
     {
         var rnd = ServiceManager.GetService<Random>();
-        var wreckage = new Wreckage { ReadableName = $"Wreckage of The {_shipName}" };
+        var wreckage = new Wreckage { ReadableName = $"Wreckage of The {_shipNameField.Contents}" };
 
         // Place wreckage
         for (var attempt = 0; attempt < GameMap.MapSize * 10; attempt++)
@@ -302,7 +355,7 @@ public class NewGameMenuUi
         _gameLogic.AddEntity(new Colonist
         {
             MapPosition = wreckage.GetShipExitTile(),
-            ReadableName = $"Captain {_captainName}"
+            ReadableName = $"Captain {_captainNameField.Contents}"
         });
 
         // Place colonists

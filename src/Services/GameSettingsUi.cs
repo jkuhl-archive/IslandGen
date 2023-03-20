@@ -72,11 +72,13 @@ public class GameSettingsUi
         _exitButton.Draw();
 
         // Draw buttons in reverse order to tooltips don't draw behind other buttons
-        foreach (var button in _settingsButtonsList.GetReverse()) button.Draw();
+        foreach (var button in _settingsButtonsList) button.Draw();
     }
 
     public void Update()
     {
+        if (!SettingsMenuActive) return;
+
         _exitButton.Update();
         foreach (var button in _settingsButtonsList) button.Update();
     }

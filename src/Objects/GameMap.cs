@@ -296,6 +296,18 @@ public class GameMap
     }
 
     /// <summary>
+    ///     Sets the TileType of a specific tile on the game map
+    /// </summary>
+    /// <param name="tilePosition"> Tuple containing position of tile </param>
+    /// <param name="tileType"> TileType the tile should be set to </param>
+    public void SetTileType((int, int) tilePosition, TileType tileType)
+    {
+        if (!_tileMap.InRange(tilePosition)) return;
+
+        _tileMap[tilePosition.Item1, tilePosition.Item2] = tileType;
+    }
+
+    /// <summary>
     ///     Deforms the perimeter of the GameMap's BaseIslandArea by replacing random subsections of it
     /// </summary>
     /// <param name="maxIterations"> Max number of time deform workflow should run </param>

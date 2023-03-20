@@ -30,6 +30,7 @@ internal static class Game
         ServiceManager.AddService(new InputManager());
         ServiceManager.AddService(new MainMenuUi());
         ServiceManager.AddService(new NewGameMenuUi());
+        ServiceManager.AddService(new OverlayUi());
         ServiceManager.AddService(new ScalingManager());
         ServiceManager.AddService(new StateManager());
 
@@ -37,6 +38,9 @@ internal static class Game
         {
             // Update scaling
             ServiceManager.GetService<ScalingManager>().Update();
+
+            // Update pressed keyboard characters 
+            InputManager.UpdatePressedChars();
 
             // Start drawing
             Raylib.BeginDrawing();
@@ -72,6 +76,9 @@ internal static class Game
             // Draw settings menu overlay if enabled
             ServiceManager.GetService<GameSettingsUi>().Update();
             ServiceManager.GetService<GameSettingsUi>().Draw();
+
+            // Draw overlay elements
+            ServiceManager.GetService<OverlayUi>().Draw();
 
             // End drawing
             Raylib.EndDrawing();

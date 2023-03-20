@@ -7,6 +7,7 @@ namespace IslandGen.Objects.ECS.Routines;
 
 public class Build : IRoutine
 {
+    [JsonProperty] private bool _groundCleared;
     [JsonIgnore] private StructureBase? _target;
     [JsonProperty] private Guid? _targetId;
     [JsonProperty] private bool _treesCleared;
@@ -34,17 +35,35 @@ public class Build : IRoutine
         // Clear any trees in the build area
         if (!_treesCleared || !_target.Deconstruct)
         {
-            var treeList = ServiceManager.GetService<GameLogic>().GetEntityList<Tree>();
+            var gameLogic = ServiceManager.GetService<GameLogic>();
+            var treeList = gameLogic.GetEntityList<Tree>();
             if (treeList.Any(tree => tree.GetOccupiedTiles().Intersect(_target.GetOccupiedTiles()).Any()))
                 for (var i = 0; i < treeList.Count; i++)
                     if (treeList[i].GetOccupiedTiles().Intersect(_target.GetOccupiedTiles()).Any())
                     {
                         treeList.Remove(treeList[i]);
-                        ServiceManager.GetService<GameLogic>().AddResource(Resource.TreeTrunk, 1);
+                        gameLogic.AddResource(Resource.TreeTrunk, 1);
                         return;
                     }
 
             _treesCleared = true;
+        }
+
+        // Clear ground below build area
+        if (!_groundCleared)
+        {
+            var gameLogic = ServiceManager.GetService<GameLogic>();
+            foreach (var groundTile in _target.GetOccupiedTiles())
+            {
+                var tileType = gameLogic.GameMap.GetTileType(groundTile);
+                if (tileType.IsGrowable() && tileType != TileType.Dirt)
+                {
+                    gameLogic.GameMap.SetTileType(groundTile, TileType.Dirt);
+                    return;
+                }
+            }
+
+            _groundCleared = true;
         }
 
         // Work the target

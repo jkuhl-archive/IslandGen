@@ -10,6 +10,8 @@ public class InputManager
     private const float MouseCameraPanSpeed = 10;
     private const int MouseCameraPanThreshold = 5;
 
+    public static List<char> PressedChars { get; } = new();
+
     public void Update()
     {
         if (ServiceManager.GetService<GameSettingsUi>().SettingsMenuActive) return;
@@ -42,6 +44,21 @@ public class InputManager
         else if (mousePosition.Y > windowHeight) mousePosition.Y = windowHeight;
 
         return mousePosition;
+    }
+
+    /// <summary>
+    ///     Gets character input from the keyboard and stores it for usage elsewhere
+    /// </summary>
+    public static void UpdatePressedChars()
+    {
+        PressedChars.Clear();
+
+        var pressedChar = Raylib.GetCharPressed();
+        while (pressedChar > 0)
+        {
+            PressedChars.Add((char)pressedChar);
+            pressedChar = Raylib.GetCharPressed();
+        }
     }
 
     /// <summary>

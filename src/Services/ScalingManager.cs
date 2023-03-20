@@ -54,7 +54,8 @@ public class ScalingManager
         ServiceManager.GetService<NewGameMenuUi>().UpdateScaling();
         EntityBase.UpdateScaling();
         LabelButton.UpdateScaling();
-        TextureButton.UpdateScaling();
+        TextField.UpdateScaling();
+        ToolTip.UpdateScaling();
     }
 
     /// <summary>

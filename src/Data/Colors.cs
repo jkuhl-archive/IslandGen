@@ -17,6 +17,9 @@ public static class Colors
     public static readonly Color NewGameBackground = new(7, 11, 52, 255);
     public static readonly Color Selected = new(255, 0, 0, 150);
     public static readonly Color SettingsMenuShade = new(0, 0, 0, 80);
+    public static readonly Color TextFieldBackdrop = new(100, 100, 100, 255);
+    public static readonly Color TextFieldBorder = new(150, 150, 150, 255);
+    public static readonly Color TextFieldBorderSelected = new(240, 240, 240, 255);
     public static readonly Color TileDebug = new(255, 0, 255, 255);
     public static readonly Color TileDirt = new(121, 85, 58, 255);
     public static readonly Color TileLake = new(0, 25, 110, 255);

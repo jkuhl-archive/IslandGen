@@ -8,19 +8,10 @@ namespace IslandGen.Objects.UI;
 
 public class TextureButton
 {
-    private const int ToolTipDelay = 30;
-    private const int ToolTipMouseOffset = 8;
-    private static int _toolTipFontSize;
-    private static int _toolTipFontSpacing;
-    private static int _toolTipPadding;
-    private static int _windowHeight;
-    private static int _windowWidth;
-
     private readonly Action _function;
     private readonly bool _settingsButton;
-    private bool _displayToolTip;
+    private readonly ToolTip? _toolTip;
     private Rectangle _textureSource;
-    private int _toolTipCounter;
 
     /// <summary>
     ///     Simple button with a texture
@@ -37,7 +28,7 @@ public class TextureButton
         Texture = texture;
         _function = function;
         Area = area;
-        ToolTip = toolTip;
+        if (toolTip != null) _toolTip = new ToolTip(toolTip);
         Disabled = disabled;
         _settingsButton = settingsButton;
 
@@ -49,7 +40,6 @@ public class TextureButton
     public bool MouseOver { get; private set; }
     public bool MouseDown { get; private set; }
     public Texture Texture { get; private set; }
-    public List<string>? ToolTip { get; private set; }
 
     public void Draw()
     {
@@ -61,49 +51,10 @@ public class TextureButton
 
         // Draw button texture
         Raylib.DrawTexturePro(Texture, _textureSource, Area, Vector2.Zero, 0.0f, tint);
-
-        // Draw tool tip
-        if (ToolTip != null && _displayToolTip)
-        {
-            var contents = string.Join("\n", ToolTip);
-            var size = Raylib.MeasureTextEx(Raylib.GetFontDefault(), contents, _toolTipFontSize, _toolTipFontSpacing);
-            var mousePosition = InputManager.GetMousePosition();
-
-            // Set tooltip area
-            var toolTipArea = new Rectangle(
-                mousePosition.X,
-                mousePosition.Y,
-                size.X + _toolTipPadding * 8,
-                size.Y + _toolTipPadding * 8);
-
-            // Adjust drawing position to prevent drawing off screen
-            if (toolTipArea.X + toolTipArea.width > _windowWidth) toolTipArea.X -= toolTipArea.width;
-            if (toolTipArea.Y + toolTipArea.height > _windowHeight) toolTipArea.Y -= toolTipArea.height;
-
-            // Set tooltip inner area
-            var innerToolTipArea = new Rectangle
-            (
-                toolTipArea.X + _toolTipPadding,
-                toolTipArea.Y + _toolTipPadding,
-                toolTipArea.width - _toolTipPadding * 2,
-                toolTipArea.height - _toolTipPadding * 2);
-
-            // Draw tooltip
-            Raylib.DrawRectangleRec(toolTipArea, Raylib.WHITE);
-            Raylib.DrawRectangleRec(innerToolTipArea, Raylib.BLACK);
-            Raylib.DrawTextEx(
-                Raylib.GetFontDefault(),
-                contents,
-                new Vector2(toolTipArea.X + _toolTipPadding * 4, toolTipArea.Y + _toolTipPadding * 4),
-                _toolTipFontSize,
-                _toolTipFontSpacing,
-                Raylib.WHITE);
-        }
     }
 
     public void Update()
     {
-        _displayToolTip = false;
         MouseOver = false;
         MouseDown = false;
 
@@ -114,13 +65,12 @@ public class TextureButton
         MouseOver = Area.PointInsideRectangle(InputManager.GetMousePosition());
         if (!MouseOver)
         {
-            _toolTipCounter = 0;
+            _toolTip?.ResetCounter();
             return;
         }
 
-        // Increment tooltip counter, display tooltip if mouse has been over button long enough
-        _toolTipCounter++;
-        if (_toolTipCounter >= ToolTipDelay) _displayToolTip = true;
+        // If mouse is over button increment tool tip counter
+        _toolTip?.IncrementCounter();
 
         // If button is disabled return
         if (Disabled) return;
@@ -134,19 +84,6 @@ public class TextureButton
             _function();
             Raylib.PlaySound(Assets.Sounds["click"]);
         }
-    }
-
-    /// <summary>
-    ///     Recalculates scaled UI elements
-    /// </summary>
-    public static void UpdateScaling()
-    {
-        var scalingManager = ServiceManager.GetService<ScalingManager>();
-        _toolTipFontSize = scalingManager.FontSize;
-        _toolTipFontSpacing = scalingManager.FontSpacing;
-        _toolTipPadding = scalingManager.Padding;
-        _windowHeight = scalingManager.WindowHeight;
-        _windowWidth = scalingManager.WindowWidth;
     }
 
     /// <summary>
@@ -166,14 +103,5 @@ public class TextureButton
     {
         Texture = texture;
         _textureSource = new Rectangle(0, 0, Texture.width, Texture.height);
-    }
-
-    /// <summary>
-    ///     Sets the button's tooltip
-    /// </summary>
-    /// <param name="toolTip"> List of strings that comprise the button's tooltip </param>
-    public void SetToolTip(List<string> toolTip)
-    {
-        ToolTip = toolTip;
     }
 }

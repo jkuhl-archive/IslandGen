@@ -78,7 +78,7 @@ public class MainMenuUi
             _versionFontSpacing, Raylib.WHITE);
 
         // Draw buttons in reverse order to tooltips don't draw behind other buttons
-        foreach (var button in _buttonsList.GetReverse()) button.Draw();
+        foreach (var button in _buttonsList) button.Draw();
     }
 
     public void Update()
