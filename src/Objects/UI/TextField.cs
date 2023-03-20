@@ -65,7 +65,11 @@ public class TextField
             _toolTip?.ResetCounter();
 
         // If mouse button clicked select the text field
-        if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT)) _selected = MouseOver;
+        if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
+        {
+            _selected = MouseOver;
+            Raylib.PlaySound(Assets.Sounds["click"]);
+        }
 
         // If not selected return now
         if (!_selected) return;
