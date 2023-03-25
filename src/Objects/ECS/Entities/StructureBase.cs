@@ -1,8 +1,6 @@
 using IslandGen.Data;
 using IslandGen.Data.Enum;
 using IslandGen.Objects.ECS.Entities.Creatures;
-using IslandGen.Objects.ECS.Routines;
-using IslandGen.Objects.UI;
 using IslandGen.Services;
 using Newtonsoft.Json;
 using Raylib_CsLo;
@@ -11,25 +9,6 @@ namespace IslandGen.Objects.ECS.Entities;
 
 public class StructureBase : EntityBase
 {
-    private const int ButtonSize = 25;
-
-    [JsonIgnore] private readonly TextureButton _deconstructButton;
-
-    /// <summary>
-    ///     Base class for structures
-    /// </summary>
-    protected StructureBase()
-    {
-        _deconstructButton = new TextureButton(
-            Assets.Textures["buttons/deconstruct"],
-            StartDeconstruction,
-            toolTip: new List<string>
-            {
-                $"Deconstruct {GetType().Name}",
-                "Resources are refunded"
-            });
-    }
-
     [JsonProperty] public int ConstructionProgress { get; protected set; }
     [JsonIgnore] protected int ConstructionTotalWork { get; init; }
     [JsonIgnore] protected bool PlaceableOnWater { get; init; }
@@ -76,50 +55,28 @@ public class StructureBase : EntityBase
     }
 
     /// <summary>
-    ///     Draws a menu for interacting with the structure if it is selected
+    ///     Gets a string that summarizes entity info, used in menus
     /// </summary>
-    public override void DrawSelectedMenu()
+    /// <returns> String containing entity info </returns>
+    public override string GetInfoString()
     {
-        base.DrawSelectedMenu();
-        _deconstructButton.Draw();
-    }
+        var info = $"Type: {GetType().Name}\n" +
+                   $"Name: {ReadableName}\n" +
+                   $"Map Position: {MapPosition}\n" +
+                   $"Size: {Size}";
 
-    /// <summary>
-    ///     Updates the contents of the selected entity menu
-    /// </summary>
-    public override void UpdateSelectedMenu()
-    {
-        var scalingManager = ServiceManager.GetService<ScalingManager>();
-        var scaledSize = ButtonSize * scalingManager.ScaleFactor;
-
-        // Set selected entity info
-        SelectedEntityInfo = $"Type: {GetType().Name}\n" +
-                             $"Name: {ReadableName}\n" +
-                             $"Map Position: {MapPosition}\n" +
-                             $"Size: {Size}";
-
-        // Set worker info
         if (WorkerId != null)
         {
             var worker = GetWorker();
-            SelectedEntityInfo += $"\nWorker: {worker!.ReadableName}";
+            info += $"\nWorker: {worker!.ReadableName}";
         }
 
-        // Add construction info
         if (!ConstructionComplete() && !Deconstruct)
-            SelectedEntityInfo += $"\nConstruction Progress: {ConstructionProgress}/{ConstructionTotalWork}";
+            info += $"\nConstruction Progress: {ConstructionProgress}/{ConstructionTotalWork}";
         else if (Deconstruct)
-            SelectedEntityInfo += $"\nDeconstruction Progress: {ConstructionProgress}/{ConstructionTotalWork}";
+            info += $"\nDeconstruction Progress: {ConstructionProgress}/{ConstructionTotalWork}";
 
-        // Update deconstruct button
-        if (Math.Abs(_deconstructButton.Area.width - scaledSize) > 0)
-            _deconstructButton.SetArea(new Rectangle(
-                SelectedEntityMenuArea.X + SelectedEntityMenuArea.width - SelectedEntityPadding * 4 - scaledSize,
-                SelectedEntityMenuArea.Y + SelectedEntityMenuArea.height - SelectedEntityPadding * 4 - scaledSize,
-                scaledSize,
-                scaledSize
-            ));
-        _deconstructButton.Update();
+        return info;
     }
 
     /// <summary>
@@ -139,7 +96,7 @@ public class StructureBase : EntityBase
             else
             {
                 ConstructionProgress--;
-                if (ConstructionProgress <= 0) CompleteDeconstruction();
+                if (DeconstructionComplete()) CompleteDeconstruction();
             }
         }
     }
@@ -216,11 +173,9 @@ public class StructureBase : EntityBase
     /// <summary>
     ///     Marks this structure for deconstruction
     /// </summary>
-    private void StartDeconstruction()
+    public void StartDeconstruction()
     {
         Deconstruct = true;
-        _deconstructButton.Disabled = true;
-
         if (ConstructionProgress == 0) CompleteDeconstruction();
     }
 
@@ -230,9 +185,6 @@ public class StructureBase : EntityBase
     private void CompleteDeconstruction()
     {
         var gameLogic = ServiceManager.GetService<GameLogic>();
-        var worker = GetWorker();
-
-        worker?.GetRoutine<Build>().EndRoutine(worker);
         gameLogic.RemoveEntity(this);
         foreach (var cost in GetCost()) gameLogic.AddResource(cost.Key, cost.Value);
         if (gameLogic.SelectedEntity == this) gameLogic.UnsetSelectedEntity();

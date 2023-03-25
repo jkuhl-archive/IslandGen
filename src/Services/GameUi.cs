@@ -157,7 +157,7 @@ public class GameUi
         DrawPopUp(_calendarString, CalendarArea);
 
         // Draw selected entity menu
-        gameLogic.SelectedEntity?.DrawSelectedMenu();
+        SelectedEntityMenu.Draw();
 
         // Start minimap texture rendering
         Raylib.BeginTextureMode(_miniMapTexture.RenderTexture);
@@ -245,7 +245,7 @@ public class GameUi
             _calendarString += $" - {gameLogic.GameSpeed}";
 
         // Update selected entity menu
-        gameLogic.SelectedEntity?.UpdateSelectedMenu();
+        SelectedEntityMenu.Update();
 
         // Set tab contents
         switch (_currentUiTab)

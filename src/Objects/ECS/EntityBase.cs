@@ -1,4 +1,3 @@
-using System.Numerics;
 using IslandGen.Objects.ECS.Components;
 using IslandGen.Objects.ECS.Routines;
 using IslandGen.Services;
@@ -9,21 +8,12 @@ namespace IslandGen.Objects.ECS;
 
 public abstract class EntityBase
 {
-    private const int SelectedEntityMenuWidth = 250;
-    private const int SelectedEntityMenuHeight = 80;
-
-    [JsonIgnore] protected static int SelectedEntityFontSize;
-    [JsonIgnore] protected static int SelectedEntityFontSpacing;
-    [JsonIgnore] protected static int SelectedEntityPadding;
-    [JsonIgnore] protected static Rectangle SelectedEntityInnerArea;
     [JsonProperty] private readonly Dictionary<Type, IComponent> _components = new();
     [JsonProperty] private readonly Dictionary<Type, IRoutine> _routines = new();
     [JsonProperty] public readonly Guid Id = Guid.NewGuid();
     [JsonIgnore] private IRoutine? _currentRoutine;
     [JsonProperty] private string? _currentRoutineName;
-    [JsonIgnore] protected string? SelectedEntityInfo;
     [JsonIgnore] protected Texture? Texture;
-    [JsonIgnore] public static Rectangle SelectedEntityMenuArea { get; private set; }
     [JsonProperty] public (int, int) MapPosition { get; set; }
     [JsonProperty] public string? ReadableName { get; set; }
     [JsonIgnore] public (int, int) Size { get; protected init; }
@@ -68,61 +58,17 @@ public abstract class EntityBase
     }
 
     /// <summary>
-    ///     Draws a menu for interacting with the entity if it is selected
+    ///     Gets a string that summarizes entity info, used in menus
     /// </summary>
-    public virtual void DrawSelectedMenu()
+    /// <returns> String containing entity info </returns>
+    public virtual string GetInfoString()
     {
-        Raylib.DrawRectangleRec(SelectedEntityMenuArea, Raylib.WHITE);
-        Raylib.DrawRectangleRec(SelectedEntityInnerArea, Raylib.BLACK);
-        Raylib.DrawTextEx(
-            Raylib.GetFontDefault(),
-            SelectedEntityInfo!,
-            new Vector2(SelectedEntityMenuArea.X + SelectedEntityPadding * 4,
-                SelectedEntityMenuArea.Y + SelectedEntityPadding * 4),
-            SelectedEntityFontSize,
-            SelectedEntityFontSpacing,
-            Raylib.WHITE);
-    }
-
-    /// <summary>
-    ///     Updates the contents of the selected entity menu
-    /// </summary>
-    public virtual void UpdateSelectedMenu()
-    {
-        SelectedEntityInfo = $"Type: {GetType().Name}\n" +
-                             $"Name: {ReadableName}\n" +
-                             $"Map Position: {MapPosition}\n" +
-                             $"Size: {Size}\n" +
-                             $"Status: {GetRoutineStatus()}\n\n" +
-                             string.Join("\n",
-                                 _components.Values.Select(component =>
-                                         $"{component.GetType().Name}: {component.GetInfoString()}")
-                                     .ToList());
-    }
-
-    /// <summary>
-    ///     Recalculates scaled UI elements
-    /// </summary>
-    public static void UpdateScaling()
-    {
-        var scalingManager = ServiceManager.GetService<ScalingManager>();
-        var gameUi = ServiceManager.GetService<GameUi>();
-        SelectedEntityFontSize = scalingManager.FontSize;
-        SelectedEntityFontSpacing = scalingManager.FontSpacing;
-        SelectedEntityPadding = scalingManager.Padding;
-        SelectedEntityMenuArea = new Rectangle(
-            (scalingManager.WindowWidth - gameUi.SidebarArea.width -
-             SelectedEntityMenuWidth * scalingManager.ScaleFactor) / 2,
-            scalingManager.WindowHeight - SelectedEntityMenuHeight * scalingManager.ScaleFactor,
-            (int)(SelectedEntityMenuWidth * scalingManager.ScaleFactor),
-            (int)(SelectedEntityMenuHeight * scalingManager.ScaleFactor));
-        SelectedEntityInnerArea = new Rectangle
-        (
-            SelectedEntityMenuArea.X + SelectedEntityPadding,
-            SelectedEntityMenuArea.Y + SelectedEntityPadding,
-            SelectedEntityMenuArea.width - SelectedEntityPadding * 2,
-            SelectedEntityMenuArea.height - SelectedEntityPadding * 2
-        );
+        return $"Type: {GetType().Name}\n" +
+               $"Name: {ReadableName}\n" +
+               $"Map Position: {MapPosition}\n" +
+               $"Size: {Size}\n" +
+               $"Status: {GetRoutineStatus()}\n\n" +
+               GetComponentStatus();
     }
 
     /// <summary>
@@ -225,6 +171,17 @@ public abstract class EntityBase
             throw new ArgumentNullException(nameof(routineType));
 
         return _routines.Keys.Contains(routineType);
+    }
+
+    /// <summary>
+    ///     Gets the status of the entity's components
+    /// </summary>
+    /// <returns> String containing status of components </returns>
+    public string GetComponentStatus()
+    {
+        return string.Join("\n",
+            _components.Values.Select(component => $"{component.GetType().Name}: {component.GetInfoString()}")
+                .ToList());
     }
 
     /// <summary>

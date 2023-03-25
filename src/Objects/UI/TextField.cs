@@ -68,7 +68,7 @@ public class TextField
         if (Raylib.IsMouseButtonReleased(MouseButton.MOUSE_BUTTON_LEFT))
         {
             _selected = MouseOver;
-            Raylib.PlaySound(Assets.Sounds["click"]);
+            if (_selected) Raylib.PlaySound(Assets.Sounds["click"]);
         }
 
         // If not selected return now

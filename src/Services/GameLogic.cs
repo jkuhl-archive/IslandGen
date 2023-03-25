@@ -6,6 +6,7 @@ using IslandGen.Objects.ECS;
 using IslandGen.Objects.ECS.Entities;
 using IslandGen.Objects.ECS.Entities.Creatures;
 using IslandGen.Objects.Textures;
+using IslandGen.Objects.UI;
 using IslandGen.Utils;
 using Newtonsoft.Json;
 using Raylib_CsLo;
@@ -283,6 +284,7 @@ public class GameLogic
     public void SetSelectedEntity(EntityBase entity)
     {
         SelectedEntity = entity;
+        SelectedEntityMenu.SetEntityButtons();
         Raylib.PlaySound(Assets.Sounds["click"]); // TODO: Replace this with a unique sound for each entity type
     }
 

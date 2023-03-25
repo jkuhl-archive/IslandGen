@@ -1,4 +1,3 @@
-using IslandGen.Objects.ECS;
 using IslandGen.Objects.UI;
 using Raylib_CsLo;
 
@@ -52,8 +51,9 @@ public class ScalingManager
         ServiceManager.GetService<GameSettingsUi>().UpdateScaling();
         ServiceManager.GetService<MainMenuUi>().UpdateScaling();
         ServiceManager.GetService<NewGameMenuUi>().UpdateScaling();
-        EntityBase.UpdateScaling();
+
         LabelButton.UpdateScaling();
+        SelectedEntityMenu.UpdateScaling();
         TextField.UpdateScaling();
         ToolTip.UpdateScaling();
     }

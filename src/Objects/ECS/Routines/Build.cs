@@ -33,7 +33,7 @@ public class Build : IRoutine
         }
 
         // Clear any trees in the build area
-        if (!_treesCleared || !_target.Deconstruct)
+        if (!_treesCleared && !_target.Deconstruct)
         {
             var gameLogic = ServiceManager.GetService<GameLogic>();
             var treeList = gameLogic.GetEntityList<Tree>();
@@ -50,7 +50,7 @@ public class Build : IRoutine
         }
 
         // Clear ground below build area
-        if (!_groundCleared)
+        if (!_groundCleared && !_target.Deconstruct)
         {
             var gameLogic = ServiceManager.GetService<GameLogic>();
             foreach (var groundTile in _target.GetOccupiedTiles())
